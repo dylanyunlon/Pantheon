@@ -194,9 +194,27 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       () => this._og.state.queryStage.phase,
       (phase) => {
         if (phase === 'unavailable') {
+          const sessionMeta = this._engine.endExperimentSession()
+          if (sessionMeta.eventCount > 0) {
+            this._log.info(
+              `Experiment session ended: ${sessionMeta.sessionId}, ` +
+              `${sessionMeta.eventCount} events, ${sessionMeta.sampleCount} samples`
+            )
+          }
           this.state.clear()
           this._engine.clearCache()
           this._ipc.sendEvent(CoachAdvisorMain.id, 'clear')
+        } else if (phase === 'champ-select' || phase === 'in-game') {
+          const selfPuuid = this._lc.data.summoner.me?.puuid
+          if (selfPuuid) {
+            const gameInfo = this._og.state.queryStage.gameInfo
+            this._engine.startExperimentSession({
+              gameMode: gameInfo?.gameMode || '',
+              queueType: gameInfo?.queueType || '',
+              selfPuuid
+            })
+            this._log.info(`Experiment session started for phase: ${phase}`)
+          }
         }
       }
     )
@@ -453,6 +471,40 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       'unsuppressAdviceType',
       (_, type: string) => {
         this._engine.unsuppressAdviceType(type)
+      }
+    )
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getExperimentExport', () => {
+      return this._engine.getExperimentExport()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getTrainingSamples', () => {
+      return this._engine.getTrainingSamples()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getCaptureStats', () => {
+      return this._engine.getCaptureStats()
+    })
+
+    this._ipc.onCall(
+      CoachAdvisorMain.id,
+      'recordFeedback',
+      (_, adviceType: string, feedback: string) => {
+        this._engine.recordUserFeedback(
+          adviceType,
+          feedback as 'helpful' | 'not-helpful' | 'dismiss'
+        )
+      }
+    )
+
+    this._ipc.onCall(
+      CoachAdvisorMain.id,
+      'setGameOutcome',
+      (_, sessionId: string, outcome: string) => {
+        return this._engine.setGameOutcome(
+          sessionId,
+          outcome as 'win' | 'loss' | 'unknown'
+        )
       }
     )
   }

@@ -199,6 +199,47 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
     return this._ipc.call(COACH_SHARD_NAMESPACE, 'unsuppressAdviceType', type)
   }
 
+  getExperimentExport() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getExperimentExport') as Promise<{
+      meta: {
+        sessionId: string
+        startedAt: number
+        endedAt: number | null
+        gameMode: string
+        queueType: string
+        selfPuuid: string
+        eventCount: number
+        sampleCount: number
+        phases: string[]
+      }
+      events: any[]
+      samples: any[]
+      accumulatorStats: Record<string, { avg: number; min: number; max: number; count: number }>
+    }>
+  }
+
+  getTrainingSamples() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getTrainingSamples') as Promise<any[]>
+  }
+
+  getCaptureStats() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getCaptureStats') as Promise<{
+      sessionId: string
+      isActive: boolean
+      eventCount: number
+      sampleCount: number
+      mergeCount: number
+    }>
+  }
+
+  recordFeedback(adviceType: string, feedback: 'helpful' | 'not-helpful' | 'dismiss') {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'recordFeedback', adviceType, feedback)
+  }
+
+  setGameOutcome(sessionId: string, outcome: 'win' | 'loss' | 'unknown') {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'setGameOutcome', sessionId, outcome) as Promise<number>
+  }
+
   async onInit() {
     const store = useCoachAdvisorStore()
     this._pm.sync(COACH_SHARD_NAMESPACE, 'settings', store.settings, [

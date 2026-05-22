@@ -46,9 +46,27 @@
         </div>
       </div>
       <template #footer v-if="cas.state.lastGeneratedAt">
-        <span class="coach-timestamp">
-          {{ t('CoachPanel.generatedAt', { time: formattedTime }) }}
-        </span>
+        <div class="coach-footer">
+          <span class="coach-timestamp">
+            {{ t('CoachPanel.generatedAt', { time: formattedTime }) }}
+          </span>
+          <div class="coach-feedback-actions" v-if="cas.state.advices.length > 0">
+            <NButton
+              size="tiny"
+              quaternary
+              @click="handleFeedback('helpful')"
+            >
+              👍
+            </NButton>
+            <NButton
+              size="tiny"
+              quaternary
+              @click="handleFeedback('not-helpful')"
+            >
+              👎
+            </NButton>
+          </div>
+        </div>
       </template>
     </NCard>
   </Transition>
@@ -104,6 +122,15 @@ const formattedTime = computed(() => {
 async function handleRefresh() {
   try {
     await ca.generateAdvices()
+  } catch (_) {}
+}
+
+async function handleFeedback(feedback: 'helpful' | 'not-helpful') {
+  try {
+    const topAdvice = cas.state.advices[0]
+    if (topAdvice) {
+      await ca.recordFeedback(topAdvice.type, feedback)
+    }
   } catch (_) {}
 }
 </script>
@@ -174,8 +201,19 @@ async function handleRefresh() {
   word-break: break-word;
 }
 
+.coach-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .coach-timestamp {
   font-size: 11px;
   opacity: 0.4;
+}
+
+.coach-feedback-actions {
+  display: flex;
+  gap: 2px;
 }
 </style>

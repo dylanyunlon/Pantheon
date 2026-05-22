@@ -27,6 +27,11 @@ import {
   mapQueryPhaseToGamePhase
 } from './coach-scheduler'
 import type { GamePhase, ScheduledAdvice, SchedulerConfig } from './coach-scheduler'
+import {
+  ExperimentCapture,
+  createExperimentCapture
+} from './coach-capture'
+import type { FeatureVector, TrainingSample, CaptureSessionMeta } from './coach-capture'
 
 export const enum CoachAdvicePriority {
   CRITICAL = 0,
@@ -908,6 +913,7 @@ export class CoachEngine {
   private _scheduler: CoachScheduler
   private _aggregationReducer: RingReducer<number>
   private _lastComparison: TeamComparisonResult | null = null
+  private _capture: ExperimentCapture
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new CoachPipeline()
@@ -936,6 +942,8 @@ export class CoachEngine {
       (acc, cur) => acc + cur,
       0
     )
+    this._capture = createExperimentCapture({ eventCapacity: 500, sampleCapacity: 100 })
+    this._capture.startAutoFlush(15_000)
   }
 
   get scheduler(): CoachScheduler {
@@ -944,6 +952,10 @@ export class CoachEngine {
 
   get lastComparison(): TeamComparisonResult | null {
     return this._lastComparison
+  }
+
+  get capture(): ExperimentCapture {
+    return this._capture
   }
 
   generateAdvices(params: {
@@ -964,6 +976,7 @@ export class CoachEngine {
     gameTimeSeconds?: number
   }): CoachAdvice[] {
     if (!params.playerStats) return []
+    const pipelineStart = Date.now()
 
     const keyParams: CoachCacheKeyParams = {
       selfPuuid: params.selfPuuid,
@@ -1047,6 +1060,73 @@ export class CoachEngine {
     this._refCounts.register(cacheKey)
     this._refCounts.retain(cacheKey)
 
+    const pipelineDuration = Date.now() - pipelineStart
+    this._capture.captureAdviceGenerated(deduped, gamePhase, pipelineDuration)
+
+    if (teamComparison) {
+      this._capture.captureTeamComparison(teamComparison, gamePhase)
+    }
+
+    const selfAnalysisForFeature = params.playerStats.players[params.selfPuuid] || null
+    const selfChampId = params.championSelections[params.selfPuuid] || null
+    const selfRank = getRankNumeric(params.rankedStats, params.selfPuuid)
+
+    let premadeMax = 0
+    if (params.inferredPremadeTeams) {
+      for (const groups of Object.values(params.inferredPremadeTeams)) {
+        for (const group of groups) {
+          if (group.length > premadeMax) premadeMax = group.length
+        }
+      }
+    }
+
+    let rankGapMax = 0
+    let laneRankGap = 0
+    const selfPos = params.positionAssignments[params.selfPuuid]?.position
+    for (const puuid of params.enemyMembers) {
+      const er = getRankNumeric(params.rankedStats, puuid)
+      if (er >= 0 && selfRank >= 0) {
+        const gap = Math.abs(er - selfRank)
+        if (gap > rankGapMax) rankGapMax = gap
+        if (params.positionAssignments[puuid]?.position === selfPos) {
+          laneRankGap = er - selfRank
+        }
+      }
+    }
+
+    let allyPhys = 0
+    let allyMagic = 0
+    let allyDmgCount = 0
+    const allAllyForFeature = [params.selfPuuid, ...allyPuuids]
+    for (const puuid of allAllyForFeature) {
+      const a = params.playerStats.players[puuid]
+      if (!a) continue
+      allyPhys += a.summary.averagePhysicalDamageDealtToChampionShareOfTeam
+      allyMagic += a.summary.averageMagicDamageDealtToChampionShareOfTeam
+      allyDmgCount++
+    }
+
+    const featureVector = this._capture.extractFeatureVector({
+      selfAnalysis: selfAnalysisForFeature,
+      selfChampionId: selfChampId,
+      selfRankNumeric: selfRank,
+      allyProfile,
+      enemyProfile,
+      teamComparison,
+      gameMode: params.gameMode,
+      queueType: params.queueType,
+      gamePhase,
+      premadeGroupMaxSize: premadeMax,
+      rankGapMax,
+      laneRankGap,
+      allyPhysDamageShare: allyDmgCount > 0 ? allyPhys / allyDmgCount : 0,
+      allyMagicDamageShare: allyDmgCount > 0 ? allyMagic / allyDmgCount : 0,
+      dataCompletenessRatio: newCompleteness / 100
+    })
+
+    this._capture.captureFeatureSnapshot(featureVector, gamePhase)
+    this._capture.buildTrainingSample(featureVector, deduped, gamePhase)
+
     return deduped
   }
 
@@ -1115,10 +1195,12 @@ export class CoachEngine {
     this._scheduler.clear()
     this._aggregationReducer.clear()
     this._lastComparison = null
+    this._capture.clear()
   }
 
     dispose() {
     this._refCounts.stopAutoGc()
+    this._capture.dispose()
     this.clearCache()
   }
 
@@ -1171,6 +1253,63 @@ export class CoachEngine {
       overallDelta: this._lastComparison.overallDelta,
       confidence: this._lastComparison.confidence,
       aggregatedTeamScore: this._aggregationReducer.reduce()
+    }
+  }
+
+  startExperimentSession(params: {
+    gameMode: string
+    queueType: string
+    selfPuuid: string
+  }): string {
+    return this._capture.startSession(params)
+  }
+
+  endExperimentSession(): CaptureSessionMeta {
+    return this._capture.endSession()
+  }
+
+  setGameOutcome(sessionId: string, outcome: 'win' | 'loss' | 'unknown'): number {
+    return this._capture.setOutcome(sessionId, outcome)
+  }
+
+  recordUserFeedback(
+    adviceType: string,
+    feedback: 'helpful' | 'not-helpful' | 'dismiss'
+  ): void {
+    this._capture.captureUserFeedback(
+      adviceType,
+      feedback,
+      this._scheduler.currentPhase
+    )
+  }
+
+  getExperimentExport(): {
+    meta: CaptureSessionMeta
+    events: ReturnType<ExperimentCapture['getEvents']>
+    samples: ReturnType<ExperimentCapture['getSamples']>
+    accumulatorStats: Record<string, { avg: number; min: number; max: number; count: number }>
+  } {
+    return this._capture.getExportPayload()
+  }
+
+  getTrainingSamples(): TrainingSample[] {
+    return this._capture.getSamples()
+  }
+
+  getCaptureStats(): {
+    sessionId: string
+    isActive: boolean
+    eventCount: number
+    sampleCount: number
+    mergeCount: number
+  } {
+    const meta = this._capture.sessionMeta
+    return {
+      sessionId: this._capture.sessionId,
+      isActive: this._capture.isActive,
+      eventCount: meta.eventCount,
+      sampleCount: meta.sampleCount,
+      mergeCount: this._capture.accumulator.mergeCount
     }
   }
 

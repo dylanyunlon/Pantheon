@@ -154,7 +154,17 @@ function runCoachPipeline(env) {
 
 function getMessages(env) {
   try {
+    var startTs = Date.now()
     var messages = runCoachPipeline(env)
+    var elapsed = Date.now() - startTs
+
+    if (env.captureEnabled) {
+      messages.push(
+        '[实验] pipeline=' + elapsed + 'ms stages=7 samples=' +
+        (messages.length - 1) + ' session=' + (env.captureSessionId || 'n/a')
+      )
+    }
+
     if (messages.length === 0) return ['[教练] 数据加载中...']
     return messages
   } catch (e) {
