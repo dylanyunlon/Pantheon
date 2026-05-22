@@ -299,6 +299,25 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
     return this._ipc.call(COACH_SHARD_NAMESPACE, 'setGameOutcome', sessionId, outcome) as Promise<number>
   }
 
+  getInferenceStats() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getInferenceStats') as Promise<{
+      totalInferences: number
+      avgLatencyMs: number
+      errors: number
+      cacheSize: number
+      isReady: boolean
+      backend: string
+    }>
+  }
+
+  loadInferenceModel(modelPath: string) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'loadInferenceModel', modelPath) as Promise<boolean>
+  }
+
+  switchInferenceBackend(backend: string) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'switchInferenceBackend', backend)
+  }
+
   async onInit() {
     const store = useCoachAdvisorStore()
     this._pm.sync(COACH_SHARD_NAMESPACE, 'settings', store.settings, [

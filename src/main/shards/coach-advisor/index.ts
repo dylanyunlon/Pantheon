@@ -558,5 +558,25 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         )
       }
     )
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getInferenceStats', () => {
+      return this._engine.getInferenceStats()
+    })
+
+    this._ipc.onCall(
+      CoachAdvisorMain.id,
+      'loadInferenceModel',
+      async (_, modelPath: string) => {
+        return this._engine.loadInferenceModel(modelPath)
+      }
+    )
+
+    this._ipc.onCall(
+      CoachAdvisorMain.id,
+      'switchInferenceBackend',
+      (_, backend: string) => {
+        this._engine.switchInferenceBackend(backend as any)
+      }
+    )
   }
 }

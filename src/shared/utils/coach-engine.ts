@@ -32,6 +32,11 @@ import {
   createExperimentCapture
 } from './coach-capture'
 import type { FeatureVector, TrainingSample, CaptureSessionMeta } from './coach-capture'
+import {
+  CoachInferenceEngine,
+  createInferenceEngine
+} from './coach-inference'
+import type { InferenceResult, InferenceConfig, InferenceBackend, OnnxSessionFactory } from './coach-inference'
 
 export const enum CoachAdvicePriority {
   CRITICAL = 0,
@@ -1172,6 +1177,7 @@ export class CoachEngine {
   private _aggregationReducer: RingReducer<number>
   private _lastComparison: TeamComparisonResult | null = null
   private _capture: ExperimentCapture
+  private _inference: CoachInferenceEngine
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new CoachPipeline()
@@ -1207,6 +1213,7 @@ export class CoachEngine {
     )
     this._capture = createExperimentCapture({ eventCapacity: 500, sampleCapacity: 100 })
     this._capture.startAutoFlush(15_000)
+    this._inference = createInferenceEngine()
   }
 
   get scheduler(): CoachScheduler {
@@ -1219,6 +1226,26 @@ export class CoachEngine {
 
   get capture(): ExperimentCapture {
     return this._capture
+  }
+
+  get inference(): CoachInferenceEngine {
+    return this._inference
+  }
+
+  setInferenceSessionFactory(factory: OnnxSessionFactory): void {
+    this._inference.setSessionFactory(factory)
+  }
+
+  async loadInferenceModel(modelPath: string): Promise<boolean> {
+    return this._inference.loadModel(modelPath)
+  }
+
+  switchInferenceBackend(backend: InferenceBackend): void {
+    this._inference.switchBackend(backend)
+  }
+
+  getInferenceStats(): ReturnType<CoachInferenceEngine['stats']> {
+    return this._inference.stats
   }
 
   generateAdvices(params: {
@@ -1467,6 +1494,7 @@ export class CoachEngine {
     dispose() {
     this._refCounts.stopAutoGc()
     this._capture.dispose()
+    this._inference.dispose()
     this.clearCache()
   }
 
