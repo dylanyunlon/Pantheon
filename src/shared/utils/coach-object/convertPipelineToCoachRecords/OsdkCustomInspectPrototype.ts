@@ -14,20 +14,20 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, Coach } from "@shared/types/league-client/coach-api";
+import type { ObjectOrInterfaceDefinition, Coach } from "../../../coach-types";
 import type { inspect, InspectOptionsStylized } from "node:util";
 import type { HolderBase } from "./InternalSymbols.js";
 import {
   InterfaceDefRef,
   ObjectDefRef,
-  UnderlyingOsdkObject,
+  UnderlyingCoachRecord,
 } from "./InternalSymbols.js";
 
 const nodejsUtilInspectCustom: unique symbol = Symbol.for(
   "nodejs.util.inspect.custom",
 );
 
-export const OsdkCustomInspectPrototype: {
+export const CoachCustomInspectPrototype: {
   [nodejsUtilInspectCustom]: typeof customInspect;
 } = Object.create(null, {
   [nodejsUtilInspectCustom]: { value: customInspect },
@@ -76,10 +76,10 @@ function customInspect(
     }\n`;
   }
 
-  if (this[UnderlyingOsdkObject] !== this) {
+  if (this[UnderlyingCoachRecord] !== this) {
     ret += "\n";
     ret += `  ${options.stylize("$as", "special")}: ${
-      localInspect(this[UnderlyingOsdkObject], newOptions).replace(
+      localInspect(this[UnderlyingCoachRecord], newOptions).replace(
         /\n/g,
         `\n  `,
       )

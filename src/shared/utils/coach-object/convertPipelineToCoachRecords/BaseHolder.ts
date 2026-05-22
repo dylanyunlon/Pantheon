@@ -19,19 +19,19 @@ import type {
   ObjectOrInterfaceDefinition,
   ObjectSpecifier,
   PropertySecurity,
-} from "@shared/types/league-client/coach-api";
+} from "../../../coach-types";
 import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter.js";
 import type { InterfaceHolder } from "./InterfaceHolder.js";
 import type {
   PropertySecuritiesRef,
-  UnderlyingOsdkObject,
+  UnderlyingCoachRecord,
 } from "./InternalSymbols.js";
 import type { ObjectHolder } from "./ObjectHolder.js";
 
 /** @internal */
 
 export interface BaseHolder {
-  readonly [UnderlyingOsdkObject]: ObjectHolder;
+  readonly [UnderlyingCoachRecord]: ObjectHolder;
   readonly [PropertySecuritiesRef]:
     | { [propName: string]: PropertySecurity[] }
     | undefined;
@@ -64,7 +64,7 @@ export interface BaseHolder {
   ) => string | undefined;
 
   // [key: `$$${string}`]: any;
-  // Unlike SimpleOsdkProperties, all of our remaining types are unknown as the full
+  // Unlike SimpleCoachProperties, all of our remaining types are unknown as the full
   // union is basically `any` when you consider the above fields.
   [key: string]: unknown;
 }

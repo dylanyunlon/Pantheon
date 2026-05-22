@@ -14,15 +14,15 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, OsdkBase } from "@shared/types/league-client/coach-api";
+import type { ObjectOrInterfaceDefinition, CoachBase } from "../../../coach-types";
 import {
   type FetchedObjectTypeDefinition,
   InterfaceDefinitions,
 } from "../../gameState/GameStateProvider.js";
 import { createSimpleCache } from "../SimpleCache.js";
-import { createOsdkInterface } from "./createOsdkInterface.js";
+import { createCoachInterface } from "./createCoachInterface.js";
 import type { InterfaceHolder } from "./InterfaceHolder.js";
-import { UnderlyingOsdkObject } from "./InternalSymbols.js";
+import { UnderlyingCoachRecord } from "./InternalSymbols.js";
 import type { ObjectHolder } from "./ObjectHolder.js";
 
 /** @internal */
@@ -32,7 +32,7 @@ export type DollarAsFn = <
 >(
   this: InterfaceHolder | ObjectHolder,
   newDef: string | NEW_Q,
-) => OsdkBase<any>;
+) => CoachBase<any>;
 
 export const get$as: (key: FetchedObjectTypeDefinition) => DollarAsFn =
   createSimpleCache<
@@ -40,15 +40,15 @@ export const get$as: (key: FetchedObjectTypeDefinition) => DollarAsFn =
     DollarAsFn
   >(new WeakMap(), $asFactory).get;
 
-const osdkObjectToInterfaceView = createSimpleCache(
+const coachRecordToInterfaceView = createSimpleCache(
   new WeakMap<
-    OsdkBase<any>,
-    Map<string, WeakRef<OsdkBase<any>>>
+    CoachBase<any>,
+    Map<string, WeakRef<CoachBase<any>>>
   >(),
   () =>
     new Map<
       /* interface api name */ string,
-      /* $as'd object */ WeakRef<OsdkBase<any>>
+      /* $as'd object */ WeakRef<CoachBase<any>>
     >(),
 );
 
@@ -60,14 +60,14 @@ function $asFactory(
   return function $as<
     NEW_Q extends ObjectOrInterfaceDefinition,
   >(
-    this: OsdkBase<any> & { [UnderlyingOsdkObject]: any },
+    this: CoachBase<any> & { [UnderlyingCoachRecord]: any },
     targetMinDef: NEW_Q | string,
-  ): OsdkBase<any> {
+  ): CoachBase<any> {
     let targetInterfaceApiName: string;
 
     if (typeof targetMinDef === "string") {
       if (targetMinDef === objDef.apiName) {
-        return this[UnderlyingOsdkObject];
+        return this[UnderlyingCoachRecord];
       }
 
       // this is sufficient to determine if we implement the interface
@@ -79,7 +79,7 @@ function $asFactory(
 
       targetInterfaceApiName = targetMinDef;
     } else if (targetMinDef.apiName === objDef.apiName) {
-      return this[UnderlyingOsdkObject];
+      return this[UnderlyingCoachRecord];
     } else {
       if (targetMinDef.type === "object") {
         throw new Error(
@@ -96,18 +96,18 @@ function $asFactory(
       );
     }
 
-    const underlying = this[UnderlyingOsdkObject];
+    const underlying = this[UnderlyingCoachRecord];
 
-    const existing = osdkObjectToInterfaceView
+    const existing = coachRecordToInterfaceView
       .get(underlying)
       .get(targetInterfaceApiName)?.deref();
     if (existing) return existing;
 
-    const osdkInterface = createOsdkInterface(underlying, def.def);
-    osdkObjectToInterfaceView.get(underlying).set(
+    const coachInterface = createCoachInterface(underlying, def.def);
+    coachRecordToInterfaceView.get(underlying).set(
       targetInterfaceApiName,
-      new WeakRef(osdkInterface),
+      new WeakRef(coachInterface),
     );
-    return osdkInterface;
+    return coachInterface;
   };
 }

@@ -14,11 +14,11 @@
  * 
  */
 
-import type { InterfaceMetadata } from "@shared/types/league-client/coach-api";
+import type { InterfaceMetadata } from "../../../../coach-types";
 import type {
   DerivedPropertyDefinition,
-  ObjectSet as WireObjectSet,
-} from "@coach/pantheon.ontologies";
+  PipelineSet as WirePipelineSet,
+} from "../../../../coach-types";
 import invariant from "../../coach-util/invariant";
 import type { MinimalClient } from "../../MinimalClientContext.js";
 import type {
@@ -41,7 +41,7 @@ import type {
 
 export async function getObjectTypesThatInvalidate(
   mc: MinimalClient,
-  objectSet: WireObjectSet,
+  pipelineSet: WirePipelineSet,
 ): Promise<{
   resultType: FetchedObjectTypeDefinition | InterfaceMetadata;
   counts: Record<string, number>;
@@ -49,8 +49,8 @@ export async function getObjectTypesThatInvalidate(
 }> {
   const counts: Record<string, number> = {};
 
-  const resultType = await calcObjectSet(
-    objectSet,
+  const resultType = await calcPipelineSet(
+    pipelineSet,
     { counts, methodInput: undefined, gameStateProvider: mc.gameStateProvider },
   );
 
@@ -71,12 +71,12 @@ export async function getObjectTypesThatInvalidate(
 
 interface Ctx {
   counts: Record<string, number>;
-  methodInput: WireObjectSet | undefined;
+  methodInput: WirePipelineSet | undefined;
   gameStateProvider: GameStateProvider;
 }
 
-async function calcObjectSet(
-  os: WireObjectSet,
+async function calcPipelineSet(
+  os: WirePipelineSet,
   ctx: Ctx,
 ): Promise<FetchedObjectTypeDefinition | InterfaceMetadata> {
   const op = ctx.gameStateProvider;
@@ -104,7 +104,7 @@ async function calcObjectSet(
       return await bumpInterface(os.interfaceType);
 
     case "interfaceLinkSearchAround": {
-      const srcDef = await calcObjectSet(os.objectSet, ctx);
+      const srcDef = await calcPipelineSet(os.pipelineSet, ctx);
       invariant(srcDef.type === "interface");
 
       for (const [k, v] of Object.entries(srcDef.links)) {
@@ -119,13 +119,13 @@ async function calcObjectSet(
       // if we got here then we did not find the link and something is wrong.
       throw new Error(
         `Could not find link ${os.interfaceLink} in object set ${
-          JSON.stringify(os.objectSet)
+          JSON.stringify(os.pipelineSet)
         }`,
       );
     }
 
     case "searchAround": {
-      const contextDef = await calcObjectSet(os.objectSet, ctx);
+      const contextDef = await calcPipelineSet(os.pipelineSet, ctx);
       invariant(contextDef.type === "object");
 
       for (const [k, v] of Object.entries(contextDef.links)) {
@@ -137,7 +137,7 @@ async function calcObjectSet(
       // if we got here then we did not find the link and something is wrong.
       throw new Error(
         `Could not find link ${os.link} in object set ${
-          JSON.stringify(os.objectSet)
+          JSON.stringify(os.pipelineSet)
         }`,
       );
     }
@@ -145,7 +145,7 @@ async function calcObjectSet(
     case "filter":
       // for the simple version of this, we can ignore the filter being based on any RDPs because
       // our RDP handling will ensure we invalidate based on those.
-      return calcObjectSet(os.objectSet, ctx);
+      return calcPipelineSet(os.pipelineSet, ctx);
 
     case "union":
     case "subtract":
@@ -171,7 +171,7 @@ async function calcObjectSet(
       const returnTypes = await Promise.all(
         resolvableSets.map(async (os) => {
           const counts: Record<string, number> = {};
-          const r = await calcObjectSet(os, { ...ctx, counts });
+          const r = await calcPipelineSet(os, { ...ctx, counts });
           return { r, counts };
         }),
       );
@@ -203,9 +203,9 @@ async function calcObjectSet(
     case "withProperties":
       // Everything in an RDP chain needs to invalidate us for now
       for (const [, v] of Object.entries(os.derivedProperties)) {
-        await calcRdp(v, { ...ctx, methodInput: os.objectSet });
+        await calcRdp(v, { ...ctx, methodInput: os.pipelineSet });
       }
-      return calcObjectSet(os.objectSet, { ...ctx, methodInput: os.objectSet });
+      return calcPipelineSet(os.pipelineSet, { ...ctx, methodInput: os.pipelineSet });
 
     // used by rdps
     case "methodInput":
@@ -213,7 +213,7 @@ async function calcObjectSet(
 
       // we only call this to get the context type, so we give it a new ctx
       // otherwise it will double count everything
-      return (await calcObjectSet(ctx.methodInput, { ...ctx, counts: {} }));
+      return (await calcPipelineSet(ctx.methodInput, { ...ctx, counts: {} }));
 
     case "asType":
       // we don't currently support this anywhere.
@@ -225,14 +225,14 @@ async function calcObjectSet(
     // which types without loading the object set definition (and it can change).
     case "static":
       // static is also a problem as we cannot know what the types are without loading them
-      throw new Error(`Unsupported ObjectSet type ${os.type}`);
+      throw new Error(`Unsupported PipelineSet type ${os.type}`);
 
     case "nearestNeighbors":
-      return calcObjectSet(os.objectSet, ctx);
+      return calcPipelineSet(os.pipelineSet, ctx);
 
     default:
       throw new Error(
-        `Unhandled ObjectSet type ${(os as any).type}`,
+        `Unhandled PipelineSet type ${(os as any).type}`,
       );
   }
 }
@@ -244,7 +244,7 @@ async function calcRdp(
   switch (dpd.type) {
     // Operates on object sets
     case "selection":
-      return await calcObjectSet(dpd.objectSet, ctx);
+      return await calcPipelineSet(dpd.pipelineSet, ctx);
 
     // Operates on single property
     case "negate":

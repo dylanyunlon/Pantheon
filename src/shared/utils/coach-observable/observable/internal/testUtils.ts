@@ -20,13 +20,13 @@ import type {
   FetchPageArgs,
   Logger,
   ObjectOrInterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   ObjectTypeDefinition,
   Coach,
-  OsdkBase,
+  CoachBase,
   PageResult,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../coach-types";
 import { Chalk } from "chalk";
 import { inspect } from "node:util";
 import type { DeferredPromise } from "p-defer";
@@ -38,7 +38,7 @@ import { afterEach, beforeEach, expect, vi, vitest } from "vitest";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction.js";
 import type { Client } from "../../coach-engine.js";
 import { additionalContext } from "../../coach-engine.js";
-import type { ObjectHolder } from "../../coach-object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder.js";
 import type { SpecificLinkPayload } from "../LinkPayload.js";
 import type { ListPayload } from "../ListPayload.js";
 import type { ObjectPayload } from "../ObjectPayload.js";
@@ -183,11 +183,11 @@ export function createClientMockHelper(): MockClientHelper {
     }
 
     let where;
-    const deadObjectSet = {
+    const deadPipelineSet = {
       where: (...whereArgs: any[]) => {
         localLogger.trace("where", whereArgs);
         where = whereArgs;
-        return deadObjectSet;
+        return deadPipelineSet;
       },
       fetchPage: (...fetchArgs: any[]) => {
         localLogger.trace("fetchPage", where!, fetchArgs);
@@ -199,7 +199,7 @@ export function createClientMockHelper(): MockClientHelper {
         throw new Error("NO");
       },
     };
-    return deadObjectSet;
+    return deadPipelineSet;
   });
 
   client[additionalContext] = {
@@ -242,7 +242,7 @@ export function createClientMockHelper(): MockClientHelper {
   >(): DeferredPromise<X> {
     const d = pDefer<X>();
 
-    const objectSet: ObjectSet<ObjectTypeDefinition> = {
+    const pipelineSet: PipelineSet<ObjectTypeDefinition> = {
       fetchPage: async (fetchPageArgs: FetchPageArgs<any>) => {
         mockLog("fetchPage", fetchPageArgs);
         const r = await d.promise;
@@ -250,19 +250,19 @@ export function createClientMockHelper(): MockClientHelper {
       },
       where: (clause) => {
         mockLog("where", clause);
-        return objectSet;
+        return pipelineSet;
       },
     } as Pick<
-      ObjectSet<ObjectTypeDefinition>,
+      PipelineSet<ObjectTypeDefinition>,
       "fetchPage" | "where"
-    > as ObjectSet<ObjectTypeDefinition>;
+    > as PipelineSet<ObjectTypeDefinition>;
 
-    client.mockReturnValueOnce(objectSet);
+    client.mockReturnValueOnce(pipelineSet);
     return d;
   }
 
   function mockFetchOneOnce<
-    X extends Partial<OsdkBase<any>>,
+    X extends Partial<CoachBase<any>>,
   >(expectedId?: string | number | boolean): DeferredPromise<X> {
     const d = pDefer<X>();
 
@@ -283,7 +283,7 @@ export function createClientMockHelper(): MockClientHelper {
           );
           return r as Coach.Instance<any>;
         },
-      } as Pick<ObjectSet<ObjectTypeDefinition>, "fetchOne">,
+      } as Pick<PipelineSet<ObjectTypeDefinition>, "fetchOne">,
     );
     return d;
   }
@@ -600,7 +600,7 @@ export function listPayloadContaining(
     isOptimistic: expect.any(Boolean),
     status: x.status ?? expect.anything(),
     lastUpdated: x.lastUpdated ?? expect.anything(),
-    objectSet: x.objectSet ?? expect.anything(),
+    pipelineSet: x.pipelineSet ?? expect.anything(),
   } as ListPayload;
 }
 

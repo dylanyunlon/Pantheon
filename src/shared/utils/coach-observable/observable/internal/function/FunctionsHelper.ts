@@ -14,7 +14,7 @@
  * 
  */
 
-import type { QueryDefinition } from "@shared/types/league-client/coach-api";
+import type { QueryDefinition } from "../../../../../coach-types";
 import type { FunctionPayload } from "../../FunctionPayload.js";
 import type { Observer } from "../../ObservableClient/common.js";
 import { AbstractHelper } from "../AbstractHelper.js";

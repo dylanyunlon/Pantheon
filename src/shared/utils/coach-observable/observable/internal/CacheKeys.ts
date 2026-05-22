@@ -14,7 +14,7 @@
  * 
  */
 
-import { Trie } from "@wry/trie";
+import { Trie } from "../../../../coach-types";
 import { DEBUG_CACHE_KEYS, DEBUG_REFCOUNTS } from "../DebugFlags.js";
 import type { CacheKey } from "./CacheKey.js";
 import { RefCounts } from "./RefCounts.js";

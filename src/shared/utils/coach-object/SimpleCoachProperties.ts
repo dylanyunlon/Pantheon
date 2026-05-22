@@ -23,7 +23,7 @@
  *
  * @internal
  */
-export interface SimpleOsdkProperties {
+export interface SimpleCoachProperties {
   $apiName: string;
   $objectType: string;
   $primaryKey: string | number;

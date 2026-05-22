@@ -14,9 +14,9 @@
  * 
  */
 
-import type { ObjectSet } from "@shared/types/league-client/coach-api";
+import type { PipelineSet } from "../../../coach-types";
 import type { BaseCollectionPayload } from "./internal/base-list/BaseCollectionQuery.js";
 
 export interface ObjectSetPayload extends BaseCollectionPayload {
-  objectSet: ObjectSet<any, any>;
+  pipelineSet: PipelineSet<any, any>;
 }

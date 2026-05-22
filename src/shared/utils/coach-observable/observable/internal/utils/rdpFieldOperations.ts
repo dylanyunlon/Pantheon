@@ -14,14 +14,14 @@
  * 
  */
 
-import { createOsdkObject } from "../../../object/convertWireToOsdkObjects/createOsdkObject.js";
+import { createCoachRecord } from "../../../object/convertWireToCoachRecords/createCoachRecord.js";
 import {
   ClientRef,
   ObjectDefRef,
-  UnderlyingOsdkObject,
-} from "../../../object/convertWireToOsdkObjects/InternalSymbols.js";
-import type { ObjectHolder } from "../../../object/convertWireToOsdkObjects/ObjectHolder.js";
-import type { SimpleOsdkProperties } from "../../../object/SimpleOsdkProperties.js";
+  UnderlyingCoachRecord,
+} from "../../../object/convertWireToCoachRecords/InternalSymbols.js";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
+import type { SimpleCoachProperties } from "../../../object/SimpleCoachProperties.js";
 import type { Canonical } from "../Canonical.js";
 import type { Rdp } from "../RdpCanonicalizer.js";
 
@@ -42,10 +42,10 @@ function stripRdpFields(
     return value;
   }
 
-  const underlying = value[UnderlyingOsdkObject] as SimpleOsdkProperties;
+  const underlying = value[UnderlyingCoachRecord] as SimpleCoachProperties;
   const objectDef = value[ObjectDefRef];
 
-  const newProps: SimpleOsdkProperties = {
+  const newProps: SimpleCoachProperties = {
     $apiName: underlying.$apiName,
     $objectType: underlying.$objectType,
     $primaryKey: underlying.$primaryKey,
@@ -59,7 +59,7 @@ function stripRdpFields(
     }
   }
 
-  return createOsdkObject(value[ClientRef], objectDef, newProps);
+  return createCoachRecord(value[ClientRef], objectDef, newProps);
 }
 
 function isSuperset(
@@ -79,10 +79,10 @@ function filterToRdpFields(
   rdpFieldsToKeep: ReadonlySet<string>,
   sourceRdpFields: ReadonlySet<string>,
 ): ObjectHolder {
-  const underlying = value[UnderlyingOsdkObject] as SimpleOsdkProperties;
+  const underlying = value[UnderlyingCoachRecord] as SimpleCoachProperties;
   const objectDef = value[ObjectDefRef];
 
-  const newProps: SimpleOsdkProperties = {
+  const newProps: SimpleCoachProperties = {
     $apiName: underlying.$apiName,
     $objectType: underlying.$objectType,
     $primaryKey: underlying.$primaryKey,
@@ -99,7 +99,7 @@ function filterToRdpFields(
     }
   }
 
-  return createOsdkObject(value[ClientRef], objectDef, newProps);
+  return createCoachRecord(value[ClientRef], objectDef, newProps);
 }
 
 export function mergeSelectFields(
@@ -108,12 +108,12 @@ export function mergeSelectFields(
   existingValue: ObjectHolder,
 ): ObjectHolder {
   const sourceUnderlying =
-    sourceValue[UnderlyingOsdkObject] as SimpleOsdkProperties;
+    sourceValue[UnderlyingCoachRecord] as SimpleCoachProperties;
   const existingUnderlying =
-    existingValue[UnderlyingOsdkObject] as SimpleOsdkProperties;
+    existingValue[UnderlyingCoachRecord] as SimpleCoachProperties;
   const objectDef = sourceValue[ObjectDefRef];
 
-  const newProps: SimpleOsdkProperties = {
+  const newProps: SimpleCoachProperties = {
     $apiName: sourceUnderlying.$apiName,
     $objectType: sourceUnderlying.$objectType,
     $primaryKey: sourceUnderlying.$primaryKey,
@@ -133,7 +133,7 @@ export function mergeSelectFields(
     }
   }
 
-  return createOsdkObject(sourceValue[ClientRef], objectDef, newProps);
+  return createCoachRecord(sourceValue[ClientRef], objectDef, newProps);
 }
 
 export function mergeObjectFields(
@@ -154,10 +154,10 @@ export function mergeObjectFields(
   }
 
   const sourceUnderlying =
-    sourceValue[UnderlyingOsdkObject] as SimpleOsdkProperties;
+    sourceValue[UnderlyingCoachRecord] as SimpleCoachProperties;
   const objectDef = sourceValue[ObjectDefRef];
 
-  const newProps: SimpleOsdkProperties = {
+  const newProps: SimpleCoachProperties = {
     $apiName: sourceUnderlying.$apiName,
     $objectType: sourceUnderlying.$objectType,
     $primaryKey: sourceUnderlying.$primaryKey,
@@ -176,7 +176,7 @@ export function mergeObjectFields(
 
   if (targetCurrentValue) {
     const targetUnderlying =
-      targetCurrentValue[UnderlyingOsdkObject] as SimpleOsdkProperties;
+      targetCurrentValue[UnderlyingCoachRecord] as SimpleCoachProperties;
     for (const field of targetRdpFields) {
       if (field in targetUnderlying) {
         // Preserve target's value when:
@@ -192,7 +192,7 @@ export function mergeObjectFields(
     }
   }
 
-  return createOsdkObject(
+  return createCoachRecord(
     sourceValue[ClientRef],
     objectDef,
     newProps,

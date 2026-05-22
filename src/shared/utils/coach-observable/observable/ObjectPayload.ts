@@ -14,8 +14,8 @@
  * 
  */
 
-import type { ObjectTypeDefinition, Coach } from "@shared/types/league-client/coach-api";
-import type { ObjectHolder } from "../object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { ObjectTypeDefinition, Coach } from "../../../coach-types";
+import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder.js";
 import type { ObserveObjectCallbackArgs } from "./ObservableClient.js";
 
 export interface ObjectPayload

@@ -15,36 +15,36 @@
  */
 
 import type {
-  ObjectSet,
-  OsdkObjectLinksObject,
+  PipelineSet,
+  CoachRecordLinksObject,
   SelectArg,
   SingleLinkAccessor,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
-import { getWireObjectSet } from "../../coach-pipeline/createObjectSet.js";
+} from "../../../coach-types";
+import { getWirePipelineSet } from "../../coach-pipeline/createPipeline.js";
 import { fetchSingle, fetchSingleWithErrors } from "../fetchSingle.js";
 import type { InterfaceHolder } from "./InterfaceHolder.js";
 import {
   ClientRef,
   InterfaceDefRef,
   ObjectDefRef,
-  UnderlyingOsdkObject,
+  UnderlyingCoachRecord,
 } from "./InternalSymbols.js";
 import type { ObjectHolder } from "./ObjectHolder.js";
 
 /** @internal */
 export function get$link(
   holder: ObjectHolder,
-): OsdkObjectLinksObject<any> {
+): CoachRecordLinksObject<any> {
   const client = holder[ClientRef];
   const objDef = holder[ObjectDefRef];
-  const rawObj = holder[UnderlyingOsdkObject];
+  const rawObj = holder[UnderlyingCoachRecord];
   return Object.freeze(Object.fromEntries(
     Object.keys(objDef.links).map(
       (linkName) => {
         const linkDef = objDef.links[linkName as keyof typeof objDef.links];
-        const objectSet =
-          (client.objectSetFactory(objDef, client) as ObjectSet<any>)
+        const pipelineSet =
+          (client.objectSetFactory(objDef, client) as PipelineSet<any>)
             .where({
               [objDef.primaryKeyApiName]: rawObj.$primaryKey,
             } as WhereClause<any>)
@@ -59,7 +59,7 @@ export function get$link(
                 client,
                 objDef,
                 options ?? {},
-                getWireObjectSet(objectSet),
+                getWirePipelineSet(pipelineSet),
               ),
             fetchOneWithErrors: <A extends SelectArg<any, any, any, any>>(
               options?: A,
@@ -68,10 +68,10 @@ export function get$link(
                 client,
                 objDef,
                 options ?? {},
-                getWireObjectSet(objectSet),
+                getWirePipelineSet(pipelineSet),
               ),
           } as SingleLinkAccessor<any>
-          : objectSet;
+          : pipelineSet;
 
         return [linkName, value];
       },
@@ -82,20 +82,20 @@ export function get$link(
 /** @internal */
 export function get$linkForInterface(
   holder: InterfaceHolder,
-): OsdkObjectLinksObject<any> {
-  const client = holder[UnderlyingOsdkObject][ClientRef];
-  const objDef = holder[UnderlyingOsdkObject][ObjectDefRef];
+): CoachRecordLinksObject<any> {
+  const client = holder[UnderlyingCoachRecord][ClientRef];
+  const objDef = holder[UnderlyingCoachRecord][ObjectDefRef];
   const interfaceDef = holder[InterfaceDefRef];
-  const rawObj = holder[UnderlyingOsdkObject];
+  const rawObj = holder[UnderlyingCoachRecord];
   return Object.freeze(Object.fromEntries(
     Object.keys(interfaceDef.links).map(
       (linkName) => {
         const linkDef =
           interfaceDef.links[linkName as keyof typeof objDef.links];
-        const objectSet =
-          (client.objectSetFactory(interfaceDef, client) as ObjectSet<any>)
+        const pipelineSet =
+          (client.objectSetFactory(interfaceDef, client) as PipelineSet<any>)
             .intersect(
-              (client.objectSetFactory(objDef, client) as ObjectSet<any>)
+              (client.objectSetFactory(objDef, client) as PipelineSet<any>)
                 .where({
                   [objDef.primaryKeyApiName]: rawObj.$primaryKey,
                 } as WhereClause<any>),
@@ -115,7 +115,7 @@ export function get$linkForInterface(
                 client,
                 linkTargetDef,
                 options ?? {},
-                getWireObjectSet(objectSet),
+                getWirePipelineSet(pipelineSet),
               ),
             fetchOneWithErrors: <A extends SelectArg<any, any, any, any>>(
               options?: A,
@@ -124,10 +124,10 @@ export function get$linkForInterface(
                 client,
                 linkTargetDef,
                 options ?? {},
-                getWireObjectSet(objectSet),
+                getWirePipelineSet(pipelineSet),
               ),
           } as SingleLinkAccessor<any>
-          : objectSet;
+          : pipelineSet;
 
         return [linkName, value];
       },

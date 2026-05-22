@@ -18,7 +18,7 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../coach-types";
 import type { Canonical } from "./Canonical.js";
 import { CachingCanonicalizer } from "./Canonicalizer.js";
 import type { SimpleWhereClause } from "./SimpleWhereClause.js";

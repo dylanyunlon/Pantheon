@@ -21,7 +21,7 @@ import type {
   AggregateOpts,
   CompileTimeMetadata,
   ObjectOrInterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   ObjectTypeDefinition,
   Coach,
   PrimaryKeyType,
@@ -29,14 +29,14 @@ import type {
   SimplePropertyDef,
   WhereClause,
   WirePropertyTypes,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../coach-types";
 import { Subscription } from "rxjs";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction.js";
 import { additionalContext } from "../../coach-engine.js";
 import {
-  getWireObjectSet,
-  isObjectSet,
-} from "../../coach-pipeline/createObjectSet.js";
+  getWirePipelineSet,
+  isPipelineSet,
+} from "../../coach-pipeline/createPipeline.js";
 import { extractObjectOrInterfaceType } from "../../coach-util/extractObjectOrInterfaceType.js";
 import type { FunctionPayload } from "../FunctionPayload.js";
 import type { SpecificLinkPayload } from "../LinkPayload.js";
@@ -50,7 +50,7 @@ import type {
   ObservableClient,
   ObserveAggregationArgs,
   ObserveAggregationOptions,
-  ObserveAggregationOptionsWithObjectSet,
+  ObserveAggregationOptionsWithPipelineSet,
   ObserveFunctionCallbackArgs,
   ObserveFunctionOptions,
   ObserveListOptions,
@@ -140,7 +140,7 @@ export class ObservableClientImpl implements ObservableClient {
     A extends AggregateOpts<T>,
     RDPs extends Record<string, SimplePropertyDef> = {},
   >(
-    options: ObserveAggregationOptionsWithObjectSet<T, A, RDPs>,
+    options: ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
     subFn: Observer<ObserveAggregationArgs<T, A>>,
   ): Promise<Unsubscribable>;
   public observeAggregation<
@@ -150,12 +150,12 @@ export class ObservableClientImpl implements ObservableClient {
   >(
     options:
       | ObserveAggregationOptions<T, A, RDPs>
-      | ObserveAggregationOptionsWithObjectSet<T, A, RDPs>,
+      | ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
     subFn: Observer<ObserveAggregationArgs<T, A>>,
   ): Unsubscribable | Promise<Unsubscribable> {
-    if (options.objectSet) {
+    if (options.pipelineSet) {
       return this.__experimentalStore.aggregations.observeAsync(
-        options as ObserveAggregationOptionsWithObjectSet<T, A, RDPs>,
+        options as ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
         subFn as Observer<AggregationPayloadBase>,
       );
     }
@@ -179,12 +179,12 @@ export class ObservableClientImpl implements ObservableClient {
     type ObjectDependency = { $apiName: string; $primaryKey: string | number };
     const instances: ObjectDependency[] = [];
     const objectSetWires: Array<
-      ReturnType<typeof getWireObjectSet>
+      ReturnType<typeof getWirePipelineSet>
     > = [];
 
     for (const item of options.dependsOnObjects ?? []) {
-      if (isObjectSet(item)) {
-        objectSetWires.push(getWireObjectSet(item));
+      if (isPipelineSet(item)) {
+        objectSetWires.push(getWirePipelineSet(item));
       } else {
         instances.push({
           $apiName: item.$objectType ?? item.$apiName,
@@ -193,7 +193,7 @@ export class ObservableClientImpl implements ObservableClient {
       }
     }
 
-    // Start async extraction of ObjectSet types
+    // Start async extraction of PipelineSet types
     const objectSetTypesPromise = objectSetWires.length > 0
       ? Promise.all(
         objectSetWires.map(wire =>
@@ -266,19 +266,19 @@ export class ObservableClientImpl implements ObservableClient {
     args: Parameters<ActionSignatureFromDef<Q>["applyAction"]>[0],
   ) => Promise<ActionValidationResponse>;
 
-  public observeObjectSet<
+  public observePipelineSet<
     T extends ObjectOrInterfaceDefinition,
     RDPs extends Record<
       string,
       WirePropertyTypes | undefined | Array<WirePropertyTypes>
     > = {},
   >(
-    baseObjectSet: ObjectSet<T>,
+    basePipelineSet: PipelineSet<T>,
     options: ObserveObjectSetOptions<T, RDPs>,
     subFn: Observer<ObserveObjectSetArgs<T, RDPs>>,
   ): Unsubscribable {
     return this.__experimentalStore.objectSets.observe(
-      { baseObjectSet, ...options },
+      { basePipelineSet, ...options },
       // cast to cross typed to untyped barrier
       subFn as unknown as Observer<ObjectSetPayload>,
     );
@@ -380,7 +380,7 @@ export class ObservableClientImpl implements ObservableClient {
       return arr;
     }
     const wireStrings = arr.map(os =>
-      JSON.stringify(getWireObjectSet(os as ObjectSet<any, any>))
+      JSON.stringify(getWirePipelineSet(os as PipelineSet<any, any>))
     );
     const canonKey = canonicalize(wireStrings);
     let cached = cache.get(canonKey);

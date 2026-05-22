@@ -17,13 +17,13 @@
 import type {
   InterfaceDefinition,
   ObjectOrInterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   ObjectTypeDefinition,
   Coach,
   PageResult,
   PrimaryKeyType,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import { type Subject } from "rxjs";
 import { additionalContext } from "../../../Client.js";
@@ -193,7 +193,7 @@ export class SpecificLinkQuery extends BaseListQuery<
       );
     }
 
-    let linkQuery: ObjectSet<ObjectOrInterfaceDefinition>;
+    let linkQuery: PipelineSet<ObjectOrInterfaceDefinition>;
 
     if (isInterface) {
       const objectMetadata = await gameStateProvider.getObjectDefinition(
@@ -203,7 +203,7 @@ export class SpecificLinkQuery extends BaseListQuery<
       const interfaceSet = client({
         type: "interface",
         apiName: this.#sourceApiName,
-      } as InterfaceDefinition) as ObjectSet<ObjectOrInterfaceDefinition>;
+      } as InterfaceDefinition) as PipelineSet<ObjectOrInterfaceDefinition>;
 
       const objectFilteredByPk = client({
         type: "object",

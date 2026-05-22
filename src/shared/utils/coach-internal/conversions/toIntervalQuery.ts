@@ -14,8 +14,8 @@
  * 
  */
 
-import type { IntervalRule } from "@shared/types/league-client/coach-api";
-import type { SearchJsonQueryV2 } from "@coach/pantheon.ontologies";
+import type { IntervalRule } from "../../../coach-types";
+import type { SearchJsonQueryV2 } from "../../../coach-types";
 import invariant from "../../coach-util/invariant";
 
 type IntervalQueryRule = Extract<

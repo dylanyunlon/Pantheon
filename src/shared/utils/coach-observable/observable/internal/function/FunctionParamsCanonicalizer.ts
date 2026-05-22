@@ -14,12 +14,12 @@
  * 
  */
 
-import type { ObjectSet as WireObjectSet } from "@coach/pantheon.ontologies";
-import { Trie } from "@wry/trie";
+import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
+import { Trie } from "../../../../../coach-types";
 import {
-  getWireObjectSet,
-  isObjectSet,
-} from "../../../objectSet/createObjectSet.js";
+  getWirePipelineSet,
+  isPipelineSet,
+} from "../../../pipelineSet/createPipeline.js";
 import { isObjectSpecifiersObject } from "../../../util/isObjectSpecifiersObject.js";
 import type { Canonical } from "../Canonical.js";
 
@@ -27,17 +27,17 @@ export type CanonicalFunctionParams = Record<string, CanonicalValue>;
 
 type PrimitiveValue = string | number | boolean | bigint | null | undefined;
 
-type OsdkObjectRef = { $apiName: string; $primaryKey: string | number };
+type CoachRecordRef = { $apiName: string; $primaryKey: string | number };
 
 type CanonicalValue =
   | PrimitiveValue
-  | OsdkObjectRef
-  | WireObjectSet
+  | CoachRecordRef
+  | WirePipelineSet
   | CanonicalValue[]
   | [CanonicalValue, CanonicalValue][]
   | { [key: string]: CanonicalValue };
 
-type PathElement = PrimitiveValue | WireObjectSet;
+type PathElement = PrimitiveValue | WirePipelineSet;
 
 // Path markers use "$:" prefix. User data with this prefix is unlikely but could
 // theoretically cause collisions if it matches the exact marker sequence.
@@ -147,8 +147,8 @@ export class FunctionParamsCanonicalizer {
       return { $apiName: objectType, $primaryKey: value.$primaryKey };
     }
 
-    if (isObjectSet(value)) {
-      const wire = JSON.stringify(getWireObjectSet(value));
+    if (isPipelineSet(value)) {
+      const wire = JSON.stringify(getWirePipelineSet(value));
       path.push("$:objectset", wire);
       return wire;
     }

@@ -25,7 +25,7 @@ import type {
   QueryDefinition,
   QueryParam,
   QueryResult,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 import type { PartialByNotStrict } from "../util/partialBy.js";
 
 export type QuerySignatureFromDef<T extends QueryDefinition<any>> = {

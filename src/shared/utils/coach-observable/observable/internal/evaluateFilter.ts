@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PossibleWhereClauseFilters } from "@shared/types/league-client/coach-api";
+import type { PossibleWhereClauseFilters } from "../../../../coach-types";
 import invariant from "../../coach-util/invariant";
 
 /**

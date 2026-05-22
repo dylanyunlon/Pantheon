@@ -14,13 +14,13 @@
  * 
  */
 
-import type { ObjectSet, Coach, PageResult } from "@shared/types/league-client/coach-api";
-import type { ObjectSet as WireObjectSet } from "@coach/pantheon.ontologies";
+import type { PipelineSet, Coach, PageResult } from "../../../../../coach-types";
+import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
 import type { Observable, Subscription } from "rxjs";
 import { additionalContext } from "../../../Client.js";
-import type { InterfaceHolder } from "../../../object/convertWireToOsdkObjects/InterfaceHolder.js";
-import type { ObjectHolder } from "../../../object/convertWireToOsdkObjects/ObjectHolder.js";
-import { getWireObjectSet } from "../../../objectSet/createObjectSet.js";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
 import type { ObjectSetPayload } from "../../ObjectSetPayload.js";
 import type { Status } from "../../ObservableClient/common.js";
 import { BaseListQuery } from "../base-list/BaseListQuery.js";
@@ -54,7 +54,7 @@ export class ObjectSetQuery extends BaseListQuery<
 > {
   #baseObjectSetWire: string;
   #operations: Canonical<ObjectSetOperations>;
-  #composedObjectSet: ObjectSet<any, any>;
+  #composedPipelineSet: PipelineSet<any, any>;
   #objectTypes: Set<string>;
   #requiresServerEvaluation: boolean;
   #resultTypeApiName: string;
@@ -89,9 +89,9 @@ export class ObjectSetQuery extends BaseListQuery<
 
     this.#baseObjectSetWire = baseObjectSetWire;
     this.#operations = operations;
-    this.#composedObjectSet = this.#composeObjectSet(opts);
+    this.#composedPipelineSet = this.#composePipelineSet(opts);
 
-    const baseWire: WireObjectSet = JSON.parse(baseObjectSetWire);
+    const baseWire: WirePipelineSet = JSON.parse(baseObjectSetWire);
     this.#objectTypes = this.#extractObjectTypes(baseWire, opts);
 
     this.#requiresServerEvaluation = !!(
@@ -102,7 +102,7 @@ export class ObjectSetQuery extends BaseListQuery<
     );
 
     this.#resultTypeApiName =
-      ObjectSetQuery.#extractTypeFromWireObjectSet(baseWire) ?? "";
+      ObjectSetQuery.#extractTypeFromWirePipelineSet(baseWire) ?? "";
 
     if (opts.autoFetchMore === true) {
       this.minResultsToLoad = Number.MAX_SAFE_INTEGER;
@@ -129,8 +129,8 @@ export class ObjectSetQuery extends BaseListQuery<
     return this.#operations.select;
   }
 
-  #composeObjectSet(opts: ObjectSetQueryOptions): ObjectSet<any, any> {
-    let result = opts.baseObjectSet;
+  #composePipelineSet(opts: ObjectSetQueryOptions): PipelineSet<any, any> {
+    let result = opts.basePipelineSet;
 
     if (opts.withProperties) {
       result = result.withProperties(opts.withProperties);
@@ -155,11 +155,11 @@ export class ObjectSetQuery extends BaseListQuery<
   }
 
   #extractObjectTypes(
-    baseWire: WireObjectSet,
+    baseWire: WirePipelineSet,
     opts: ObjectSetQueryOptions,
   ): Set<string> {
     const types = new Set<string>();
-    const baseTypeName = ObjectSetQuery.#extractTypeFromWireObjectSet(
+    const baseTypeName = ObjectSetQuery.#extractTypeFromWirePipelineSet(
       baseWire,
     );
     if (baseTypeName) {
@@ -172,15 +172,15 @@ export class ObjectSetQuery extends BaseListQuery<
   }
 
   static #addTypesFromObjectSets(
-    sets: ReadonlyArray<ObjectSet<any, any>> | undefined,
+    sets: ReadonlyArray<PipelineSet<any, any>> | undefined,
     types: Set<string>,
   ): void {
     if (!sets) {
       return;
     }
     for (const os of sets) {
-      const typeName = ObjectSetQuery.#extractTypeFromWireObjectSet(
-        getWireObjectSet(os),
+      const typeName = ObjectSetQuery.#extractTypeFromWirePipelineSet(
+        getWirePipelineSet(os),
       );
       if (typeName) {
         types.add(typeName);
@@ -188,8 +188,8 @@ export class ObjectSetQuery extends BaseListQuery<
     }
   }
 
-  static #extractTypeFromWireObjectSet(
-    wire: WireObjectSet,
+  static #extractTypeFromWirePipelineSet(
+    wire: WirePipelineSet,
   ): string | undefined {
     if (wire.type === "base") {
       return wire.objectType;
@@ -204,12 +204,12 @@ export class ObjectSetQuery extends BaseListQuery<
    * Register changes to the cache specific to ObjectSetQuery
    */
   protected registerCacheChanges(batch: BatchContext): void {
-    batch.changes.registerObjectSet(this.cacheKey);
+    batch.changes.registerPipelineSet(this.cacheKey);
   }
 
   /**
    * Implements fetchPageData from BaseListQuery template method
-   * Fetches a page of data from the composed ObjectSet
+   * Fetches a page of data from the composed PipelineSet
    */
   protected async fetchPageData(
     signal: AbortSignal | undefined,
@@ -219,11 +219,11 @@ export class ObjectSetQuery extends BaseListQuery<
       && Object.keys(this.#operations.orderBy).length > 0
       && !(this.sortingStrategy instanceof OrderBySortingStrategy)
     ) {
-      const wireObjectSet = getWireObjectSet(this.#composedObjectSet);
+      const wirePipelineSet = getWirePipelineSet(this.#composedPipelineSet);
       const { resultType, invalidationSet } =
         await getObjectTypesThatInvalidate(
           this.store.client[additionalContext],
-          wireObjectSet,
+          wirePipelineSet,
         );
       this.sortingStrategy = new OrderBySortingStrategy(
         resultType.apiName,
@@ -236,21 +236,21 @@ export class ObjectSetQuery extends BaseListQuery<
       this.#rdpInvalidationSet == null
       && this.#operations.withProperties != null
     ) {
-      const wireObjectSet = getWireObjectSet(this.#composedObjectSet);
+      const wirePipelineSet = getWirePipelineSet(this.#composedPipelineSet);
       this.#rdpInvalidationSet = await this.#computeInvalidationTypes(
-        wireObjectSet,
+        wirePipelineSet,
       );
     }
 
     // Fetch the data with pagination
-    const resp = await this.#composedObjectSet.fetchPage({
+    const resp = await this.#composedPipelineSet.fetchPage({
       $nextPageToken: this.nextPageToken,
       $pageSize: this.getEffectiveFetchPageSize(),
       $includeRid: true,
       ...(this.#operations.select && this.#operations.select.length > 0
         ? { $select: this.#operations.select }
         : {}),
-      // OrderBy is already applied in the composed ObjectSet
+      // OrderBy is already applied in the composed PipelineSet
       ...(this.#operations.orderBy
           && Object.keys(this.#operations.orderBy).length > 0
         ? { $orderBy: this.#operations.orderBy }
@@ -287,9 +287,9 @@ export class ObjectSetQuery extends BaseListQuery<
 
   registerStreamUpdates(sub: Subscription): void {
     this.createWebsocketSubscription(
-      this.#composedObjectSet,
+      this.#composedPipelineSet,
       sub,
-      "observeObjectSet",
+      "observePipelineSet",
     );
   }
 
@@ -462,12 +462,12 @@ export class ObjectSetQuery extends BaseListQuery<
   }
 
   async #computeInvalidationTypes(
-    wireObjectSet: WireObjectSet,
+    wirePipelineSet: WirePipelineSet,
   ): Promise<Set<string>> {
     try {
       const { invalidationSet } = await getObjectTypesThatInvalidate(
         this.store.client[additionalContext],
-        wireObjectSet,
+        wirePipelineSet,
       );
       return invalidationSet;
     } catch (error) {
@@ -521,7 +521,7 @@ export class ObjectSetQuery extends BaseListQuery<
       hasMore: this.nextPageToken != null,
       status: params.status,
       lastUpdated: params.lastUpdated,
-      objectSet: this.#composedObjectSet,
+      pipelineSet: this.#composedPipelineSet,
       totalCount: params.totalCount,
     };
   }

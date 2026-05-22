@@ -14,10 +14,10 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, Coach } from "@shared/types/league-client/coach-api";
+import type { ObjectOrInterfaceDefinition, Coach } from "../../../../../coach-types";
 import deepEqual from "fast-deep-equal";
-import { UnderlyingOsdkObject } from "../../../object/convertWireToOsdkObjects/InternalSymbols.js";
-import type { ObjectHolder } from "../../../object/convertWireToOsdkObjects/ObjectHolder.js";
+import { UnderlyingCoachRecord } from "../../../object/convertWireToCoachRecords/InternalSymbols.js";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
 import { getDefType } from "../../../util/interfaceUtils.js";
 import type { ObjectPayload } from "../../ObjectPayload.js";
 import type { ObserveObjectOptions } from "../../ObservableClient.js";
@@ -176,7 +176,7 @@ export class ObjectsHelper extends AbstractHelper<
       const expectedRdpFields = this.store.objectCacheKeyRegistry
         .getRdpFieldSet(sourceCacheKey);
       if (expectedRdpFields.size > 0) {
-        const underlying = valueToWrite[UnderlyingOsdkObject];
+        const underlying = valueToWrite[UnderlyingCoachRecord];
         const actualRdpFields = new Set<string>();
         for (const field of expectedRdpFields) {
           if (underlying && field in underlying) {

@@ -14,8 +14,8 @@
  * 
  */
 
-import type { InterfaceHolder } from "../object/convertWireToOsdkObjects/InterfaceHolder.js";
-import type { ObjectHolder } from "../object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { InterfaceHolder } from "../object/convertWireToCoachRecords/InterfaceHolder.js";
+import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder.js";
 import type { ObserveLinkCallbackArgs } from "./ObservableClient.js";
 
 /**

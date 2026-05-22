@@ -2352,3 +2352,34 @@ CoachAdvisorSettings:
   experimentEvents: Experiment Events
   experimentSamples: Training Samples
   sessionActive: Session Status
+
+  titleAdvanced: Advanced & Experiment Capture
+
+  captureEnabled:
+    label: Enable experiment capture
+    description: Records feature vectors and training samples for each advice generation
+
+  captureShowStatsInPanel:
+    label: Show capture stats in panel
+    description: Display real-time capture statistics in the coach panel footer
+
+  captureAutoFlushInterval:
+    label: Auto-flush interval (ms)
+    description: Time interval for automatic capture buffer writes
+
+  captureEventCapacity:
+    label: Event buffer capacity
+    description: Max events in ring buffer, older entries are overwritten
+
+  captureSampleCapacity:
+    label: Sample buffer capacity
+    description: Max training samples in ring buffer
+
+  captureExportFormat:
+    label: Export format
+    description: File format for training data export
+
+  captureExportButton: Export experiment data
+
+  captureStats:
+    merges: Total merges

@@ -18,11 +18,11 @@ import type {
   AggregateOpts,
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
-} from "@shared/types/league-client/coach-api";
-import { getWireObjectSet } from "../../../objectSet/createObjectSet.js";
+} from "../../../../../coach-types";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
 import type {
   ObserveAggregationOptions,
-  ObserveAggregationOptionsWithObjectSet,
+  ObserveAggregationOptionsWithPipelineSet,
 } from "../../ObservableClient.js";
 import type { Observer } from "../../ObservableClient/common.js";
 import { AbstractHelper } from "../AbstractHelper.js";
@@ -46,7 +46,7 @@ type AggregationOptions =
     ObjectOrInterfaceDefinition,
     AggregateOpts<ObjectOrInterfaceDefinition>
   >
-  | ObserveAggregationOptionsWithObjectSet<
+  | ObserveAggregationOptionsWithPipelineSet<
     ObjectOrInterfaceDefinition,
     AggregateOpts<ObjectOrInterfaceDefinition>
   >;
@@ -89,10 +89,10 @@ export class AggregationsHelper extends AbstractHelper<
     A extends AggregateOpts<T>,
     RDPs extends Record<string, SimplePropertyDef> = {},
   >(
-    options: ObserveAggregationOptionsWithObjectSet<T, A, RDPs>,
+    options: ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
     subFn: Observer<AggregationPayloadBase>,
   ): Promise<QuerySubscription<AggregationQuery>> {
-    const query = this.getQueryWithObjectSet(options);
+    const query = this.getQueryWithPipelineSet(options);
     await query.ensureInvalidationTypesReady();
     return this._subscribe(
       query,
@@ -111,25 +111,25 @@ export class AggregationsHelper extends AbstractHelper<
     return this.getOrCreateQuery(options as AggregationOptions, undefined);
   }
 
-  getQueryWithObjectSet<
+  getQueryWithPipelineSet<
     T extends ObjectOrInterfaceDefinition,
     A extends AggregateOpts<T>,
     RDPs extends Record<string, SimplePropertyDef> = {},
   >(
-    options: ObserveAggregationOptionsWithObjectSet<T, A, RDPs>,
+    options: ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
   ): AggregationQuery {
-    const serializedObjectSet = JSON.stringify(
-      getWireObjectSet(options.objectSet),
+    const serializedPipelineSet = JSON.stringify(
+      getWirePipelineSet(options.pipelineSet),
     );
     return this.getOrCreateQuery(
       options as AggregationOptions,
-      serializedObjectSet,
+      serializedPipelineSet,
     );
   }
 
   private getOrCreateQuery(
     options: AggregationOptions,
-    serializedObjectSet: string | undefined,
+    serializedPipelineSet: string | undefined,
   ): AggregationQuery {
     const { type, where, withProperties, intersectWith, aggregate } = options;
     const { apiName } = type;
@@ -149,7 +149,7 @@ export class AggregationsHelper extends AbstractHelper<
       "aggregation",
       typeKind,
       apiName,
-      serializedObjectSet,
+      serializedPipelineSet,
       canonWhere,
       canonRdp,
       canonIntersect,

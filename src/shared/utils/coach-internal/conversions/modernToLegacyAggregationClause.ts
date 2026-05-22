@@ -14,8 +14,8 @@
  * 
  */
 
-import type { AggregationClause } from "@shared/types/league-client/coach-api";
-import type { AggregationV2 } from "@coach/pantheon.ontologies";
+import type { AggregationClause } from "../../../coach-types";
+import type { AggregationV2 } from "../../../coach-types";
 
 const directionFieldMap = (dir?: "asc" | "desc" | "unordered") =>
   dir === "asc" ? "ASC" : dir === "desc" ? "DESC" : undefined;

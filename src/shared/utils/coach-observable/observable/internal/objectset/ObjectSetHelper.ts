@@ -14,7 +14,7 @@
  * 
  */
 
-import { getWireObjectSet } from "../../../objectSet/createObjectSet.js";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
 import { hasWithProperties } from "../../../util/extractRdpDefinition.js";
 import type { ObjectSetPayload } from "../../ObjectSetPayload.js";
 import type { Observer } from "../../ObservableClient/common.js";
@@ -82,7 +82,7 @@ export class ObjectSetHelper extends AbstractHelper<
         }
       } else if (
         options.withProperties
-        || hasWithProperties(getWireObjectSet(options.baseObjectSet))
+        || hasWithProperties(getWirePipelineSet(options.basePipelineSet))
       ) {
         if (process.env.NODE_ENV !== "production") {
           // eslint-disable-next-line no-console
@@ -100,12 +100,12 @@ export class ObjectSetHelper extends AbstractHelper<
   }
 
   getQuery(options: ObjectSetQueryOptions): ObjectSetQuery {
-    const { baseObjectSet } = options;
-    const baseObjectSetWire = JSON.stringify(getWireObjectSet(baseObjectSet));
+    const { basePipelineSet } = options;
+    const baseObjectSetWire = JSON.stringify(getWirePipelineSet(basePipelineSet));
     const operations = this.buildCanonicalizedOperations(options);
 
     const objectSetCacheKey = this.cacheKeys.get<ObjectSetCacheKey>(
-      "objectSet",
+      "pipelineSet",
       baseObjectSetWire,
       operations,
     );
@@ -139,21 +139,21 @@ export class ObjectSetHelper extends AbstractHelper<
 
     if (options.union && options.union.length > 0) {
       operations.union = this.objectSetArrayCanonicalizer.canonicalizeUnion(
-        options.union.map(os => JSON.stringify(getWireObjectSet(os))),
+        options.union.map(os => JSON.stringify(getWirePipelineSet(os))),
       );
     }
 
     if (options.intersect && options.intersect.length > 0) {
       operations.intersect = this.objectSetArrayCanonicalizer
         .canonicalizeIntersect(
-          options.intersect.map(os => JSON.stringify(getWireObjectSet(os))),
+          options.intersect.map(os => JSON.stringify(getWirePipelineSet(os))),
         );
     }
 
     if (options.subtract && options.subtract.length > 0) {
       operations.subtract = this.objectSetArrayCanonicalizer
         .canonicalizeSubtract(
-          options.subtract.map(os => JSON.stringify(getWireObjectSet(os))),
+          options.subtract.map(os => JSON.stringify(getWirePipelineSet(os))),
         );
     }
 

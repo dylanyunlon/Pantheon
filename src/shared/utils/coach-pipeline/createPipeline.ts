@@ -25,7 +25,7 @@ import type {
   MinimalDirectedObjectLinkInstance,
   NullabilityAdherence,
   ObjectOrInterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   ObjectSetArgs,
   ObjectSetSubscription,
   ObjectTypeDefinition,
@@ -35,15 +35,15 @@ import type {
   Result,
   SelectArg,
   SingleOsdkResult,
-} from "@shared/types/league-client/coach-api";
-import type { MinimalObjectSet } from "@shared/types/league-client/coach-api/unstable";
+} from "../coach-types";
+import type { MinimalPipelineSet } from "../coach-types";
 import type {
   DerivedPropertyDefinition,
-  ObjectSet as WireObjectSet,
+  PipelineSet as WirePipelineSet,
   PropertyApiName,
-} from "@coach/pantheon.ontologies";
+} from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import { createWithPropertiesObjectSet } from "../derivedProperties/createWithPropertiesObjectSet.js";
+import { createWithPropertiesPipelineSet } from "../derivedProperties/createWithPropertiesPipelineSet.js";
 import { modernToLegacyWhereClause } from "../internal/conversions/modernToLegacyWhereClause.js";
 import type { MinimalClient } from "../MinimalClientContext.js";
 import { aggregate } from "../object/aggregate.js";
@@ -54,18 +54,18 @@ import {
 import { fetchSingle, fetchSingleWithErrors } from "../object/fetchSingle.js";
 import { augmentRequestContext } from "../util/augmentRequestContext.js";
 import { resolveBaseObjectSetType } from "../util/objectSetUtils.js";
-import { isWireObjectSet } from "../util/WireObjectSet.js";
-import { fetchLinksPage } from "./fetchLinksPage.js";
+import { isWirePipelineSet } from "../util/WirePipelineSet.js";
+import { fetchRelationsPage } from "./fetchRelationsPage.js";
 
-const a: WireObjectSet = {
+const a: WirePipelineSet = {
   "type": "interfaceLinkSearchAround",
   "interfaceLink": "lead",
-  "objectSet": {
+  "pipelineSet": {
     "type": "asType",
     "entityType": "Person",
-    "objectSet": {
+    "pipelineSet": {
       "type": "filter",
-      "objectSet": { "type": "base", "objectType": "Employee" },
+      "pipelineSet": { "type": "base", "objectType": "Employee" },
       "where": {
         "type": "eq",
         "field": "employeeNumber",
@@ -80,45 +80,45 @@ function isObjectTypeDefinition(
   return def.type === "object";
 }
 
-export function isObjectSet(
+export function isPipelineSet(
   o: object,
-): o is ObjectSet<ObjectOrInterfaceDefinition> {
+): o is PipelineSet<ObjectOrInterfaceDefinition> {
   return o != null && typeof o === "object"
-    && isWireObjectSet(objectSetDefinitions.get(o));
+    && isWirePipelineSet(objectSetDefinitions.get(o));
 }
 
-export function getWireObjectSet(
-  objectSet: ObjectSet<any> | MinimalObjectSet<any>,
-): WireObjectSet {
-  return objectSetDefinitions.get(objectSet)!;
+export function getWirePipelineSet(
+  pipelineSet: PipelineSet<any> | MinimalPipelineSet<any>,
+): WirePipelineSet {
+  return objectSetDefinitions.get(pipelineSet)!;
 }
 
 /** @internal exported for internal use only */
 export const objectSetDefinitions = new WeakMap<
   any,
-  WireObjectSet
+  WirePipelineSet
 >();
 
 /** @internal */
-export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
+export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
   objectType: Q,
   clientCtx: MinimalClient,
-  objectSet: WireObjectSet = resolveBaseObjectSetType(objectType),
-): ObjectSet<Q> {
-  const base: ObjectSet<Q> = {
+  pipelineSet: WirePipelineSet = resolveBaseObjectSetType(objectType),
+): PipelineSet<Q> {
+  const base: PipelineSet<Q> = {
     aggregate: (aggregate<Q, any>).bind(
       globalThis,
       augmentRequestContext(clientCtx, _ => ({ finalMethodCall: "aggregate" })),
       objectType,
-      objectSet,
-    ) as ObjectSet<Q>["aggregate"],
+      pipelineSet,
+    ) as PipelineSet<Q>["aggregate"],
 
     fetchPage: fetchPageInternal.bind(
       globalThis,
       augmentRequestContext(clientCtx, _ => ({ finalMethodCall: "fetchPage" })),
       objectType,
-      objectSet,
-    ) as ObjectSet<Q>["fetchPage"],
+      pipelineSet,
+    ) as PipelineSet<Q>["fetchPage"],
 
     fetchPageWithErrors: fetchPageWithErrorsInternal.bind(
       globalThis,
@@ -127,20 +127,20 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
         _ => ({ finalMethodCall: "fetchPageWithErrors" }),
       ),
       objectType,
-      objectSet,
-    ) as ObjectSet<Q>["fetchPageWithErrors"],
+      pipelineSet,
+    ) as PipelineSet<Q>["fetchPageWithErrors"],
 
     where: (clause) => {
       return clientCtx.objectSetFactory(objectType, clientCtx, {
         type: "filter",
-        objectSet,
+        pipelineSet,
         where: modernToLegacyWhereClause(clause, objectType),
       });
     },
 
     pivotTo<L extends LinkNames<Q>>(
       type: L,
-    ): ObjectSet<LinkedType<Q, L>> {
+    ): PipelineSet<LinkedType<Q, L>> {
       return createSearchAround(type)();
     },
 
@@ -148,7 +148,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
       return clientCtx.objectSetFactory(objectType, clientCtx, {
         type: "union",
         objectSets: [
-          objectSet,
+          pipelineSet,
           ...objectSets.map(os => objectSetDefinitions.get(os)!),
         ],
       });
@@ -158,7 +158,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
       return clientCtx.objectSetFactory(objectType, clientCtx, {
         type: "intersect",
         objectSets: [
-          objectSet,
+          pipelineSet,
           ...objectSets.map(os => objectSetDefinitions.get(os)!),
         ],
       });
@@ -168,7 +168,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
       return clientCtx.objectSetFactory(objectType, clientCtx, {
         type: "subtract",
         objectSets: [
-          objectSet,
+          pipelineSet,
           ...objectSets.map(os => objectSetDefinitions.get(os)!),
         ],
       });
@@ -183,7 +183,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
         clientCtx,
         {
           type: "nearestNeighbors",
-          objectSet,
+          pipelineSet,
           propertyIdentifier: {
             type: "property",
             apiName: property as PropertyApiName,
@@ -191,7 +191,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
           numNeighbors,
           query: nearestNeighborsQuery,
         },
-      ) as ObjectSet<Q>;
+      ) as PipelineSet<Q>;
     },
 
     async *asyncIter<
@@ -221,7 +221,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
             _ => ({ finalMethodCall: "asyncIter" }),
           ),
           objectType,
-          objectSet,
+          pipelineSet,
           { ...args, $pageSize: 10000, $nextPageToken },
           true,
         );
@@ -248,12 +248,12 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
           await createWithPk(
             clientCtx,
             objectType,
-            objectSet,
+            pipelineSet,
             primaryKey,
           ),
         ) as Coach<Q>;
       }
-      : undefined) as ObjectSet<Q>["fetchOne"],
+      : undefined) as PipelineSet<Q>["fetchOne"],
 
     fetchOneWithErrors: (isObjectTypeDefinition(objectType)
       ? async <A extends SelectArg<Q>>(
@@ -271,23 +271,23 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
           await createWithPk(
             clientCtx,
             objectType,
-            objectSet,
+            pipelineSet,
             primaryKey,
           ),
         ) as Result<Coach<Q>>;
       }
-      : undefined) as ObjectSet<Q>["fetchOneWithErrors"],
+      : undefined) as PipelineSet<Q>["fetchOneWithErrors"],
 
     subscribe: (
       listener,
       opts,
     ) => {
-      const pendingSubscribe = import("./ObjectSetListenerWebsocket.js")
-        .then(({ ObjectSetListenerWebsocket }) =>
-          ObjectSetListenerWebsocket.getInstance(clientCtx)
+      const pendingSubscribe = import("./PipelineListenerWebsocket.js")
+        .then(({ PipelineListenerWebsocket }) =>
+          PipelineListenerWebsocket.getInstance(clientCtx)
             .subscribe(
               objectType,
-              objectSet,
+              pipelineSet,
               listener as ObjectSetSubscription.Listener<Q, any>,
               opts?.properties,
               opts?.includeRid,
@@ -303,7 +303,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
       const derivedProperties: Record<string, DerivedPropertyDefinition> = {};
       for (const key of Object.keys(clause)) {
         const derivedPropertyDefinition = clause
-          [key](createWithPropertiesObjectSet(
+          [key](createWithPropertiesPipelineSet(
             objectType,
             { type: "methodInput" },
             definitionMap,
@@ -320,7 +320,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
         {
           type: "withProperties",
           derivedProperties,
-          objectSet,
+          pipelineSet,
         },
       );
     },
@@ -342,7 +342,7 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
         clientCtx,
         {
           type: "asType",
-          objectSet,
+          pipelineSet,
           entityType: objectTypeDef.apiName,
         },
       );
@@ -357,13 +357,13 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
     > {
       let $nextPageToken: string | undefined;
       do {
-        const result = await fetchLinksPage(
+        const result = await fetchRelationsPage(
           augmentRequestContext(
             clientCtx,
             _ => ({ finalMethodCall: "asyncIterLinks" }),
           ),
           objectType,
-          objectSet,
+          pipelineSet,
           links,
         );
         $nextPageToken = result.nextPageToken;
@@ -387,38 +387,38 @@ export function createObjectSet<Q extends ObjectOrInterfaceDefinition>(
         objectType.type === "object"
           ? {
             type: "searchAround",
-            objectSet,
+            pipelineSet,
             link,
           }
           : {
             type: "interfaceLinkSearchAround",
-            objectSet,
+            pipelineSet,
             interfaceLink: link,
           },
       );
     };
   }
 
-  objectSetDefinitions.set(base, objectSet);
+  objectSetDefinitions.set(base, pipelineSet);
 
-  // we are using a type assertion because the marker symbol defined in BaseObjectSet isn't actually used
+  // we are using a type assertion because the marker symbol defined in BasePipelineSet isn't actually used
   // at runtime.
-  return base as ObjectSet<Q>;
+  return base as PipelineSet<Q>;
 }
 
 async function createWithPk(
   clientCtx: MinimalClient,
   objectType: ObjectTypeDefinition,
-  objectSet: WireObjectSet,
+  pipelineSet: WirePipelineSet,
   primaryKey: PrimaryKeyType<ObjectTypeDefinition>,
 ) {
   const objDef = await clientCtx.gameStateProvider.getObjectDefinition(
     objectType.apiName,
   );
 
-  const withPk: WireObjectSet = {
+  const withPk: WirePipelineSet = {
     type: "filter",
-    objectSet,
+    pipelineSet,
     where: {
       type: "eq",
       field: objDef.primaryKeyApiName,

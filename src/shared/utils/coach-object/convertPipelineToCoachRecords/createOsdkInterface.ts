@@ -14,7 +14,7 @@
  * 
  */
 
-import type { InterfaceMetadata, PropertySecurity } from "@shared/types/league-client/coach-api";
+import type { InterfaceMetadata, PropertySecurity } from "../../../coach-types";
 import { extractNamespace } from "../../coach-internal/conversions/extractNamespace.js";
 import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider.js";
 import { get$linkForInterface } from "./getDollarLink.js";
@@ -22,7 +22,7 @@ import type { InterfaceHolder } from "./InterfaceHolder.js";
 import {
   InterfaceDefRef,
   ObjectDefRef,
-  UnderlyingOsdkObject,
+  UnderlyingCoachRecord,
 } from "./InternalSymbols.js";
 import type { ObjectHolder } from "./ObjectHolder.js";
 
@@ -31,7 +31,7 @@ type PropertySecuritiesMap = {
 };
 
 /** @internal */
-export function createOsdkInterface<
+export function createCoachInterface<
   Q extends FetchedObjectTypeDefinition,
 >(
   underlying: ObjectHolder,
@@ -42,7 +42,7 @@ export function createOsdkInterface<
   return Object.freeze(
     Object.defineProperties({}, {
       // first to minimize hidden classes
-      [UnderlyingOsdkObject]: { value: underlying },
+      [UnderlyingCoachRecord]: { value: underlying },
 
       "$apiName": { value: interfaceDef.apiName, enumerable: true },
       "$as": {

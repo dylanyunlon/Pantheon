@@ -18,9 +18,9 @@ import type {
   DatetimeFormat,
   DatetimeLocalizedFormat,
   DatetimeTimezone,
-} from "@shared/types/league-client/coach-api";
-import type { DatetimeLocalizedFormatType } from "@coach/pantheon.ontologies";
-import type { SimpleOsdkProperties } from "../SimpleOsdkProperties.js";
+} from "../../../coach-types";
+import type { DatetimeLocalizedFormatType } from "../../../coach-types";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
 import { resolvePropertyReference } from "./propertyFormattingUtils.js";
 
 /**
@@ -30,7 +30,7 @@ export function formatDateTime(
   value: Date,
   format: DatetimeFormat,
   timezone: DatetimeTimezone | undefined,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   locale: string,
   userTimezoneOverride?: string,
 ): string | undefined {
@@ -159,7 +159,7 @@ const DATE_TIME_SHORT_WITH_WEEKDAY: Intl.DateTimeFormatOptions = {
 
 function resolveTimezone(
   timezone: DatetimeTimezone | undefined,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   userTimezoneOverride?: string,
 ): string | undefined {
   if (userTimezoneOverride != null) {

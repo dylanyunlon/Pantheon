@@ -18,11 +18,11 @@ import type {
   DerivedProperty,
   LinkNames,
   ObjectOrInterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   PropertyKeys,
   WhereClause,
   WirePropertyTypes,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import type { CommonObserveOptions } from "../../ObservableClient/common.js";
 
 export interface ObserveObjectSetOptions<
@@ -34,9 +34,9 @@ export interface ObserveObjectSetOptions<
 > extends CommonObserveOptions {
   where?: WhereClause<Q>;
   withProperties?: { [K in keyof RDPs]: DerivedProperty.Creator<Q, RDPs[K]> };
-  union?: ObjectSet<Q>[];
-  intersect?: ObjectSet<Q>[];
-  subtract?: ObjectSet<Q>[];
+  union?: PipelineSet<Q>[];
+  intersect?: PipelineSet<Q>[];
+  subtract?: PipelineSet<Q>[];
 
   /**
    * Traverse to linked objects. Cannot be combined with `streamUpdates`.
@@ -71,7 +71,7 @@ export interface ObserveObjectSetOptions<
    * Cannot be combined with `pivotTo`. The server does not support
    * websocket subscriptions for link-traversal queries.
    *
-   * Cannot be combined with `withProperties` (or a `baseObjectSet` that already
+   * Cannot be combined with `withProperties` (or a `basePipelineSet` that already
    * has derived properties applied). The server does not support websocket
    * subscriptions for object sets that include derived properties; in that
    * case `streamUpdates` is ignored and a warning is logged in development.
@@ -91,5 +91,5 @@ export interface ObserveObjectSetOptions<
 export interface ObjectSetQueryOptions
   extends ObserveObjectSetOptions<any, any>
 {
-  baseObjectSet: ObjectSet<any>;
+  basePipelineSet: PipelineSet<any>;
 }

@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, Coach, PropertyKeys } from "@shared/types/league-client/coach-api";
+import type { ObjectTypeDefinition, Coach, PropertyKeys } from "../../../../../coach-types";
 
 /**
  * Represents an update to an object in a websocket subscription.

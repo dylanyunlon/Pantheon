@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectHolder } from "../../coach-object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder.js";
 import type { AggregationCacheKey } from "./aggregation/AggregationCacheKey.js";
 import type { CacheKey } from "./CacheKey.js";
 import { DEBUG_ONLY__cacheKeyToString } from "./CacheKey.js";
@@ -86,7 +86,7 @@ export class Changes {
     this.deleted.add(cacheKey);
   };
 
-  registerObjectSet = (key: ObjectSetCacheKey): void => {
+  registerPipelineSet = (key: ObjectSetCacheKey): void => {
     this.modified.add(key);
   };
 

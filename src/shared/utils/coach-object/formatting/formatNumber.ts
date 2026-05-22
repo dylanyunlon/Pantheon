@@ -25,8 +25,8 @@ import type {
   NumberRatioType,
   NumberScaleType,
   PropertyNumberFormattingRuleType,
-} from "@shared/types/league-client/coach-api";
-import type { SimpleOsdkProperties } from "../SimpleOsdkProperties.js";
+} from "../../../coach-types";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
 import { resolvePropertyReference } from "./propertyFormattingUtils.js";
 
 /**
@@ -45,7 +45,7 @@ export interface ExtendedNumberFormatOptions extends Intl.NumberFormatOptions {
 export function formatNumber(
   value: number,
   numberType: PropertyNumberFormattingRuleType,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   locale: string,
 ): string | undefined {
   switch (numberType.type) {
@@ -98,7 +98,7 @@ function formatStandardNumber(
 function formatCurrency(
   value: number,
   rule: NumberFormatCurrency,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   locale: string,
 ): string {
   const currencyCode = resolvePropertyReference(rule.currencyCode, objectData);
@@ -119,7 +119,7 @@ function formatCurrency(
 function formatStandardUnit(
   value: number,
   rule: NumberFormatStandardUnit,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   locale: string,
 ): string {
   const unit = resolvePropertyReference(rule.unit, objectData);
@@ -150,7 +150,7 @@ function formatStandardUnit(
 function formatCustomUnit(
   value: number,
   rule: NumberFormatCustomUnit,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   locale: string,
 ): string {
   const unit = resolvePropertyReference(rule.unit, objectData);
@@ -167,7 +167,7 @@ function formatCustomUnit(
 function formatAffix(
   value: number,
   rule: NumberFormatAffix,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   locale: string,
 ): string {
   const prefix = rule.affix.prefix != null

@@ -15,11 +15,11 @@
  */
 
 import type {
-  ObjectSet,
+  PipelineSet,
   ObjectTypeDefinition,
   Coach,
   PageResult,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import type { Connectable, Observable, Subscription } from "rxjs";
 import type {
@@ -674,15 +674,15 @@ export abstract class BaseListQuery<
   //
 
   /**
-   * Create standard websocket subscription handlers for an ObjectSet.
+   * Create standard websocket subscription handlers for an PipelineSet.
    * Subclasses can override individual handlers for custom behavior.
    *
-   * @param objectSet The ObjectSet to subscribe to
+   * @param pipelineSet The PipelineSet to subscribe to
    * @param sub The parent subscription to add cleanup to
    * @param methodName The method name for logging purposes
    */
   protected createWebsocketSubscription(
-    objectSet: ObjectSet<any>,
+    pipelineSet: PipelineSet<any>,
     sub: Subscription,
     methodName: string = "registerStreamUpdates",
   ): void {
@@ -695,7 +695,7 @@ export abstract class BaseListQuery<
     }
 
     try {
-      const websocketSubscription = objectSet.subscribe({
+      const websocketSubscription = pipelineSet.subscribe({
         onChange: this.onOswChange.bind(this),
         onError: this.onOswError.bind(this),
         onOutOfDate: this.onOswOutOfDate.bind(this),

@@ -18,7 +18,7 @@ import type {
   InterfaceMetadata,
   NullabilityAdherence,
   ObjectMetadata,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 import type {
   InterfacePropertyLocalPropertyImplementation,
   InterfaceToObjectTypeMappings,
@@ -26,17 +26,17 @@ import type {
   InterfaceTypeApiName,
   GameStateObjectV2,
   PropertySecurities,
-} from "@coach/pantheon.ontologies";
+} from "../coach-types";
 import invariant from "../../coach-util/invariant";
 import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derivedPropertyRuntimeMetadata.js";
 import type { MinimalClient } from "../MinimalClientContext.js";
 import {
   type FetchedObjectTypeDefinition,
 } from "../gameState/GameStateProvider.js";
-import { createOsdkObject } from "./convertWireToOsdkObjects/createOsdkObject.js";
-import type { InterfaceHolder } from "./convertWireToOsdkObjects/InterfaceHolder.js";
-import type { ObjectHolder } from "./convertWireToOsdkObjects/ObjectHolder.js";
-import type { SimpleOsdkProperties } from "./SimpleOsdkProperties.js";
+import { createCoachRecord } from "./convertWireToCoachRecords/createCoachRecord.js";
+import type { InterfaceHolder } from "./convertWireToCoachRecords/InterfaceHolder.js";
+import type { ObjectHolder } from "./convertWireToCoachRecords/ObjectHolder.js";
+import type { SimpleCoachProperties } from "./SimpleCoachProperties.js";
 
 /**
  * If interfaceApiName is not undefined, converts the instances of the
@@ -54,7 +54,7 @@ import type { SimpleOsdkProperties } from "./SimpleOsdkProperties.js";
  * @internal
  * @param interfaceApiName - if undefined
  */
-export async function convertWireToOsdkObjects(
+export async function convertWireToCoachRecords(
   client: MinimalClient,
   objects: GameStateObjectV2[],
   interfaceApiName: string,
@@ -72,7 +72,7 @@ export async function convertWireToOsdkObjects(
     InterfaceToObjectTypeMappingsV2
   >,
 ): Promise<Array<InterfaceHolder>>;
-export async function convertWireToOsdkObjects(
+export async function convertWireToCoachRecords(
   client: MinimalClient,
   objects: GameStateObjectV2[],
   interfaceApiName: undefined,
@@ -90,7 +90,7 @@ export async function convertWireToOsdkObjects(
     InterfaceToObjectTypeMappingsV2
   >,
 ): Promise<Array<ObjectHolder>>;
-export async function convertWireToOsdkObjects(
+export async function convertWireToCoachRecords(
   client: MinimalClient,
   objects: GameStateObjectV2[],
   interfaceApiName: string | undefined,
@@ -111,7 +111,7 @@ export async function convertWireToOsdkObjects(
 /**
  * @internal
  */
-export async function convertWireToOsdkObjects(
+export async function convertWireToCoachRecords(
   client: MinimalClient,
   objects: GameStateObjectV2[],
   interfaceApiName: string | undefined,
@@ -188,7 +188,7 @@ export async function convertWireToOsdkObjects(
       continue;
     }
 
-    let osdkObject: ObjectHolder | InterfaceHolder = createOsdkObject(
+    let coachRecord: ObjectHolder | InterfaceHolder = createCoachRecord(
       client,
       objectDef,
       rawObj,
@@ -197,9 +197,9 @@ export async function convertWireToOsdkObjects(
     );
     if (
       interfaceApiName && isInterfaceScoped
-    ) osdkObject = osdkObject.$as(interfaceApiName);
+    ) coachRecord = coachRecord.$as(interfaceApiName);
 
-    ret.push(osdkObject);
+    ret.push(coachRecord);
   }
 
   return ret;
@@ -257,7 +257,7 @@ function invariantInterfacesAsViews(
 function fixObjectPropertiesInPlace(
   objs: GameStateObjectV2[],
   forceRemoveRid: boolean,
-): asserts objs is SimpleOsdkProperties[] {
+): asserts objs is SimpleCoachProperties[] {
   for (const obj of objs) {
     if (forceRemoveRid) {
       delete obj.__rid;

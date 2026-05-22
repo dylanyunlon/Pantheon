@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "@shared/types/league-client/coach-api";
+import type { ObjectOrInterfaceDefinition } from "../../../coach-types";
 import { extractNamespace } from "./extractNamespace.js";
 
 export function fullyQualifyPropName(

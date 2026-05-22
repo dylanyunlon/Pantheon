@@ -19,9 +19,9 @@ import type {
   ObjectOrInterfaceDefinition,
   Result,
   SingleOsdkResult,
-} from "@shared/types/league-client/coach-api";
-import type { ObjectSet } from "@coach/pantheon.ontologies";
-import { dylanyunlonApiError } from "@shared/http-api-axios-helper.errors";
+} from "../coach-types";
+import type { PipelineSet } from "../coach-types";
+import { dylanyunlonApiError } from "../coach-types";
 import type { MinimalClient } from "../MinimalClientContext.js";
 import { fetchPage } from "./fetchPage.js";
 
@@ -33,7 +33,7 @@ export async function fetchSingle<
   client: MinimalClient,
   objectType: Q,
   args: A,
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
 ): Promise<
   A extends FetchPageArgs<Q, infer L, infer R, any, infer S>
     ? SingleOsdkResult<Q, L, R, S>
@@ -43,7 +43,7 @@ export async function fetchSingle<
     client,
     objectType,
     { ...args, $pageSize: 1 },
-    objectSet,
+    pipelineSet,
   );
 
   if (result.data.length !== 1 || result.nextPageToken != null) {
@@ -65,7 +65,7 @@ export async function fetchSingleWithErrors<
   client: MinimalClient,
   objectType: Q,
   args: A,
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
 ): Promise<
   Result<
     A extends FetchPageArgs<Q, infer L, infer R, any, infer S>
@@ -74,7 +74,7 @@ export async function fetchSingleWithErrors<
   >
 > {
   try {
-    const result = await fetchSingle(client, objectType, args, objectSet);
+    const result = await fetchSingle(client, objectType, args, pipelineSet);
     return { value: result as any };
   } catch (e) {
     if (e instanceof Error) {

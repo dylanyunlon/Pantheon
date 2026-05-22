@@ -14,7 +14,7 @@
  * 
  */
 
-import type { InterfaceMetadata, ObjectMetadata, Coach } from "@shared/types/league-client/coach-api";
+import type { InterfaceMetadata, ObjectMetadata, Coach } from "../../../coach-types";
 import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter.js";
 import type { BaseHolder } from "./BaseHolder.js";
 import type { InterfaceDefRef } from "./InternalSymbols.js";

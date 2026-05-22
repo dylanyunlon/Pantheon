@@ -19,11 +19,11 @@ import type {
   InterfaceDefinition,
   ObjectTypeDefinition,
   PrimaryKeyType,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
 import { additionalContext } from "../../../Client.js";
-import type { ObjectHolder } from "../../../object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
 import type { DefType } from "../../../util/interfaceUtils.js";
 import type { ObjectPayload } from "../../ObjectPayload.js";
 import type {

@@ -19,23 +19,23 @@ import type {
   LinkTypeApiNamesFor,
   ObjectIdentifiers,
   ObjectOrInterfaceDefinition,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 import type {
   LoadObjectSetLinksResponseV2,
-  ObjectSet,
+  PipelineSet,
   GameStateObjectV2,
-} from "@coach/pantheon.ontologies";
-import * as GameStateObjectSets from "@coach/pantheon.ontologies/GameStateObjectSet";
+} from "../coach-types";
+import * as GameStateObjectSets from "../coach-types";
 import type { MinimalClient } from "../MinimalClientContext.js";
 
 /** @internal */
-export const fetchLinksPage = async <
+export const fetchRelationsPage = async <
   Q extends ObjectOrInterfaceDefinition,
   LINK_TYPES extends LinkTypeApiNamesFor<Q>,
 >(
   client: MinimalClient,
   objectType: Q,
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
   links: LINK_TYPES[],
 ): Promise<FetchLinksPageResult<Q, LINK_TYPES>> => {
   if (objectType.type === "interface") {
@@ -50,7 +50,7 @@ export const fetchLinksPage = async <
     client,
     await client.gameStateRid,
     {
-      objectSet,
+      pipelineSet,
       links,
     },
     { branch: client.branch, preview: true },

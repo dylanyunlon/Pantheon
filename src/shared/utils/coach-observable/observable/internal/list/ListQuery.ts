@@ -18,21 +18,21 @@ import type {
   DerivedProperty,
   InterfaceDefinition,
   ObjectOrInterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   ObjectTypeDefinition,
   Coach,
   PageResult,
   PropertyKeys,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import type { Observable, Subscription } from "rxjs";
 import invariant from "../../coach-util/invariant";
 import { additionalContext } from "../../../Client.js";
-import type { InterfaceHolder } from "../../../object/convertWireToOsdkObjects/InterfaceHolder.js";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
 import type {
   ObjectHolder,
-} from "../../../object/convertWireToOsdkObjects/ObjectHolder.js";
-import { getWireObjectSet } from "../../../objectSet/createObjectSet.js";
+} from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
 import type { ListPayload } from "../../ListPayload.js";
 import type { Status } from "../../ObservableClient/common.js";
 import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery.js";
@@ -103,7 +103,7 @@ export abstract class ListQuery extends BaseListQuery<
   #select: Canonical<readonly string[]> | undefined;
   #intersectWith: Canonical<Array<Canonical<SimpleWhereClause>>> | undefined;
   #pivotInfo: Canonical<PivotInfo> | undefined;
-  #objectSet: ObjectSet<ObjectTypeDefinition>;
+  #pipelineSet: PipelineSet<ObjectTypeDefinition>;
   #pivotIntersectApplied = false;
 
   // The actual type of objects this query returns, resolved on first fetch
@@ -158,7 +158,7 @@ export abstract class ListQuery extends BaseListQuery<
     this.#intersectWith = cacheKey.otherKeys[INTERSECT_IDX];
     this.#pivotInfo = cacheKey.otherKeys[PIVOT_IDX];
 
-    this.#objectSet = this.createObjectSet(store);
+    this.#pipelineSet = this.createPipeline(store);
     this.#objectTypesCache = new Set([this.apiName]);
 
     // Only initialize the sorting strategy here if there's no pivotTo.
@@ -215,13 +215,13 @@ export abstract class ListQuery extends BaseListQuery<
   ): ListPayload {
     return {
       ...super.createPayload(params),
-      objectSet: this.#objectSet,
+      pipelineSet: this.#pipelineSet,
     } as ListPayload;
   }
 
-  protected abstract createObjectSet(
+  protected abstract createPipeline(
     store: Store,
-  ): ObjectSet<ObjectTypeDefinition>;
+  ): PipelineSet<ObjectTypeDefinition>;
 
   /**
    * Implements fetchPageData from BaseCollectionQuery template method
@@ -236,11 +236,11 @@ export abstract class ListQuery extends BaseListQuery<
         && this.#intersectWith.length > 0 && !this.#pivotIntersectApplied);
 
     if (needsResultType) {
-      const wireObjectSet = getWireObjectSet(this.#objectSet);
+      const wirePipelineSet = getWirePipelineSet(this.#pipelineSet);
       const { resultType, invalidationSet } =
         await getObjectTypesThatInvalidate(
           this.store.client[additionalContext],
-          wireObjectSet,
+          wirePipelineSet,
         );
 
       this.#updateFetchedObjectType(resultType.apiName);
@@ -263,18 +263,18 @@ export abstract class ListQuery extends BaseListQuery<
         const rdpConfig = this.cacheKey.otherKeys[RDP_IDX];
         const intersectSets = this.#intersectWith.map(whereClause => {
           if (resultType.type === "object") {
-            let objectSet = this.store.client({
+            let pipelineSet = this.store.client({
               type: "object",
               apiName: resultType.apiName,
             } as ObjectTypeDefinition);
 
             if (rdpConfig != null) {
-              objectSet = objectSet.withProperties(
+              pipelineSet = pipelineSet.withProperties(
                 rdpConfig as DerivedProperty.Clause<ObjectTypeDefinition>,
               );
             }
 
-            return objectSet.where(whereClause as WhereClause<any>);
+            return pipelineSet.where(whereClause as WhereClause<any>);
           }
 
           return this.store.client({
@@ -285,7 +285,7 @@ export abstract class ListQuery extends BaseListQuery<
           );
         });
 
-        this.#objectSet = this.#objectSet.intersect(
+        this.#pipelineSet = this.#pipelineSet.intersect(
           ...intersectSets,
         );
         this.#pivotIntersectApplied = true;
@@ -295,15 +295,15 @@ export abstract class ListQuery extends BaseListQuery<
     // Resolve the actual result type on first fetch so revalidateObjectType
     // can match against it. For simple queries this equals apiName; for
     // transformed queries (link traversal, etc.) it may differ.
-    // Some ObjectSet types (static, reference) don't support result type
+    // Some PipelineSet types (static, reference) don't support result type
     // resolution, so we fall back to apiName.
     if (this.#fetchedObjectType == null) {
       try {
-        const wireObjectSet = getWireObjectSet(this.#objectSet);
+        const wirePipelineSet = getWirePipelineSet(this.#pipelineSet);
         const { resultType, invalidationSet } =
           await getObjectTypesThatInvalidate(
             this.store.client[additionalContext],
-            wireObjectSet,
+            wirePipelineSet,
           );
         this.#updateFetchedObjectType(resultType.apiName);
         this.#rdpInvalidationSet = invalidationSet;
@@ -313,7 +313,7 @@ export abstract class ListQuery extends BaseListQuery<
     }
 
     // Fetch the data with pagination using effective pageSize (max of all subscribers)
-    const resp = await this.#objectSet.fetchPage({
+    const resp = await this.#pipelineSet.fetchPage({
       $nextPageToken: this.nextPageToken,
       $pageSize: this.getEffectiveFetchPageSize(),
       $includeRid: true,
@@ -579,7 +579,7 @@ export abstract class ListQuery extends BaseListQuery<
   ): ExtractRelevantObjectsResult;
 
   registerStreamUpdates(sub: Subscription): void {
-    this.createWebsocketSubscription(this.#objectSet, sub, "observeList");
+    this.createWebsocketSubscription(this.#pipelineSet, sub, "observeList");
   }
 
   protected onOswChange(

@@ -14,8 +14,8 @@
  * 
  */
 
-import type { Attachment, Media, MediaMetadata } from "@shared/types/league-client/coach-api";
-import * as OntologiesV2 from "@coach/pantheon.ontologies";
+import type { Attachment, Media, MediaMetadata } from "../../../../../coach-types";
+import * as OntologiesV2 from "../../../../../coach-types";
 import { additionalContext } from "../../../Client.js";
 import type { Observer } from "../../ObservableClient/common.js";
 import type { MediaPropertyLocation } from "../../ObservableClient/MediaTypes.js";

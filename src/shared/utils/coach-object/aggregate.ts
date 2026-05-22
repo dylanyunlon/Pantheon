@@ -20,13 +20,13 @@ import type {
   AggregationResultsWithGroups,
   AggregationsResults,
   ObjectOrInterfaceDefinition,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 import type {
   AggregateObjectsRequestV2,
   AggregateObjectsResponseV2,
-  ObjectSet,
-} from "@coach/pantheon.ontologies";
-import * as GameStateObjectSets from "@coach/pantheon.ontologies/GameStateObjectSet";
+  PipelineSet,
+} from "../coach-types";
+import * as GameStateObjectSets from "../coach-types";
 import invariant from "../../coach-util/invariant";
 import { legacyToModernSingleAggregationResult } from "../internal/conversions/legacyToModernSingleAggregationResult.js";
 import { modernToLegacyAggregationClause } from "../internal/conversions/modernToLegacyAggregationClause.js";
@@ -43,10 +43,10 @@ export async function aggregate<
 >(
   clientCtx: MinimalClient,
   objectType: Q,
-  objectSet: ObjectSet = resolveBaseObjectSetType(objectType),
+  pipelineSet: PipelineSet = resolveBaseObjectSetType(objectType),
   req: AggregateOptsThatErrorsAndDisallowsOrderingWithMultipleGroupBy<Q, AO>,
 ): Promise<AggregationsResults<Q, AO>> {
-  const resolvedObjectSet = resolveBaseObjectSetType(objectType);
+  const resolvedPipelineSet = resolveBaseObjectSetType(objectType);
   const body: AggregateObjectsRequestV2 = {
     aggregation: modernToLegacyAggregationClause<AO["$select"]>(
       req.$select,
@@ -67,7 +67,7 @@ export async function aggregate<
     addUserAgentAndRequestContextHeaders(clientCtx, objectType),
     await clientCtx.gameStateRid,
     {
-      objectSet,
+      pipelineSet,
       groupBy: body.groupBy,
       aggregation: body.aggregation,
     },

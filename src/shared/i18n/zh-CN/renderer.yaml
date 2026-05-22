@@ -2356,3 +2356,34 @@ CoachAdvisorSettings:
   experimentEvents: 实验事件数
   experimentSamples: 训练样本数
   sessionActive: 会话状态
+
+  titleAdvanced: 高级设置与实验捕获
+
+  captureEnabled:
+    label: 启用实验数据捕获
+    description: 开启后将记录每次建议生成的特征向量和训练样本
+
+  captureShowStatsInPanel:
+    label: 面板显示捕获状态
+    description: 在教练面板底部显示实时捕获统计
+
+  captureAutoFlushInterval:
+    label: 自动刷新间隔 (ms)
+    description: 捕获缓冲区自动写入的时间间隔
+
+  captureEventCapacity:
+    label: 事件缓冲区容量
+    description: 环形缓冲区最大事件数量，超出后自动覆盖旧数据
+
+  captureSampleCapacity:
+    label: 样本缓冲区容量
+    description: 环形缓冲区最大训练样本数量
+
+  captureExportFormat:
+    label: 导出格式
+    description: 训练数据的导出文件格式
+
+  captureExportButton: 导出实验数据
+
+  captureStats:
+    merges: 累计合并次数

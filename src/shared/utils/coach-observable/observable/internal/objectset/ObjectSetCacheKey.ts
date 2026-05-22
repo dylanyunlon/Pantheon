@@ -37,7 +37,7 @@ export interface ObjectSetOperations {
 
 export interface ObjectSetCacheKey extends
   CacheKey<
-    "objectSet",
+    "pipelineSet",
     ObjectSetStorageData,
     ObjectSetQuery,
     [

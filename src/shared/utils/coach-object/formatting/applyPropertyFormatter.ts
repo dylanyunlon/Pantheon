@@ -14,8 +14,8 @@
  * 
  */
 
-import type { ObjectMetadata, PropertyValueFormattingRule } from "@shared/types/league-client/coach-api";
-import type { SimpleOsdkProperties } from "../SimpleOsdkProperties.js";
+import type { ObjectMetadata, PropertyValueFormattingRule } from "../../../coach-types";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
 import { formatBoolean } from "./formatBoolean.js";
 import { formatDateTime } from "./formatDateTime.js";
 import { formatNumber } from "./formatNumber.js";
@@ -49,7 +49,7 @@ type DefinedPropertyValue = NonNullable<PropertyValue>;
 export function applyPropertyFormatter(
   propertyValue: PropertyValue,
   propertyDefinition: ObjectMetadata.Property | undefined,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   options: FormatPropertyOptions = {},
 ): string | undefined {
   if (propertyDefinition?.valueFormatting == null || propertyValue == null) {
@@ -66,7 +66,7 @@ export function applyPropertyFormatter(
 function formatPropertyValue(
   value: DefinedPropertyValue,
   rule: PropertyValueFormattingRule,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
   options: FormatPropertyOptions,
 ): string | undefined {
   switch (rule.type) {

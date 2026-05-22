@@ -23,7 +23,7 @@ import type {
   CompileTimeMetadata,
   DerivedProperty,
   ObjectOrInterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   ObjectTypeDefinition,
   Coach,
   PrimaryKeyType,
@@ -32,8 +32,8 @@ import type {
   SimplePropertyDef,
   WhereClause,
   WirePropertyTypes,
-} from "@shared/types/league-client/coach-api";
-import { createFetchHeaderMutator } from "@shared/http-api-axios-helper.fetch";
+} from "../../../coach-types";
+import { createFetchHeaderMutator } from "../../../coach-types";
 import type { ActionSignatureFromDef } from "../actions/applyAction.js";
 import { additionalContext, type Client } from "../Client.js";
 import { createClientFromContext } from "../createClient.js";
@@ -97,7 +97,7 @@ export type CacheEntry =
     pageSize?: number;
   }
   | CacheEntryBase & { type: "link"; linkName?: string }
-  | CacheEntryBase & { type: "objectSet" };
+  | CacheEntryBase & { type: "pipelineSet" };
 
 export interface ObserveObjectOptions<
   T extends ObjectOrInterfaceDefinition,
@@ -243,7 +243,7 @@ export interface ObserveObjectsCallbackArgs<
   hasMore: boolean;
   status: Status;
   totalCount?: string;
-  objectSet: ObjectSet<T, RDPs>;
+  pipelineSet: PipelineSet<T, RDPs>;
 }
 
 export interface ObserveObjectSetArgs<
@@ -263,7 +263,7 @@ export interface ObserveObjectSetArgs<
   fetchMore: () => Promise<void>;
   hasMore: boolean;
   status: Status;
-  objectSet: ObjectSet<T, RDPs>;
+  pipelineSet: PipelineSet<T, RDPs>;
   totalCount?: string;
 }
 
@@ -282,28 +282,28 @@ interface ObserveAggregationBaseOptions<
 }
 
 /**
- * Options for observeAggregation without an ObjectSet (synchronous).
+ * Options for observeAggregation without an PipelineSet (synchronous).
  */
 export interface ObserveAggregationOptions<
   T extends ObjectOrInterfaceDefinition,
   A extends AggregateOpts<T>,
   RDPs extends Record<string, SimplePropertyDef> = {},
 > extends ObserveAggregationBaseOptions<T, A, RDPs> {
-  objectSet?: undefined;
+  pipelineSet?: undefined;
 }
 
 /**
- * Options for observeAggregation with an ObjectSet (asynchronous).
+ * Options for observeAggregation with an PipelineSet (asynchronous).
  *
- * When objectSet is provided, the aggregation is performed on that ObjectSet
+ * When pipelineSet is provided, the aggregation is performed on that PipelineSet
  * instead of the base type, enabling aggregation on pivoted or filtered sets.
  */
-export interface ObserveAggregationOptionsWithObjectSet<
+export interface ObserveAggregationOptionsWithPipelineSet<
   T extends ObjectOrInterfaceDefinition,
   A extends AggregateOpts<T>,
   RDPs extends Record<string, SimplePropertyDef> = {},
 > extends ObserveAggregationBaseOptions<T, A, RDPs> {
-  objectSet: ObjectSet<T>;
+  pipelineSet: PipelineSet<T>;
 }
 
 export interface ObserveAggregationArgs<
@@ -332,7 +332,7 @@ export interface ObserveFunctionOptions extends CommonObserveOptions {
    * a refetch.
    */
   dependsOnObjects?: Array<
-    Coach.Instance<ObjectTypeDefinition> | ObjectSet<ObjectTypeDefinition>
+    Coach.Instance<ObjectTypeDefinition> | PipelineSet<ObjectTypeDefinition>
   >;
 }
 
@@ -421,35 +421,35 @@ export interface ObservableClient extends ObserveLinks {
   ): Unsubscribable;
 
   /**
-   * Observe an ObjectSet with automatic updates when matching objects change.
+   * Observe an PipelineSet with automatic updates when matching objects change.
    *
-   * @param baseObjectSet - The base ObjectSet to observe
-   * @param options - Options for transforming and observing the ObjectSet
-   * @param subFn - Observer that receives ObjectSet state updates
+   * @param basePipelineSet - The base PipelineSet to observe
+   * @param options - Options for transforming and observing the PipelineSet
+   * @param subFn - Observer that receives PipelineSet state updates
    * @returns Subscription that can be unsubscribed to stop updates
    *
-   * Supports all ObjectSet operations:
+   * Supports all PipelineSet operations:
    * - Filtering with where clauses
    * - Derived properties with withProperties
    * - Set operations (union, intersect, subtract)
    * - Link traversal with pivotTo
    * - Sorting and pagination
    */
-  observeObjectSet<
+  observePipelineSet<
     T extends ObjectOrInterfaceDefinition,
     RDPs extends Record<
       string,
       WirePropertyTypes | undefined | Array<WirePropertyTypes>
     > = {},
   >(
-    baseObjectSet: ObjectSet<T>,
+    basePipelineSet: PipelineSet<T>,
     options: ObserveObjectSetOptions<T, RDPs>,
     subFn: Observer<ObserveObjectSetArgs<T, RDPs>>,
   ): Unsubscribable;
 
   /**
-   * @deprecated Use the async overload with `objectSet` parameter instead.
-   * Pass `objectSet: client(YourType)` to get the base object set.
+   * @deprecated Use the async overload with `pipelineSet` parameter instead.
+   * Pass `pipelineSet: client(YourType)` to get the base object set.
    */
   observeAggregation<
     T extends ObjectOrInterfaceDefinition,
@@ -461,13 +461,13 @@ export interface ObservableClient extends ObserveLinks {
   ): Unsubscribable;
 
   /**
-   * Observe an aggregation query on a custom ObjectSet with automatic updates.
+   * Observe an aggregation query on a custom PipelineSet with automatic updates.
    *
-   * This overload accepts an ObjectSet parameter, enabling aggregation on pivoted,
+   * This overload accepts an PipelineSet parameter, enabling aggregation on pivoted,
    * filtered, or composed ObjectSets. Returns a Promise because invalidation type
    * computation is async (requires lookups for link targets).
    *
-   * @param options - Aggregation configuration including objectSet, where, aggregate spec
+   * @param options - Aggregation configuration including pipelineSet, where, aggregate spec
    * @param subFn - Observer that receives aggregation result updates
    * @returns Promise resolving to subscription that can be unsubscribed
    *
@@ -476,7 +476,7 @@ export interface ObservableClient extends ObserveLinks {
    * const sub = await observableClient.observeAggregation(
    *   {
    *     type: Office,
-   *     objectSet: $(Employee).pivotTo("primaryOffice"),
+   *     pipelineSet: $(Employee).pivotTo("primaryOffice"),
    *     aggregate: { $select: { $count: "unordered" } }
    *   },
    *   observer
@@ -488,7 +488,7 @@ export interface ObservableClient extends ObserveLinks {
     A extends AggregateOpts<T>,
     RDPs extends Record<string, SimplePropertyDef> = {},
   >(
-    options: ObserveAggregationOptionsWithObjectSet<T, A, RDPs>,
+    options: ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
     subFn: Observer<ObserveAggregationArgs<T, A>>,
   ): Promise<Unsubscribable>;
 
@@ -627,7 +627,7 @@ export interface ObservableClient extends ObserveLinks {
   ): Unsubscribable;
 }
 
-export interface CanonicalizeOptionsInput<OS = ObjectSet<any, any>> {
+export interface CanonicalizeOptionsInput<OS = PipelineSet<any, any>> {
   where?: object;
   withProperties?: object;
   orderBy?: Record<string, "asc" | "desc" | undefined>;

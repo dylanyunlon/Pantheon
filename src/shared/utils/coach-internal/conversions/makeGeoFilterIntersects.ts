@@ -14,11 +14,11 @@
  * 
  */
 
-import type { GeoFilterOptions } from "@shared/types/league-client/coach-api";
+import type { GeoFilterOptions } from "../../../coach-types";
 import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
-} from "@coach/pantheon.ontologies";
+} from "../../../coach-types";
 import { makeGeoFilterBbox } from "./makeGeoFilterBbox.js";
 import { makeGeoFilterPolygon } from "./makeGeoFilterPolygon.js";
 

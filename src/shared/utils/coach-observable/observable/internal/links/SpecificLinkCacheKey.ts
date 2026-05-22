@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, PrimaryKeyType } from "@shared/types/league-client/coach-api";
+import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
 import type { CollectionStorageData } from "../base-list/BaseCollectionQuery.js";
 import type { CacheKey } from "../CacheKey.js";
 import type { Canonical } from "../Canonical.js";

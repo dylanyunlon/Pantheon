@@ -24,13 +24,13 @@ import type {
   ApplyBatchActionOptions,
   CompileTimeMetadata as CompileTimeActionMetadata,
   DataValueClientToWire,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 import type {
   BatchApplyActionResponseV2,
   DataValue,
   SyncApplyActionResponseV2,
-} from "@coach/pantheon.ontologies";
-import * as Actions from "@coach/pantheon.ontologies/Action";
+} from "../coach-types";
+import * as Actions from "../coach-types";
 import invariant from "../../coach-util/invariant";
 import type { MinimalClient } from "../MinimalClientContext.js";
 import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
@@ -44,7 +44,7 @@ import { ActionValidationError } from "./ActionValidationError.js";
 type BaseType<APD extends Pick<ActionMetadata.Parameter<any>, "type">> =
   APD["type"] extends ActionMetadata.DataType.Object<infer TTargetType>
     ? ActionParam.ObjectType<TTargetType>
-    : APD["type"] extends ActionMetadata.DataType.ObjectSet<infer TTargetType>
+    : APD["type"] extends ActionMetadata.DataType.PipelineSet<infer TTargetType>
       ? ActionParam.ObjectSetType<TTargetType>
     : APD["type"] extends ActionMetadata.DataType.Struct<infer TStructType>
       ? ActionParam.StructType<TStructType>

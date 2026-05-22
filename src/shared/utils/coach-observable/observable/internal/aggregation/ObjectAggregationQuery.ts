@@ -14,9 +14,9 @@
  * 
  */
 
-import type { DerivedProperty, ObjectTypeDefinition } from "@shared/types/league-client/coach-api";
+import type { DerivedProperty, ObjectTypeDefinition } from "../../../../../coach-types";
 import { additionalContext } from "../../../Client.js";
-import { createObjectSet } from "../../../objectSet/createObjectSet.js";
+import { createPipeline } from "../../../pipelineSet/createPipeline.js";
 import {
   type AggregationCacheKey,
   API_NAME_IDX,
@@ -35,24 +35,24 @@ export class ObjectAggregationQuery extends AggregationQuery {
       apiName: type,
     } as ObjectTypeDefinition;
 
-    let objectSet;
-    if (this.parsedWireObjectSet) {
-      objectSet = createObjectSet(
+    let pipelineSet;
+    if (this.parsedWirePipelineSet) {
+      pipelineSet = createPipeline(
         objectTypeDef,
         this.store.client[additionalContext],
-        this.parsedWireObjectSet,
+        this.parsedWirePipelineSet,
       );
     } else {
-      objectSet = this.store.client(objectTypeDef);
+      pipelineSet = this.store.client(objectTypeDef);
     }
 
     if (this.rdpConfig) {
-      objectSet = objectSet.withProperties(
+      pipelineSet = pipelineSet.withProperties(
         this.rdpConfig as DerivedProperty.Clause<ObjectTypeDefinition>,
       );
     }
 
-    objectSet = objectSet.where(this.canonicalWhere);
+    pipelineSet = pipelineSet.where(this.canonicalWhere);
 
     if (intersectWith != null && intersectWith.length > 0) {
       const intersectSets = intersectWith.map(whereClause => {
@@ -67,11 +67,11 @@ export class ObjectAggregationQuery extends AggregationQuery {
         return intersectSet.where(whereClause);
       });
 
-      objectSet = objectSet.intersect(...intersectSets);
+      pipelineSet = pipelineSet.intersect(...intersectSets);
     }
 
-    return await objectSet.aggregate(
-      this.canonicalAggregate as Parameters<typeof objectSet.aggregate>[0],
+    return await pipelineSet.aggregate(
+      this.canonicalAggregate as Parameters<typeof pipelineSet.aggregate>[0],
     );
   }
 }

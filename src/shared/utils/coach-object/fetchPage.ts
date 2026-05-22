@@ -26,21 +26,21 @@ import type {
   ObjectTypeDefinition,
   PropertyKeys,
   Result,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 
 type PropertyModifierValue =
   | "applyMainValue"
   | "applyReducers"
   | "applyReducersAndExtractMainValue";
-import type { PageSize, PageToken } from "@coach/pantheon.core";
+import type { PageSize, PageToken } from "../coach-types";
 import type {
   LoadObjectSetV2MultipleObjectTypesRequest,
-  ObjectSet,
+  PipelineSet,
   GameStateObjectV2,
   SearchJsonQueryV2,
   SearchOrderByV2,
-} from "@coach/pantheon.ontologies";
-import * as GameStateObjectSets from "@coach/pantheon.ontologies/GameStateObjectSet";
+} from "../coach-types";
+import * as GameStateObjectSets from "../coach-types";
 import invariant from "../../coach-util/invariant";
 import { extractNamespace } from "../internal/conversions/extractNamespace.js";
 import type { MinimalClient } from "../MinimalClientContext.js";
@@ -145,58 +145,58 @@ export function augment<
 
 /** @internal */
 export function objectSetToSearchJsonV2(
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
   expectedApiName: string,
   existingWhere: SearchJsonQueryV2 | undefined = undefined,
 ): SearchJsonQueryV2 | undefined {
-  if (objectSet.type === "base" || objectSet.type === "interfaceBase") {
-    if (objectSet.type === "base" && objectSet.objectType !== expectedApiName) {
+  if (pipelineSet.type === "base" || pipelineSet.type === "interfaceBase") {
+    if (pipelineSet.type === "base" && pipelineSet.objectType !== expectedApiName) {
       throw new Error(
-        `Expected objectSet.objectType to be ${expectedApiName}, but got ${objectSet.objectType}`,
+        `Expected pipelineSet.objectType to be ${expectedApiName}, but got ${pipelineSet.objectType}`,
       );
     }
     if (
-      objectSet.type === "interfaceBase"
-      && objectSet.interfaceType !== expectedApiName
+      pipelineSet.type === "interfaceBase"
+      && pipelineSet.interfaceType !== expectedApiName
     ) {
       throw new Error(
-        `Expected objectSet.objectType to be ${expectedApiName}, but got ${objectSet.interfaceType}`,
+        `Expected pipelineSet.objectType to be ${expectedApiName}, but got ${pipelineSet.interfaceType}`,
       );
     }
 
     return existingWhere;
   }
 
-  if (objectSet.type === "filter") {
+  if (pipelineSet.type === "filter") {
     return objectSetToSearchJsonV2(
-      objectSet.objectSet,
+      pipelineSet.pipelineSet,
       expectedApiName,
-      existingWhere == null ? objectSet.where : {
+      existingWhere == null ? pipelineSet.where : {
         type: "and",
-        value: [existingWhere, objectSet.where],
+        value: [existingWhere, pipelineSet.where],
       },
     );
   }
 
-  throw new Error(`Unsupported objectSet type: ${objectSet.type}`);
+  throw new Error(`Unsupported pipelineSet type: ${pipelineSet.type}`);
 }
 
 /** @internal */
-export function resolveInterfaceObjectSet(
-  objectSet: ObjectSet,
+export function resolveInterfacePipelineSet(
+  pipelineSet: PipelineSet,
   interfaceTypeApiName: string,
   args: FetchPageArgs<any, any, any, any, any, any>,
-): ObjectSet {
+): PipelineSet {
   return args?.$includeAllBaseObjectProperties
     ? {
       type: "intersect",
-      objectSets: [objectSet, {
+      objectSets: [pipelineSet, {
         type: "interfaceBase",
         interfaceType: interfaceTypeApiName,
         includeAllBaseObjectProperties: true,
       }],
     }
-    : objectSet;
+    : pipelineSet;
 }
 
 /** @internal */
@@ -236,7 +236,7 @@ export async function fetchStaticRidPage<
   const requestBody = await applyFetchArgs(
     args,
     {
-      objectSet: {
+      pipelineSet: {
         type: "static",
         objects: rids as string[],
       },
@@ -254,7 +254,7 @@ export async function fetchStaticRidPage<
   }
 
   const result = await GameStateObjectSets.loadMultipleObjectTypes(
-    addUserAgentAndRequestContextHeaders(client, { osdkMetadata: undefined }),
+    addUserAgentAndRequestContextHeaders(client, { coachMetadata: undefined }),
     await client.gameStateRid,
     requestBody,
     { preview: true, transactionId: client.transactionId },
@@ -298,15 +298,15 @@ async function fetchInterfacePage<
   client: MinimalClient,
   interfaceType: Q,
   args: FetchPageArgs<Q, L, R, any, S, T>,
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
   useSnapshot: boolean = false,
 ): Promise<FetchPageResult<Q, L, R, S, T>> {
   const extractedInterfaceTypeApiName = (await extractObjectOrInterfaceType(
     client,
-    objectSet,
+    pipelineSet,
   ))?.apiName ?? interfaceType.apiName;
-  const resolvedInterfaceObjectSet = resolveInterfaceObjectSet(
-    objectSet,
+  const resolvedInterfacePipelineSet = resolveInterfacePipelineSet(
+    pipelineSet,
     extractedInterfaceTypeApiName,
     args,
   );
@@ -336,7 +336,7 @@ async function fetchInterfacePage<
   const requestBody = await buildAndRemapRequestBody(
     args,
     {
-      objectSet: resolvedInterfaceObjectSet,
+      pipelineSet: resolvedInterfacePipelineSet,
       select: [],
       selectV2,
       loadPropertySecurities: shouldLoadPropertySecurities,
@@ -393,7 +393,7 @@ export async function fetchPageInternal<
 >(
   client: MinimalClient,
   objectType: Q,
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
   args: FetchPageArgs<
     Q,
     L,
@@ -423,7 +423,7 @@ export async function fetchPageInternal<
         never,
         ORDER_BY_OPTIONS
       >,
-      objectSet,
+      pipelineSet,
       useSnapshot,
     ) as any; // fixme
   } else {
@@ -440,7 +440,7 @@ export async function fetchPageInternal<
         never,
         ORDER_BY_OPTIONS
       >,
-      objectSet,
+      pipelineSet,
       useSnapshot,
     ) as any; // fixme
   }
@@ -457,11 +457,11 @@ export async function fetchPageWithErrorsInternal<
 >(
   client: MinimalClient,
   objectType: Q,
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
   args: FetchPageArgs<Q, L, R, A, S, T> = {},
 ): Promise<Result<FetchPageResult<Q, L, R, S, T>>> {
   try {
-    const result = await fetchPageInternal(client, objectType, objectSet, args);
+    const result = await fetchPageInternal(client, objectType, pipelineSet, args);
     return { value: result };
   } catch (e) {
     if (e instanceof Error) {
@@ -475,7 +475,7 @@ export async function fetchPageWithErrorsInternal<
  * @param client
  * @param objectType
  * @param args
- * @param objectSet
+ * @param pipelineSet
  * @returns
  * @internal
  */
@@ -490,9 +490,9 @@ export async function fetchPage<
   client: MinimalClient,
   objectType: Q,
   args: FetchPageArgs<Q, L, R, any, S, T, never, {}, PROPERTY_SECURITIES>,
-  objectSet: ObjectSet = resolveBaseObjectSetType(objectType),
+  pipelineSet: PipelineSet = resolveBaseObjectSetType(objectType),
 ): Promise<FetchPageResult<Q, L, R, S, T, {}, PROPERTY_SECURITIES>> {
-  return fetchPageInternal(client, objectType, objectSet, args);
+  return fetchPageInternal(client, objectType, pipelineSet, args);
 }
 
 /** @internal */
@@ -506,9 +506,9 @@ export async function fetchPageWithErrors<
   client: MinimalClient,
   objectType: Q,
   args: FetchPageArgs<Q, L, R, any, S, T>,
-  objectSet: ObjectSet = resolveBaseObjectSetType(objectType),
+  pipelineSet: PipelineSet = resolveBaseObjectSetType(objectType),
 ): Promise<Result<FetchPageResult<Q, L, R, S, T>>> {
-  return fetchPageWithErrorsInternal(client, objectType, objectSet, args);
+  return fetchPageWithErrorsInternal(client, objectType, pipelineSet, args);
 }
 
 async function buildAndRemapRequestBody<
@@ -693,7 +693,7 @@ export async function fetchObjectPage<
   client: MinimalClient,
   objectType: Q,
   args: FetchPageArgs<Q, L, R, Augments, S, T, never, ORDER_BY_OPTIONS>,
-  objectSet: ObjectSet,
+  pipelineSet: PipelineSet,
   useSnapshot: boolean = false,
 ): Promise<FetchPageResult<Q, L, R, S, T, ORDER_BY_OPTIONS>> {
   // For simple object fetches, since we know the object type up front
@@ -731,7 +731,7 @@ export async function fetchObjectPage<
   const requestBody = await buildAndRemapRequestBody(
     args,
     {
-      objectSet,
+      pipelineSet,
       select: [],
       selectV2,
       loadPropertySecurities: shouldLoadPropertySecurities,
@@ -758,7 +758,7 @@ export async function fetchObjectPage<
       client,
       r.data as GameStateObjectV2[],
       undefined,
-      await extractRdpDefinition(client, objectSet),
+      await extractRdpDefinition(client, pipelineSet),
       shouldLoadPropertySecurities ? r.propertySecurities : undefined,
       !args.$includeRid,
       args.$select,

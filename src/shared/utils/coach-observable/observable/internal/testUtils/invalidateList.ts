@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, WhereClause } from "@shared/types/league-client/coach-api";
+import type { ObjectTypeDefinition, WhereClause } from "../../../../../coach-types";
 import type { OrderBy } from "../../ObservableClient.js";
 import type { Canonical } from "../Canonical.js";
 import type { ListCacheKey } from "../list/ListCacheKey.js";

@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Attachment, Media, MediaPropertyLocation } from "@shared/types/league-client/coach-api";
+import type { Attachment, Media, MediaPropertyLocation } from "../../../../../coach-types";
 
 export function getMediaCacheKey(
   mediaOrLocation: Media | Attachment | MediaPropertyLocation,

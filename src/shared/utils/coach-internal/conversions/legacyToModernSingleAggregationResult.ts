@@ -18,8 +18,8 @@ import type {
   AggregationClause,
   AggregationResultsWithoutGroups,
   ObjectOrInterfaceDefinition,
-} from "@shared/types/league-client/coach-api";
-import type { AggregateObjectsResponseV2 } from "@coach/pantheon.ontologies";
+} from "../../../coach-types";
+import type { AggregateObjectsResponseV2 } from "../../../coach-types";
 import type { ArrayElement } from "../../coach-util/ArrayElement.js";
 import { splitAggregationKey } from "./modernToLegacyAggregationClause.js";
 

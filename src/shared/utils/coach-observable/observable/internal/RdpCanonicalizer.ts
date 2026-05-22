@@ -18,9 +18,9 @@ import type {
   DerivedProperty,
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
-} from "@shared/types/league-client/coach-api";
-import type { DerivedPropertyDefinition } from "@coach/pantheon.ontologies";
-import { createWithPropertiesObjectSet } from "../../derivedProperties/createWithPropertiesObjectSet.js";
+} from "../../../../coach-types";
+import type { DerivedPropertyDefinition } from "../../../../coach-types";
+import { createWithPropertiesPipelineSet } from "../../derivedProperties/createWithPropertiesPipelineSet.js";
 import type { Canonical } from "./Canonical.js";
 import { CachingCanonicalizer } from "./Canonicalizer.js";
 
@@ -47,11 +47,11 @@ export class RdpCanonicalizer extends CachingCanonicalizer<Rdp, Rdp> {
     } as ObjectOrInterfaceDefinition;
 
     for (const [key, rdpFunction] of Object.entries(rdp)) {
-      const builder = createWithPropertiesObjectSet(
+      const builder = createWithPropertiesPipelineSet(
         objectTypeHolder,
         { type: "methodInput" },
         definitionMap,
-        /* fromBaseObjectSet */ true,
+        /* fromBasePipelineSet */ true,
       );
 
       const result = rdpFunction(builder);

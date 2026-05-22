@@ -18,14 +18,14 @@ import type {
   InterfaceDefinition,
   Logger,
   ObjectTypeDefinition,
-} from "@shared/types/league-client/coach-api";
-import { dylanyunlonApiError } from "@shared/http-api-axios-helper.errors";
+} from "../../../../coach-types";
+import { dylanyunlonApiError } from "../../../../coach-types";
 import type { DeferredPromise } from "p-defer";
 import pDefer from "p-defer";
 import { additionalContext, type Client } from "../../coach-engine.js";
 import type {
   ObjectHolder,
-} from "../../coach-object/convertWireToOsdkObjects/ObjectHolder.js";
+} from "../../coach-object/convertWireToCoachRecords/ObjectHolder.js";
 import type { DefType } from "../../coach-util/interfaceUtils.js";
 import { DefaultMap } from "./collections/DefaultMap.js";
 import { DefaultWeakMap } from "./collections/DefaultWeakMap.js";

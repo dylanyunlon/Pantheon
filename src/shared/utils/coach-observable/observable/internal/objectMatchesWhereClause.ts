@@ -14,11 +14,11 @@
  * 
  */
 
-import type { PossibleWhereClauseFilters } from "@shared/types/league-client/coach-api";
+import type { PossibleWhereClauseFilters } from "../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import invariant from "../../coach-util/invariant";
-import type { InterfaceHolder } from "../../coach-object/convertWireToOsdkObjects/InterfaceHolder.js";
-import type { ObjectHolder } from "../../coach-object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { InterfaceHolder } from "../../coach-object/convertWireToCoachRecords/InterfaceHolder.js";
+import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder.js";
 import { evaluateFilter } from "./evaluateFilter.js";
 import type { SimpleWhereClause } from "./SimpleWhereClause.js";
 

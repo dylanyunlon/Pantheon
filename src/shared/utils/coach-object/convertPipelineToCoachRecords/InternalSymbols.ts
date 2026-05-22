@@ -14,11 +14,11 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, OsdkBase } from "@shared/types/league-client/coach-api";
-import type { PropertySecurities } from "@coach/pantheon.ontologies";
+import type { ObjectOrInterfaceDefinition, CoachBase } from "../../../coach-types";
+import type { PropertySecurities } from "../../../coach-types";
 
 /** @internal */
-export const UnderlyingOsdkObject = Symbol(
+export const UnderlyingCoachRecord = Symbol(
   process.env.MODE !== "production" ? "Underlying Object" : undefined,
 );
 
@@ -43,7 +43,7 @@ export const PropertySecuritiesRef = Symbol(
 );
 
 export interface HolderBase<T extends ObjectOrInterfaceDefinition> {
-  [UnderlyingOsdkObject]: OsdkBase<any>;
+  [UnderlyingCoachRecord]: CoachBase<any>;
   [ObjectDefRef]?: T;
   [InterfaceDefRef]?: T;
   [PropertySecuritiesRef]?: PropertySecurities[];

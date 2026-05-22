@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition } from "@shared/types/league-client/coach-api";
+import type { ObjectTypeDefinition } from "../../../../coach-types";
 import type { OrderBy } from "../ObservableClient.js";
 import type { Canonical } from "./Canonical.js";
 import { WeakRefTrie } from "./WeakRefTrie.js";

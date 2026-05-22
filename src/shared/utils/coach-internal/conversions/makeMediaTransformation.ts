@@ -45,8 +45,8 @@ import type {
   VideoToImageOperation,
   VideoToTextOperation,
   VlmPreprocessingConfig,
-} from "@shared/types/league-client/coach-api/unstable";
-import type { Transformation } from "@coach/pantheon.mediasets";
+} from "../../../coach-types";
+import type { Transformation } from "../../../coach-types";
 
 export function makeMediaTransformation(
   transformation: MediaTransformation,

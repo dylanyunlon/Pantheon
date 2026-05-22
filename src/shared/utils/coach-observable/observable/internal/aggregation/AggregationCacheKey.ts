@@ -18,7 +18,7 @@ import type {
   AggregateOpts,
   AggregationsResults,
   ObjectOrInterfaceDefinition,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import type { CacheKey } from "../CacheKey.js";
 import type { Canonical } from "../Canonical.js";
 import type { Rdp } from "../RdpCanonicalizer.js";
@@ -45,7 +45,7 @@ export interface AggregationCacheKey extends
     [
       type: "object" | "interface",
       apiName: string,
-      wireObjectSet: string | undefined,
+      wirePipelineSet: string | undefined,
       whereClause: Canonical<SimpleWhereClause>,
       rdpConfig: Canonical<Rdp> | undefined,
       intersectWith: Canonical<Array<Canonical<SimpleWhereClause>>> | undefined,

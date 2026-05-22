@@ -18,7 +18,7 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../coach-types";
 
 /**
  * A where clause without specific type information - used for runtime matching logic.

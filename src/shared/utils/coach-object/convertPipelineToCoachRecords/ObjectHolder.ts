@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Coach } from "@shared/types/league-client/coach-api";
+import type { Coach } from "../../../coach-types";
 import type { MinimalClient } from "../../MinimalClientContext.js";
 import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider.js";
 import type { BaseHolder } from "./BaseHolder.js";

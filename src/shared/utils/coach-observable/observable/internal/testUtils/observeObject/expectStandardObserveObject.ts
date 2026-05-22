@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, PrimaryKeyType } from "@shared/types/league-client/coach-api";
+import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
 import { expect } from "vitest";
 import type { TypedObjectPayload } from "../../../ObjectPayload.js";
 import type { Store } from "../../Store.js";

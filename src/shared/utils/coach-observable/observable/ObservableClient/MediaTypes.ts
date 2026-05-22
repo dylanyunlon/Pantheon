@@ -14,4 +14,4 @@
  * 
  */
 
-export type { MediaPropertyLocation } from "@shared/types/league-client/coach-api";
+export type { MediaPropertyLocation } from "../../../../coach-types";

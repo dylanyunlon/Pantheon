@@ -21,8 +21,8 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
-import type { ObjectSet as WireObjectSet } from "@coach/pantheon.ontologies";
+} from "../../../../../coach-types";
+import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
 import { additionalContext } from "../../../Client.js";
@@ -93,7 +93,7 @@ export abstract class AggregationQuery extends Query<
     AggregateOpts<ObjectOrInterfaceDefinition>
   >;
   protected rdpConfig: Canonical<Rdp> | undefined;
-  protected parsedWireObjectSet: WireObjectSet | undefined;
+  protected parsedWirePipelineSet: WirePipelineSet | undefined;
   #invalidationTypes: Set<string>;
   #invalidationTypesPromise: Promise<Set<string>> | undefined;
 
@@ -123,25 +123,25 @@ export abstract class AggregationQuery extends Query<
     this.rdpConfig = cacheKey.otherKeys[RDP_IDX];
     this.canonicalAggregate = cacheKey.otherKeys[AGGREGATE_IDX];
 
-    const serializedObjectSet = cacheKey.otherKeys[WIRE_OBJECT_SET_IDX];
+    const serializedPipelineSet = cacheKey.otherKeys[WIRE_OBJECT_SET_IDX];
     this.#invalidationTypes = new Set([this.apiName]);
-    if (serializedObjectSet) {
-      this.parsedWireObjectSet = JSON.parse(
-        serializedObjectSet,
-      ) as WireObjectSet;
+    if (serializedPipelineSet) {
+      this.parsedWirePipelineSet = JSON.parse(
+        serializedPipelineSet,
+      ) as WirePipelineSet;
       this.#invalidationTypesPromise = this.#computeInvalidationTypes(
-        this.parsedWireObjectSet,
+        this.parsedWirePipelineSet,
       );
     }
   }
 
   async #computeInvalidationTypes(
-    wireObjectSet: WireObjectSet,
+    wirePipelineSet: WirePipelineSet,
   ): Promise<Set<string>> {
     try {
       const { invalidationSet } = await getObjectTypesThatInvalidate(
         this.store.client[additionalContext],
-        wireObjectSet,
+        wirePipelineSet,
       );
       return new Set([this.apiName, ...invalidationSet]);
     } catch (error) {

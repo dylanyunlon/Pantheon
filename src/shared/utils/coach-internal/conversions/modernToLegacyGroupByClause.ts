@@ -14,12 +14,12 @@
  * 
  */
 
-import type { AllGroupByValues, GroupByClause, GroupByRange } from "@shared/types/league-client/coach-api";
-import { DurationMapping } from "@shared/types/league-client/coach-api";
+import type { AllGroupByValues, GroupByClause, GroupByRange } from "../../../coach-types";
+import { DurationMapping } from "../../../coach-types";
 import type {
   AggregationGroupByV2,
   AggregationRangeV2,
-} from "@coach/pantheon.ontologies";
+} from "../../../coach-types";
 
 /** @internal */
 export function modernToLegacyGroupByClause(

@@ -14,10 +14,10 @@
  * 
  */
 
-import type { ObjectTypeDefinition, Coach } from "@shared/types/league-client/coach-api";
+import type { ObjectTypeDefinition, Coach } from "../../../../../coach-types";
 import type { Observer } from "type-fest";
 import type { MockedObject } from "vitest";
-import type { ObjectHolder } from "../../../../object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { ObjectHolder } from "../../../../object/convertWireToCoachRecords/ObjectHolder.js";
 import type { SpecificLinkPayload } from "../../../LinkPayload.js";
 import type { Store } from "../../Store.js";
 import {

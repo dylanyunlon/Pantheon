@@ -22,12 +22,12 @@ import type {
   PossibleWhereClauseFilters,
   SimplePropertyDef,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../coach-types";
 
 import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
-} from "@coach/pantheon.ontologies";
+} from "../../../coach-types";
 import invariant from "../../coach-util/invariant";
 import { fullyQualifyPropName } from "./fullyQualifyPropName.js";
 import { makeGeoFilterIntersects } from "./makeGeoFilterIntersects.js";

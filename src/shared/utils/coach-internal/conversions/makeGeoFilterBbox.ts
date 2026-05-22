@@ -17,7 +17,7 @@
 import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
-} from "@coach/pantheon.ontologies";
+} from "../../../coach-types";
 import type { BBox } from "geojson";
 
 export function makeGeoFilterBbox(

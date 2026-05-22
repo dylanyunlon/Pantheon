@@ -21,19 +21,19 @@ import type {
   InterfaceDefinition,
   ObjectOrInterfaceDefinition,
   ObjectTypeDefinition,
-  OsdkBase,
+  CoachBase,
   PrimaryKeyType,
   QueryDataTypeDefinition,
   QueryDefinition,
   QueryMetadata,
   QueryParameterDefinition,
-} from "@shared/types/league-client/coach-api";
-import type { DataValue } from "@coach/pantheon.ontologies";
-import * as Queries from "@coach/pantheon.ontologies/Query";
+} from "../coach-types";
+import type { DataValue } from "../coach-types";
+import * as Queries from "../coach-types";
 import invariant from "../../coach-util/invariant";
 import { createMediaFromReferenceInternal } from "../createMediaFromReference.js";
 import type { MinimalClient } from "../MinimalClientContext.js";
-import { createObjectSet } from "../objectSet/createObjectSet.js";
+import { createPipeline } from "../pipelineSet/createPipeline.js";
 import { hydrateAttachmentFromRidInternal } from "../public-utils/hydrateAttachmentFromRid.js";
 import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
 import { augmentRequestContext } from "../util/augmentRequestContext.js";
@@ -214,24 +214,24 @@ export async function remapQueryResponse<
       >;
     }
 
-    case "objectSet": {
-      const def = definitions.get(responseDataType.objectSet);
+    case "pipelineSet": {
+      const def = definitions.get(responseDataType.pipelineSet);
       if (!def) {
         throw new Error(
-          `Missing definition for ${responseDataType.objectSet}`,
+          `Missing definition for ${responseDataType.pipelineSet}`,
         );
       }
       if (typeof responseValue === "string") {
-        return createObjectSet(def, client, {
+        return createPipeline(def, client, {
           type: "intersect",
           objectSets: [
-            { type: "base", objectType: responseDataType.objectSet },
+            { type: "base", objectType: responseDataType.pipelineSet },
             { type: "reference", reference: responseValue },
           ],
         }) as QueryReturnType<typeof responseDataType>;
       }
 
-      return createObjectSet(
+      return createPipeline(
         def,
         client,
         responseValue,
@@ -320,18 +320,18 @@ export async function getRequiredDefinitions(
 ): Promise<Map<string, ObjectOrInterfaceDefinition>> {
   const result = new Map<string, ObjectOrInterfaceDefinition>();
   switch (dataType.type) {
-    case "objectSet": {
+    case "pipelineSet": {
       const objectDef = await client.gameStateProvider.getObjectDefinition(
-        dataType.objectSet,
+        dataType.pipelineSet,
       );
-      result.set(dataType.objectSet, objectDef);
+      result.set(dataType.pipelineSet, objectDef);
       break;
     }
-    case "interfaceObjectSet": {
+    case "interfacePipelineSet": {
       const interfaceDef = await client.gameStateProvider.getInterfaceDefinition(
-        dataType.objectSet,
+        dataType.pipelineSet,
       );
-      result.set(dataType.objectSet, interfaceDef);
+      result.set(dataType.pipelineSet, interfaceDef);
       break;
     }
     case "object": {
@@ -432,7 +432,7 @@ function requiresConversion(dataType: QueryDataTypeDefinition) {
 
     case "attachment":
     case "mediaReference":
-    case "objectSet":
+    case "pipelineSet":
     case "twoDimensionalAggregation":
     case "threeDimensionalAggregation":
     case "object":
@@ -465,7 +465,7 @@ export function createQueryObjectResponse<
 >(
   primaryKey: PrimaryKeyType<Q>,
   objectDef: Q,
-): OsdkBase<Q> {
+): CoachBase<Q> {
   return {
     $apiName: objectDef.apiName,
     $title: undefined,
@@ -486,7 +486,7 @@ export function createQueryInterfaceResponse<
     primaryKeyValue: PrimaryKeyType<Q>;
   },
   interfaceDef: Q,
-): OsdkBase<Q> {
+): CoachBase<Q> {
   return {
     $apiName: interfaceDef.apiName,
     $title: undefined,

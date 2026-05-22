@@ -14,8 +14,8 @@
  * 
  */
 
-import type { ObjectTypeDefinition, PrimaryKeyType } from "@shared/types/league-client/coach-api";
-import type { ObjectHolder } from "../../../object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
 import type { CacheKey } from "../CacheKey.js";
 import type { Canonical } from "../Canonical.js";
 import type { Rdp } from "../RdpCanonicalizer.js";

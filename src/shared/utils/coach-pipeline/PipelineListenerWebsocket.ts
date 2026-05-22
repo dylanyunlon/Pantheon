@@ -20,18 +20,18 @@ import type {
   ObjectSetSubscription,
   Coach,
   PropertyKeys,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 import type {
-  ObjectSet,
+  PipelineSet,
   ObjectSetStreamSubscribeRequest,
   ObjectSetStreamSubscribeRequests,
   ObjectSetSubscribeResponses,
   ObjectSetUpdates,
   ObjectState,
-  RefreshObjectSet,
+  RefreshPipelineSet,
   StreamMessage,
   SubscriptionClosed,
-} from "@coach/pantheon.ontologies";
+} from "../coach-types";
 import WebSocket from "isomorphic-ws";
 import invariant from "../../coach-util/invariant";
 import type { ClientCacheKey, MinimalClient } from "../MinimalClientContext.js";
@@ -73,7 +73,7 @@ interface Subscription<
   listener: Required<ObjectSetSubscription.Listener<Q, P>>;
   requestedProperties: Array<P>;
   requestedReferenceProperties: Array<P>;
-  objectSet: ObjectSet;
+  pipelineSet: PipelineSet;
 
   subscriptionId: string;
   isReady?: boolean;
@@ -104,21 +104,21 @@ function subscriptionIsDone(sub: Subscription<any, any>) {
 }
 
 /** @internal */
-export class ObjectSetListenerWebsocket {
+export class PipelineListenerWebsocket {
   static #instances = new WeakMap<
     ClientCacheKey,
-    ObjectSetListenerWebsocket
+    PipelineListenerWebsocket
   >();
   readonly MINIMUM_RECONNECT_DELAY_MS: number;
 
   // FIXME
-  static getInstance(client: MinimalClient): ObjectSetListenerWebsocket {
-    let instance = ObjectSetListenerWebsocket.#instances.get(
+  static getInstance(client: MinimalClient): PipelineListenerWebsocket {
+    let instance = PipelineListenerWebsocket.#instances.get(
       client.clientCacheKey,
     );
     if (instance == null) {
-      instance = new ObjectSetListenerWebsocket(client);
-      ObjectSetListenerWebsocket.#instances.set(
+      instance = new PipelineListenerWebsocket(client);
+      PipelineListenerWebsocket.#instances.set(
         client.clientCacheKey,
         instance,
       );
@@ -188,7 +188,7 @@ export class ObjectSetListenerWebsocket {
     P extends PropertyKeys<Q>,
   >(
     objectType: ObjectOrInterfaceDefinition,
-    objectSet: ObjectSet,
+    pipelineSet: PipelineSet,
     listener: ObjectSetSubscription.Listener<Q, P>,
     properties: Array<P> = [],
     shouldLoadRids: boolean = false,
@@ -220,7 +220,7 @@ export class ObjectSetListenerWebsocket {
 
     const sub: Subscription<Q, P> = {
       listener: fillOutListener<Q, P>(listener),
-      objectSet,
+      pipelineSet,
       primaryKeyPropertyName: objOrInterfaceDef.type === "interface"
         ? undefined
         : objOrInterfaceDef.primaryKeyApiName,
@@ -256,7 +256,7 @@ export class ObjectSetListenerWebsocket {
    * `shouldLoadRids` is true). `$primaryKey` will be `undefined`.
    */
   subscribeWithoutType(
-    objectSet: ObjectSet,
+    pipelineSet: PipelineSet,
     listener: ObjectSetSubscription.Listener<
       ObjectOrInterfaceDefinition,
       never
@@ -265,7 +265,7 @@ export class ObjectSetListenerWebsocket {
   ): () => void {
     const sub: Subscription<ObjectOrInterfaceDefinition, never> = {
       listener: fillOutListener(listener),
-      objectSet,
+      pipelineSet,
       primaryKeyPropertyName: undefined,
       requestedProperties: [],
       requestedReferenceProperties: [],
@@ -341,14 +341,14 @@ export class ObjectSetListenerWebsocket {
       id,
       requests: readySubs.map<ObjectSetStreamSubscribeRequest>((
         {
-          objectSet,
+          pipelineSet,
           requestedProperties,
           requestedReferenceProperties,
           interfaceApiName,
         },
       ) => {
         return {
-          objectSet,
+          pipelineSet,
           propertySet: requestedProperties,
           referenceSet: requestedReferenceProperties,
           objectLoadingResponseOptions: { shouldLoadObjectRids: true },
@@ -502,8 +502,8 @@ export class ObjectSetListenerWebsocket {
         await this.#handleMessage_objectSetChanged(data);
         return;
 
-      case "refreshObjectSet":
-        this.#handleMessage_refreshObjectSet(data);
+      case "refreshPipelineSet":
+        this.#handleMessage_refreshPipelineSet(data);
         return;
 
       case "subscribeResponses":
@@ -533,9 +533,9 @@ export class ObjectSetListenerWebsocket {
     const referenceUpdates = payload.updates.filter((update) =>
       update.type === "reference"
     );
-    const osdkObjectsWithReferenceUpdates = await Promise.all(
+    const coachRecordsWithReferenceUpdates = await Promise.all(
       referenceUpdates.map(async (o) => {
-        const osdkObjectArray = await this.#client.objectFactory(
+        const coachRecordArray = await this.#client.objectFactory(
           this.#client,
           [{
             __apiName: o.objectType,
@@ -556,17 +556,17 @@ export class ObjectSetListenerWebsocket {
             sub.interfaceApiName,
           ),
         );
-        const singleOsdkObject = osdkObjectArray[0] ?? undefined;
-        return singleOsdkObject != null
+        const singleCoachRecord = coachRecordArray[0] ?? undefined;
+        return singleCoachRecord != null
           ? {
-            object: singleOsdkObject as Coach.Instance<any, never, any>,
+            object: singleCoachRecord as Coach.Instance<any, never, any>,
             state: "ADDED_OR_UPDATED" as ObjectState,
           }
           : undefined;
       }),
     );
 
-    for (const update of osdkObjectsWithReferenceUpdates) {
+    for (const update of coachRecordsWithReferenceUpdates) {
       if (update != null) {
         try {
           sub.listener.onChange?.(update);
@@ -577,7 +577,7 @@ export class ObjectSetListenerWebsocket {
       }
     }
 
-    const osdkObjects = await Promise.all(objectUpdates.map(async (o) => {
+    const coachRecords = await Promise.all(objectUpdates.map(async (o) => {
       const keysToDelete = Object.keys(o.object).filter((key) =>
         sub.requestedReferenceProperties.includes(key)
       );
@@ -585,7 +585,7 @@ export class ObjectSetListenerWebsocket {
         delete o.object[key];
       }
 
-      const osdkObjectArray = await this.#client.objectFactory(
+      const coachRecordArray = await this.#client.objectFactory(
         this.#client,
         [o.object],
         sub.interfaceApiName,
@@ -599,28 +599,28 @@ export class ObjectSetListenerWebsocket {
           sub.interfaceApiName,
         ),
       ) as Array<Coach.Instance<any>>;
-      const singleOsdkObject = osdkObjectArray[0] ?? undefined;
+      const singleCoachRecord = coachRecordArray[0] ?? undefined;
 
-      const rid = singleOsdkObject.$rid as string | undefined;
+      const rid = singleCoachRecord.$rid as string | undefined;
 
-      return singleOsdkObject != null
+      return singleCoachRecord != null
         ? rid === undefined
           ? {
-            object: singleOsdkObject,
+            object: singleCoachRecord,
             state: o.state,
           }
           : {
-            object: singleOsdkObject,
+            object: singleCoachRecord,
             state: o.state,
             rid,
           }
         : undefined;
     }));
 
-    for (const osdkObject of osdkObjects) {
-      if (osdkObject != null) {
+    for (const coachRecord of coachRecords) {
+      if (coachRecord != null) {
         try {
-          sub.listener.onChange?.(osdkObject);
+          sub.listener.onChange?.(coachRecord);
         } catch (error) {
           this.#logger?.error(error, "Error in onChange callback");
           this.#tryCatchOnError(sub, false, error);
@@ -643,7 +643,7 @@ export class ObjectSetListenerWebsocket {
     };
   }
 
-  #handleMessage_refreshObjectSet = (payload: RefreshObjectSet) => {
+  #handleMessage_refreshPipelineSet = (payload: RefreshPipelineSet) => {
     const sub = this.#subscriptions.get(payload.id);
     invariant(sub, `Expected subscription id ${payload.id}`);
     try {

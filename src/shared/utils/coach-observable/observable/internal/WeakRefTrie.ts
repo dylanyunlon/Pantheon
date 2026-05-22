@@ -14,7 +14,7 @@
  * 
  */
 
-import { Trie } from "@wry/trie";
+import { Trie } from "../../../../coach-types";
 
 const defaultMakeData = () => Object.create(null);
 

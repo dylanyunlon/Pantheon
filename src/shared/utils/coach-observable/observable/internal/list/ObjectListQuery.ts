@@ -17,14 +17,14 @@
 import type {
   DerivedProperty,
   InterfaceDefinition,
-  ObjectSet,
+  PipelineSet,
   ObjectTypeDefinition,
   Coach,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import { additionalContext } from "../../../Client.js";
-import type { InterfaceHolder } from "../../../object/convertWireToOsdkObjects/InterfaceHolder.js";
-import type { ObjectHolder } from "../../../object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
 import type { Changes } from "../Changes.js";
 import type { Store } from "../Store.js";
 import {
@@ -43,7 +43,7 @@ type ExtractRelevantObjectsResult = Record<"added" | "modified", {
 }>;
 
 export class ObjectListQuery extends ListQuery {
-  protected createObjectSet(store: Store): ObjectSet<ObjectTypeDefinition> {
+  protected createPipeline(store: Store): PipelineSet<ObjectTypeDefinition> {
     const rdpConfig = this.cacheKey.otherKeys[RDP_IDX];
     const intersectWith = this.cacheKey.otherKeys[INTERSECT_IDX];
     const pivotInfo = this.cacheKey.otherKeys[PIVOT_IDX];
@@ -56,7 +56,7 @@ export class ObjectListQuery extends ListQuery {
     } as ObjectTypeDefinition;
 
     if (pivotInfo != null) {
-      let sourceSet: ObjectSet<ObjectTypeDefinition>;
+      let sourceSet: PipelineSet<ObjectTypeDefinition>;
       if (rids != null) {
         sourceSet = clientCtx.objectSetFactory(
           {
@@ -75,43 +75,43 @@ export class ObjectListQuery extends ListQuery {
           : store.client({
             type: "object",
             apiName: pivotInfo.sourceType,
-          } as ObjectTypeDefinition)) as ObjectSet<ObjectTypeDefinition>;
+          } as ObjectTypeDefinition)) as PipelineSet<ObjectTypeDefinition>;
       }
 
-      let objectSet = sourceSet
+      let pipelineSet = sourceSet
         .where(this.canonicalWhere as WhereClause<any>)
         .pivotTo(pivotInfo.linkName);
 
       if (rdpConfig != null) {
-        objectSet = objectSet.withProperties(
+        pipelineSet = pipelineSet.withProperties(
           rdpConfig as DerivedProperty.Clause<ObjectTypeDefinition>,
         );
       }
 
       // intersectWith for pivot queries is deferred to fetchPageData
       // where the target type can be resolved asynchronously
-      return objectSet;
+      return pipelineSet;
     }
 
     // Start with either a static objectset (for RIDs) or a base objectset
-    let objectSet: ObjectSet<ObjectTypeDefinition>;
+    let pipelineSet: PipelineSet<ObjectTypeDefinition>;
     if (rids != null) {
-      objectSet = clientCtx.objectSetFactory(
+      pipelineSet = clientCtx.objectSetFactory(
         typeDefinition,
         clientCtx,
         { type: "static", objects: [...rids] },
       );
     } else {
-      objectSet = store.client(typeDefinition);
+      pipelineSet = store.client(typeDefinition);
     }
 
     if (rdpConfig != null) {
-      objectSet = objectSet.withProperties(
+      pipelineSet = pipelineSet.withProperties(
         rdpConfig as DerivedProperty.Clause<ObjectTypeDefinition>,
       );
     }
 
-    objectSet = objectSet.where(this.canonicalWhere);
+    pipelineSet = pipelineSet.where(this.canonicalWhere);
 
     if (intersectWith != null && intersectWith.length > 0) {
       const intersectSets = intersectWith.map(whereClause => {
@@ -129,10 +129,10 @@ export class ObjectListQuery extends ListQuery {
         return intersectSet.where(whereClause);
       });
 
-      objectSet = objectSet.intersect(...intersectSets);
+      pipelineSet = pipelineSet.intersect(...intersectSets);
     }
 
-    return objectSet;
+    return pipelineSet;
   }
 
   protected postProcessFetchedData(

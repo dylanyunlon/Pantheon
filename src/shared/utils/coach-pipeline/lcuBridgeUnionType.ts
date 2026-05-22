@@ -23,7 +23,7 @@ type DeepWriteable<T> = {
  *
  * e.g `{type:"base",base:{foo:5}}` becomes `a("base",{foo:5})`
  */
-export function conjureUnionType<T extends string, const V>(
+export function lcuBridgeUnionType<T extends string, const V>(
   type: T,
   value: V,
 ): { type: T } & Record<T, DeepWriteable<V>> {

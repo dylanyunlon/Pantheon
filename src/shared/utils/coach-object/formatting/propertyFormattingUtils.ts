@@ -14,8 +14,8 @@
  * 
  */
 
-import type { PropertyTypeReferenceOrStringConstant } from "@shared/types/league-client/coach-api";
-import type { SimpleOsdkProperties } from "../SimpleOsdkProperties.js";
+import type { PropertyTypeReferenceOrStringConstant } from "../../../coach-types";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
 
 /**
  * Resolves a property reference or string constant to its actual value
@@ -23,7 +23,7 @@ import type { SimpleOsdkProperties } from "../SimpleOsdkProperties.js";
 
 export function resolvePropertyReference(
   ref: PropertyTypeReferenceOrStringConstant,
-  objectData: SimpleOsdkProperties,
+  objectData: SimpleCoachProperties,
 ): string | undefined {
   if (ref.type === "constant") {
     return ref.value;

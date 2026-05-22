@@ -14,16 +14,16 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, ObjectSet } from "@shared/types/league-client/coach-api";
-import type { ObjectSet as WireObjectSet } from "@coach/pantheon.ontologies";
+import type { ObjectOrInterfaceDefinition, PipelineSet } from "../coach-types";
+import type { PipelineSet as WirePipelineSet } from "../coach-types";
 import type { MinimalClient } from "../MinimalClientContext.js";
 
 /** @internal */
-export type ObjectSetFactory<
+export type PipelineFactory<
   Q extends ObjectOrInterfaceDefinition,
-  R extends ObjectSet<Q>,
+  R extends PipelineSet<Q>,
 > = (
   type: Q,
   clientCtx: MinimalClient,
-  objectSet?: WireObjectSet,
+  pipelineSet?: WirePipelineSet,
 ) => R;

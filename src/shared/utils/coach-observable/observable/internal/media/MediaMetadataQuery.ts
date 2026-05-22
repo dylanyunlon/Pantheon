@@ -18,8 +18,8 @@ import type {
   MediaMetadata,
   ObjectTypeDefinition,
   PrimaryKeyType,
-} from "@shared/types/league-client/coach-api";
-import * as OntologiesV2 from "@coach/pantheon.ontologies";
+} from "../../../../../coach-types";
+import * as OntologiesV2 from "../../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import {
   BehaviorSubject,

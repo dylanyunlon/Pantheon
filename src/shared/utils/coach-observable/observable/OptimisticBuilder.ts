@@ -19,7 +19,7 @@ import type {
   ObjectTypeDefinition,
   Coach,
   PrimaryKeyType,
-} from "@shared/types/league-client/coach-api";
+} from "../../../coach-types";
 
 export interface OptimisticBuilder {
   updateObject: <T extends ObjectTypeDefinition>(

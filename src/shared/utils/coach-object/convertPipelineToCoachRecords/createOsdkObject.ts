@@ -14,15 +14,15 @@
  * 
  */
 
-import type { PropertySecurity } from "@shared/types/league-client/coach-api";
-import type { MediaReference } from "@coach/pantheon.core";
+import type { PropertySecurity } from "../../../coach-types";
+import type { MediaReference } from "../../../coach-types";
 import type {
   Attachment,
   PropertySecurities,
   PropertySecurity as WirePropertySecurity,
   ReferenceValue,
   SecuredPropertyValue,
-} from "@coach/pantheon.ontologies";
+} from "../../../coach-types";
 import invariant from "../../coach-util/invariant";
 import { GeotimeSeriesPropertyImpl } from "../../createGeotimeSeriesProperty.js";
 import { MediaReferencePropertyImpl } from "../../createMediaReferenceProperty.js";
@@ -36,14 +36,14 @@ import {
   applyPropertyFormatter,
   type FormatPropertyOptions,
 } from "../formatting/applyPropertyFormatter.js";
-import type { SimpleOsdkProperties } from "../SimpleOsdkProperties.js";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
 import { get$as } from "./getDollarAs.js";
 import { get$link } from "./getDollarLink.js";
 import {
   ClientRef,
   ObjectDefRef,
   PropertySecuritiesRef,
-  UnderlyingOsdkObject,
+  UnderlyingCoachRecord,
 } from "./InternalSymbols.js";
 import type { ObjectHolder } from "./ObjectHolder.js";
 
@@ -79,11 +79,11 @@ const basePropDefs = {
       update: Record<string, any> | undefined,
     ) {
       // I think `rawObj` is the same thing as `this` and can be removed?
-      const rawObj = this[UnderlyingOsdkObject] as SimpleOsdkProperties;
+      const rawObj = this[UnderlyingCoachRecord] as SimpleCoachProperties;
       const def = this[ObjectDefRef];
 
       if (update == null) {
-        return createOsdkObject(this[ClientRef], def, { ...rawObj });
+        return createCoachRecord(this[ClientRef], def, { ...rawObj });
       }
 
       if (
@@ -99,13 +99,13 @@ const basePropDefs = {
         update.$title = update[def.titleProperty];
       }
 
-      const newObject = { ...this[UnderlyingOsdkObject], ...update };
-      return createOsdkObject(this[ClientRef], this[ObjectDefRef], newObject);
+      const newObject = { ...this[UnderlyingCoachRecord], ...update };
+      return createCoachRecord(this[ClientRef], this[ObjectDefRef], newObject);
     },
   },
   "$objectSpecifier": {
     get(this: ObjectHolder) {
-      const rawObj = this[UnderlyingOsdkObject];
+      const rawObj = this[UnderlyingCoachRecord];
       return createObjectSpecifierFromPrimaryKey(
         this[ObjectDefRef],
         rawObj.$primaryKey,
@@ -133,7 +133,7 @@ const basePropDefs = {
       propertyApiName: string,
       options?: FormatPropertyOptions,
     ): string | undefined {
-      const rawObj = this[UnderlyingOsdkObject] as SimpleOsdkProperties;
+      const rawObj = this[UnderlyingCoachRecord] as SimpleCoachProperties;
       const def = this[ObjectDefRef];
       const propertyValue = rawObj[propertyApiName];
 
@@ -154,10 +154,10 @@ const basePropDefs = {
  * @param objectDef
  * @param simpleOsdkProperties
  */
-export function createOsdkObject(
+export function createCoachRecord(
   client: MinimalClient,
   objectDef: FetchedObjectTypeDefinition,
-  simpleOsdkProperties: SimpleOsdkProperties,
+  simpleOsdkProperties: SimpleCoachProperties,
   derivedPropertyTypeByName: DerivedPropertyRuntimeMetadata = {},
   wirePropertySecurities: PropertySecurities[] | undefined = [],
 ): ObjectHolder {
@@ -173,7 +173,7 @@ export function createOsdkObject(
   Object.defineProperties(
     rawObj,
     {
-      [UnderlyingOsdkObject]: {
+      [UnderlyingCoachRecord]: {
         enumerable: false,
         value: simpleOsdkProperties,
       },
@@ -340,11 +340,11 @@ function createSpecialProperty(
 
 function parseWhenSecuritiesLoaded(
   wirePropertySecurities: PropertySecurities[] | undefined,
-  rawObject: SimpleOsdkProperties,
+  rawObject: SimpleCoachProperties,
   objectDef: FetchedObjectTypeDefinition,
   derivedPropertyTypeByName: DerivedPropertyRuntimeMetadata = {},
 ): {
-  parsedObject: SimpleOsdkProperties;
+  parsedObject: SimpleCoachProperties;
   clientPropertySecurities:
     | { [propName: string]: PropertySecurity[] | PropertySecurity[][] }
     | undefined;
@@ -353,7 +353,7 @@ function parseWhenSecuritiesLoaded(
     return { parsedObject: rawObject, clientPropertySecurities: undefined };
   }
 
-  const parsedObject: SimpleOsdkProperties = rawObject;
+  const parsedObject: SimpleCoachProperties = rawObject;
   const clientPropertySecurities: {
     [propName: string]: PropertySecurity[] | PropertySecurity[][];
   } = {};

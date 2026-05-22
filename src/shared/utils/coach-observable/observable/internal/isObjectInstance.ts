@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Coach } from "@shared/types/league-client/coach-api";
+import type { Coach } from "../../../../coach-types";
 
 /**
  * Type guard to check if an item is an object instance

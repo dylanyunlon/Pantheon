@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ActionDefinition, ActionEditResponse } from "@shared/types/league-client/coach-api";
+import type { ActionDefinition, ActionEditResponse } from "../../../../../coach-types";
 import type { ActionSignatureFromDef } from "../../../actions/applyAction.js";
 import { API_NAME_IDX } from "../list/ListCacheKey.js";
 import type { Store } from "../Store.js";

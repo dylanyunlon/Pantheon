@@ -14,7 +14,7 @@
  * 
  */
 
-import type { QueryDefinition } from "@shared/types/league-client/coach-api";
+import type { QueryDefinition } from "../../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
 import { additionalContext } from "../../../Client.js";
@@ -86,7 +86,7 @@ export class FunctionQuery extends Query<
     this.#dependsOnObjects = opts.dependsOnObjects;
     this.#queryDef = queryDef;
 
-    // Handle async ObjectSet type resolution
+    // Handle async PipelineSet type resolution
     if (objectSetTypesPromise) {
       objectSetTypesPromise
         .then(types => {
@@ -111,7 +111,7 @@ export class FunctionQuery extends Query<
           if (this.abortController?.signal.aborted) return;
 
           if (process.env.NODE_ENV !== "production") {
-            this.logger?.error("Failed to extract ObjectSet types", error);
+            this.logger?.error("Failed to extract PipelineSet types", error);
           }
         });
     }

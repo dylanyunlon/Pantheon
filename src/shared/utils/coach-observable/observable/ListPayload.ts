@@ -14,9 +14,9 @@
  * 
  */
 
-import type { WirePropertyTypes } from "@shared/types/league-client/coach-api";
-import type { InterfaceHolder } from "../object/convertWireToOsdkObjects/InterfaceHolder.js";
-import type { ObjectHolder } from "../object/convertWireToOsdkObjects/ObjectHolder.js";
+import type { WirePropertyTypes } from "../../../coach-types";
+import type { InterfaceHolder } from "../object/convertWireToCoachRecords/InterfaceHolder.js";
+import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder.js";
 import type { ObserveObjectsCallbackArgs } from "./ObservableClient.js";
 
 export interface ListPayload<

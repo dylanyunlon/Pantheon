@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Media, MediaReference, MediaUpload } from "@shared/types/league-client/coach-api";
+import type { Media, MediaReference, MediaUpload } from "../coach-types";
 
 export function isMedia(o: any): o is Media {
   return typeof o === "object"

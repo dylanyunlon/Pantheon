@@ -23,7 +23,7 @@ import type {
   Coach,
   PrimaryKeyType,
   QueryDefinition,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../coach-types";
 import invariant from "../../coach-util/invariant";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction.js";
 import { additionalContext, type Client } from "../../coach-engine.js";
@@ -459,7 +459,7 @@ export class Store {
     cacheKey: KnownCacheKey,
     changes: Changes,
   ): boolean {
-    if (cacheKey.type === "objectSet" || cacheKey.type === "list") {
+    if (cacheKey.type === "pipelineSet" || cacheKey.type === "list") {
       const query = this.queries.peek(cacheKey);
       // Both ObjectSetQuery and ListQuery expose objectTypes: ReadonlySet<string>
       if (query && "objectTypes" in query) {
@@ -513,7 +513,7 @@ export class Store {
         return cacheKey.otherKeys[LIST_RDP_IDX];
       } else if (cacheKey.type === "aggregation") {
         return cacheKey.otherKeys[AGGREGATION_RDP_IDX];
-      } else if (cacheKey.type === "objectSet") {
+      } else if (cacheKey.type === "pipelineSet") {
         const query = this.queries.peek(cacheKey);
         if (query) {
           return query.rdpConfig;
@@ -692,8 +692,8 @@ export class Store {
         } else if (cacheKey.type === "specificLink") {
           entryType = "link";
           objectType = cacheKey.otherKeys[LINK_API_NAME_IDX];
-        } else if (cacheKey.type === "objectSet") {
-          entryType = "objectSet";
+        } else if (cacheKey.type === "pipelineSet") {
+          entryType = "pipelineSet";
           objectType = "";
         }
 

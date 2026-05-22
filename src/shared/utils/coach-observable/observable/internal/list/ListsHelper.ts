@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "@shared/types/league-client/coach-api";
+import type { ObjectOrInterfaceDefinition } from "../../../../../coach-types";
 import type { ListPayload } from "../../ListPayload.js";
 import type { ObserveListOptions } from "../../ObservableClient.js";
 import type { Observer } from "../../ObservableClient/common.js";

@@ -18,7 +18,7 @@ import type {
   InterfaceDefinition,
   ObjectTypeDefinition,
   PropertyKeys,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../coach-types";
 
 /**
  * Represents the current state of an observation.

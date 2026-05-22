@@ -14,7 +14,7 @@
  * 
  */
 
-import type { AttachmentUpload } from "@shared/types/league-client/coach-api";
+import type { AttachmentUpload } from "../coach-types";
 
 export function isAttachmentUpload(o: any): o is AttachmentUpload {
   return typeof o === "object"

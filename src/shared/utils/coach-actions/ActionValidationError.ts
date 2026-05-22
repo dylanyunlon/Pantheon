@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ValidateActionResponseV2 as ActionValidationResponse } from "@coach/pantheon.ontologies";
+import type { ValidateActionResponseV2 as ActionValidationResponse } from "../coach-types";
 
 export class ActionValidationError extends Error {
   constructor(public validation: ActionValidationResponse) {

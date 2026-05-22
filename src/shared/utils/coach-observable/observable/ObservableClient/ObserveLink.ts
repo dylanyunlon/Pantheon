@@ -21,7 +21,7 @@ import type {
   Coach,
   PrimaryKeyType,
   WhereClause,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../coach-types";
 import type { Unsubscribable } from "../Unsubscribable.js";
 import type {
   CommonObserveOptions,

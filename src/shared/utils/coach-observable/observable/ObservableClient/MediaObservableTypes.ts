@@ -14,7 +14,7 @@
  * 
  */
 
-import type { MediaMetadata } from "@shared/types/league-client/coach-api";
+import type { MediaMetadata } from "../../../../coach-types";
 import type { Status } from "./common.js";
 
 export interface MediaMetadataPayload {

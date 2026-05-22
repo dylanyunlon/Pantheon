@@ -18,8 +18,8 @@ import type {
   CompileTimeMetadata,
   QueryDefinition,
   QueryMetadata,
-} from "@shared/types/league-client/coach-api";
-import * as Functions from "@coach/pantheon.functions/Query";
+} from "../coach-types";
+import * as Functions from "../coach-types";
 import type { MinimalClient } from "../MinimalClientContext.js";
 import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
 import { augmentRequestContext } from "../util/augmentRequestContext.js";

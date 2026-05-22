@@ -17,7 +17,7 @@
 import type {
   CompileTimeMetadata,
   ObjectOrInterfaceDefinition,
-} from "@shared/types/league-client/coach-api";
+} from "../../../../../coach-types";
 import type { SpecificLinkPayload } from "../../LinkPayload.js";
 
 import type { Observer } from "../../ObservableClient/common.js";
