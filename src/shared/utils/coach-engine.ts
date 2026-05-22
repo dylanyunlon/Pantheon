@@ -52,6 +52,11 @@ import {
   createReplayAnalysisPipeline
 } from './coach-replay'
 import type { ReplayAnalysisReport } from './coach-replay'
+import {
+  CoachStreamServer,
+  createStreamServer
+} from './coach-streaming'
+import type { StreamServerConfig } from './coach-streaming'
 
 export const enum CoachAdvicePriority {
   CRITICAL = 0,
@@ -920,8 +925,6 @@ function stagePlaystyleAdaptation(ctx: PipelineStageContext): PipelineStageConte
 
   return finalizeStage(ctx, advices, { playstyleAdaptationCompleted: true })
 }
-
-
 function stageGoldEfficiency(ctx: PipelineStageContext): PipelineStageContext {
   if (ctx.gameMode === 'ARAM') return ctx
   const advices: CoachAdvice[] = []
@@ -1159,8 +1162,6 @@ function stageKdaTrend(ctx: PipelineStageContext): PipelineStageContext {
 
   return finalizeStage(ctx, advices, { kdaTrendCompleted: true })
 }
-
-
 export class CoachPipeline {
   private _stages: { name: string; handler: PipelineStageHandler }[] = []
 
@@ -1196,6 +1197,8 @@ export class CoachEngine {
   private _experimentManager: CoachExperimentManager
   private _observableStore: CoachObservableStore
   private _replayAnalysis: ReplayAnalysisPipeline
+  private _streamServer: CoachStreamServer
+  
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new CoachPipeline()
@@ -1236,6 +1239,8 @@ export class CoachEngine {
     this._observableStore = createObservableStore({ staleAfterMs: 30000 })
     this._observableStore.startStaleCheck(15000)
     this._replayAnalysis = createReplayAnalysisPipeline()
+    this._streamServer = createStreamServer()
+    
   }
 
   get scheduler(): CoachScheduler {
@@ -1327,6 +1332,7 @@ export class CoachEngine {
     }
 
     this._observableStore.write(`replay:${params.eogStats.gameId}`, report, 'loaded')
+    if (this._streamServer.isRunning) this._streamServer.broadcastReplayAnalysis(report)
     return report
   }
 
@@ -1341,6 +1347,28 @@ export class CoachEngine {
   getPredictionErrors(): ReturnType<ReplayAnalysisPipeline['getPredictionErrorHistory']> {
     return this._replayAnalysis.getPredictionErrorHistory()
   }
+
+  get streamServer(): CoachStreamServer {
+    return this._streamServer
+  }
+
+  async startStreaming(port?: number): Promise<boolean> {
+    if (port) {
+      this._streamServer.dispose()
+      this._streamServer = createStreamServer({ port })
+    }
+    return this._streamServer.start(this._capture.sessionId)
+  }
+
+  stopStreaming(): void {
+    this._streamServer.stop()
+  }
+
+  getStreamStats(): ReturnType<CoachStreamServer['stats']> {
+    return this._streamServer.stats
+  }
+
+  
 
   generateAdvices(params: {
     playerStats: {
@@ -1457,6 +1485,11 @@ export class CoachEngine {
 
     this._observableStore.write(`advices:${cacheKey}`, deduped, 'loaded')
     this._observableStore.write(`phase:${params.selfPuuid}`, gamePhase, 'loaded')
+
+    if (this._streamServer.isRunning) {
+      this._streamServer.broadcastAdvices(deduped, gamePhase)
+      this._streamServer.broadcastFeatureSnapshot(featureVector, gamePhase)
+    }
 
     if (teamComparison) {
       this._capture.captureTeamComparison(teamComparison, gamePhase)
@@ -1603,6 +1636,7 @@ export class CoachEngine {
     this._experimentManager.dispose()
     this._observableStore.dispose()
     this._replayAnalysis.dispose()
+    this._streamServer.dispose()
     this.clearCache()
   }
 

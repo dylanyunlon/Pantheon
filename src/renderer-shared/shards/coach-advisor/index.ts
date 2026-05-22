@@ -375,9 +375,29 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
 
   getPredictionErrors() {
     return this._ipc.call(COACH_SHARD_NAMESPACE, 'getPredictionErrors') as Promise<{
-      avgPredictionError: number
-      errors: Array<{ gameId: number; predicted: number; actual: number; error: number }>
+      avgPredictionError: number; errors: Array<{ gameId: number; predicted: number; actual: number; error: number }>
     }>
+  }
+
+  startStreaming(port?: number) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'startStreaming', port) as Promise<boolean>
+  }
+
+  stopStreaming() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'stopStreaming')
+  }
+
+  getStreamStats() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getStreamStats') as Promise<{
+      isRunning: boolean; port: number; clientCount: number
+      totalMessages: number; totalBytes: number; queueSize: number; sessionId: string
+    }>
+  }
+
+  getStreamClients() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getStreamClients') as Promise<
+      Array<{ id: string; connectedAt: number; lastPingAt: number; messagesSent: number; bytesTransferred: number }>
+    >
   }
 
   async onInit() {

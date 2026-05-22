@@ -253,6 +253,8 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
               )
             }
             this._log.info(`Experiment session started for phase: ${phase}`)
+            this._engine.streaming.setSessionId(`${selfPuuid}:${gameInfo?.gameMode || ''}:${Date.now()}`)
+            if (this._engine.streaming.isRunning) this._engine.streaming.broadcastPhaseTransition('unknown', phase as any)
           }
         }
       }
@@ -607,10 +609,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       CoachAdvisorMain.id,
       'recordFeedback',
       (_, adviceType: string, feedback: string) => {
-        this._engine.recordUserFeedback(
-          adviceType,
-          feedback as 'helpful' | 'not-helpful' | 'dismiss'
-        )
+        this._engine.recordUserFeedback(adviceType, feedback as 'helpful' | 'not-helpful' | 'dismiss')
+        if (this._engine.streaming.isRunning) this._engine.streaming.broadcastFeedback(adviceType, feedback)
+        const selfPuuid = this._lc.data.summoner.me?.puuid
+        if (selfPuuid) {
+          const gameInfo = this._og.state.queryStage.gameInfo
+          this._engine.experimentManager.recordFeedback(`${selfPuuid}:${gameInfo?.gameMode || ''}`, feedback as any)
+        }
       }
     )
 
@@ -683,6 +688,25 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
 
     this._ipc.onCall(CoachAdvisorMain.id, 'getPredictionErrors', () => {
       return this._engine.getPredictionErrors()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'startStreaming', async (_, port?: number) => {
+      const ok = await this._engine.startStreaming(port)
+      if (ok) this._log.info(`Streaming started on port ${this._engine.getStreamStats().port}`)
+      return ok
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'stopStreaming', () => {
+      this._engine.stopStreaming()
+      this._log.info('Streaming stopped')
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getStreamStats', () => {
+      return this._engine.getStreamStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getStreamClients', () => {
+      return this._engine.streamServer.getClients()
     })
   }
 }
