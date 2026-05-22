@@ -20,3 +20,15 @@ export type {
   CoachBatchContext,
   DataAvailability
 } from './query'
+export {
+  aggregateTeamProfile,
+  compareTeams,
+  RingReducer,
+  BatchAggregationContext
+} from './aggregator'
+export type {
+  AggregationDimension,
+  DimensionWeight,
+  AggregatedTeamProfile,
+  TeamComparisonResult
+} from './aggregator'

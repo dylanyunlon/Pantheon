@@ -14,6 +14,19 @@ import {
   shouldReplace
 } from './coach-cache'
 import type { CoachCacheKeyParams } from './coach-cache'
+import {
+  aggregateTeamProfile,
+  compareTeams,
+  RingReducer,
+  BatchAggregationContext
+} from './coach-cache/aggregator'
+import type { TeamComparisonResult, AggregatedTeamProfile } from './coach-cache/aggregator'
+import {
+  CoachScheduler,
+  createCoachScheduler,
+  mapQueryPhaseToGamePhase
+} from './coach-scheduler'
+import type { GamePhase, ScheduledAdvice, SchedulerConfig } from './coach-scheduler'
 
 export const enum CoachAdvicePriority {
   CRITICAL = 0,
@@ -36,7 +49,10 @@ export const enum CoachAdviceType {
   MENTAL = 'mental',
   LANE_MATCHUP = 'lane_matchup',
   RANK_DISPARITY = 'rank_disparity',
-  COMPOSITION = 'composition'
+  COMPOSITION = 'composition',
+  ITEMIZATION_HINT = 'itemization_hint',
+  OBJECTIVE_TIMING = 'objective_timing',
+  PLAYSTYLE_ADAPTATION = 'playstyle_adaptation'
 }
 
 export interface CoachAdvice {
@@ -63,6 +79,10 @@ export interface PipelineStageContext {
   enemyPuuids: string[]
   gameMode: string
   queueType: string
+  teamComparison: TeamComparisonResult | null
+  allyProfile: AggregatedTeamProfile | null
+  enemyProfile: AggregatedTeamProfile | null
+  currentGamePhase: GamePhase
 }
 
 type PipelineStageHandler = (ctx: PipelineStageContext) => PipelineStageContext
@@ -695,6 +715,169 @@ function stageComposition(ctx: PipelineStageContext): PipelineStageContext {
   return finalizeStage(ctx, advices, { compositionCompleted: true })
 }
 
+function stageItemization(ctx: PipelineStageContext): PipelineStageContext {
+  if (ctx.gameMode === 'ARAM') return ctx
+  const advices: CoachAdvice[] = []
+  const comparison = ctx.teamComparison
+
+  if (comparison && comparison.confidence > 0.3) {
+    const physDelta = comparison.dimensionDeltas.damage
+    const tankDelta = comparison.dimensionDeltas.tankiness
+
+    if (comparison.enemyProfile && comparison.enemyProfile.avgDamageShare > 0.75) {
+      advices.push({
+        type: CoachAdviceType.ITEMIZATION_HINT,
+        priority: CoachAdvicePriority.MEDIUM,
+        title: '对方输出集中',
+        message: '对方队伍输出集中度高，可考虑出针对性防御装备降低其团战影响',
+        evidence: ['enemyDamageConcentration', 'teamComparison'],
+        confidence: comparison.confidence * 0.7,
+        audience: 'team'
+      })
+    }
+
+    if (comparison.allyProfile && comparison.allyProfile.avgTankinessShare < 0.2) {
+      advices.push({
+        type: CoachAdviceType.ITEMIZATION_HINT,
+        priority: CoachAdvicePriority.MEDIUM,
+        title: '防御装备不足',
+        message: '我方整体坦度偏低，输出位可考虑出一件防御装保证团战生存能力',
+        evidence: ['allyTankinessDeficit'],
+        confidence: comparison.confidence * 0.65,
+        audience: 'team'
+      })
+    }
+
+    if (comparison.allyProfile && comparison.enemyProfile) {
+      const allyVision = comparison.allyProfile.avgVisionScore
+      const enemyVision = comparison.enemyProfile.avgVisionScore
+      if (enemyVision > 0 && allyVision / enemyVision < 0.6) {
+        advices.push({
+          type: CoachAdviceType.ITEMIZATION_HINT,
+          priority: CoachAdvicePriority.LOW,
+          title: '视野投入不足',
+          message: '对方视野投入明显高于我方，增加控制守卫购买量可有效减少被抓风险',
+          evidence: ['visionDeficit', 'teamComparison'],
+          confidence: comparison.confidence * 0.6,
+          audience: 'team'
+        })
+      }
+    }
+  }
+
+  return finalizeStage(ctx, advices, { itemizationCompleted: true })
+}
+
+function stageObjectiveTiming(ctx: PipelineStageContext): PipelineStageContext {
+  if (ctx.gameMode === 'ARAM') return ctx
+  const advices: CoachAdvice[] = []
+  const comparison = ctx.teamComparison
+
+  if (comparison && comparison.confidence > 0.3) {
+    if (comparison.overallDelta > 0.05) {
+      advices.push({
+        type: CoachAdviceType.OBJECTIVE_TIMING,
+        priority: CoachAdvicePriority.MEDIUM,
+        title: '主动争夺目标',
+        message: '我方整体数据占优，建议主动控制龙坑和峡谷先锋资源，扩大视野后开团',
+        evidence: ['teamAdvantage', 'overallDelta'],
+        confidence: comparison.confidence * 0.75,
+        audience: 'team'
+      })
+    } else if (comparison.overallDelta < -0.05) {
+      advices.push({
+        type: CoachAdviceType.OBJECTIVE_TIMING,
+        priority: CoachAdvicePriority.MEDIUM,
+        title: '谨慎争夺目标',
+        message: '对方整体数据略优，争夺大龙小龙时注意先确保人数和视野优势再开',
+        evidence: ['teamDisadvantage', 'overallDelta'],
+        confidence: comparison.confidence * 0.7,
+        audience: 'team'
+      })
+    }
+  }
+
+  const selfAnalysis = ctx.playerAnalyses[ctx.selfPuuid]
+  if (selfAnalysis) {
+    const selfPos = ctx.positionAssignments[ctx.selfPuuid]?.position
+    if (selfPos === 'JUNGLE') {
+      if (selfAnalysis.summary.averageKillParticipationRate < 0.5 && selfAnalysis.summary.count >= 5) {
+        advices.push({
+          type: CoachAdviceType.OBJECTIVE_TIMING,
+          priority: CoachAdvicePriority.MEDIUM,
+          title: '增加参团频率',
+          message: `近期参团率${(selfAnalysis.summary.averageKillParticipationRate * 100).toFixed(0)}%偏低，作为打野需更多参与关键团战和目标争夺`,
+          evidence: ['junglerParticipation'],
+          confidence: Math.min(selfAnalysis.summary.count / 10, 1.0) * 0.7,
+          audience: 'self'
+        })
+      }
+    }
+  }
+
+  return finalizeStage(ctx, advices, { objectiveTimingCompleted: true })
+}
+
+function stagePlaystyleAdaptation(ctx: PipelineStageContext): PipelineStageContext {
+  const advices: CoachAdvice[] = []
+  const selfAnalysis = ctx.playerAnalyses[ctx.selfPuuid]
+  if (!selfAnalysis) return ctx
+
+  const { summary } = selfAnalysis
+  const comparison = ctx.teamComparison
+
+  if (summary.count >= 5) {
+    const avgKda = summary.averageKda
+    const avgDamageShare = summary.averageDamageDealtToChampionShareToTop
+    const avgCsPM = summary.averageCsPerMinute
+    const isHighDamage = avgDamageShare > 0.8
+    const isLowDeath = avgKda > 4.0
+    const isHighCs = avgCsPM > 7.5
+
+    if (isHighDamage && !isLowDeath) {
+      advices.push({
+        type: CoachAdviceType.PLAYSTYLE_ADAPTATION,
+        priority: CoachAdvicePriority.LOW,
+        title: '高输出但风险偏高',
+        message: '你的伤害占比高但KDA偏低，可适当减少冒险换血，在确保生存的前提下输出',
+        evidence: ['highDamage', 'lowSurvival'],
+        confidence: 0.65,
+        audience: 'self'
+      })
+    }
+
+    if (isHighCs && avgDamageShare < 0.5 && ctx.gameMode !== 'ARAM') {
+      advices.push({
+        type: CoachAdviceType.PLAYSTYLE_ADAPTATION,
+        priority: CoachAdvicePriority.LOW,
+        title: '经济转化率可提升',
+        message: '你的补刀不错但伤害占比偏低，可以在团战中更积极地输出来转化经济优势',
+        evidence: ['highCs', 'lowDamageConversion'],
+        confidence: 0.6,
+        audience: 'self'
+      })
+    }
+
+    if (comparison && comparison.confidence > 0.3) {
+      const goldDelta = comparison.dimensionDeltas.gold
+      const damageDelta = comparison.dimensionDeltas.damage
+      if (goldDelta > 0.05 && damageDelta < -0.03) {
+        advices.push({
+          type: CoachAdviceType.PLAYSTYLE_ADAPTATION,
+          priority: CoachAdvicePriority.MEDIUM,
+          title: '经济领先需转化优势',
+          message: '我方经济水平高于对面但伤害转化不足，装备领先时更果断地发起进攻',
+          evidence: ['goldAdvantage', 'damageDeficit', 'teamComparison'],
+          confidence: comparison.confidence * 0.7,
+          audience: 'team'
+        })
+      }
+    }
+  }
+
+  return finalizeStage(ctx, advices, { playstyleAdaptationCompleted: true })
+}
+
 export class CoachPipeline {
   private _stages: { name: string; handler: PipelineStageHandler }[] = []
 
@@ -722,8 +905,11 @@ export class CoachEngine {
   private _refCounts: CoachRefCounts<string>
   private _completeness: Map<string, number> = new Map()
   private _cacheMaxAge = 60_000
+  private _scheduler: CoachScheduler
+  private _aggregationReducer: RingReducer<number>
+  private _lastComparison: TeamComparisonResult | null = null
 
-  constructor() {
+  constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new CoachPipeline()
     this._pipeline.addStage('enemy_weakness', stageEnemyWeakness)
     this._pipeline.addStage('team_synergy', stageTeamSynergy)
@@ -733,15 +919,31 @@ export class CoachEngine {
     this._pipeline.addStage('rank_disparity', stageRankDisparity)
     this._pipeline.addStage('lane_matchup', stageLaneMatchup)
     this._pipeline.addStage('composition', stageComposition)
+    this._pipeline.addStage('itemization', stageItemization)
+    this._pipeline.addStage('objective_timing', stageObjectiveTiming)
+    this._pipeline.addStage('playstyle_adaptation', stagePlaystyleAdaptation)
 
     this._layers = new CoachCacheLayers<CoachAdvice[]>()
     this._refCounts = new CoachRefCounts<string>(
-      30_000, // 30s keepAlive (OSDK uses 60s; ours shorter for game phases)
+      30_000,
       (key) => {
         this._completeness.delete(key)
       }
     )
     this._refCounts.startAutoGc(5000)
+    this._scheduler = createCoachScheduler(schedulerConfig)
+    this._aggregationReducer = new RingReducer<number>(
+      (acc, cur) => acc + cur,
+      0
+    )
+  }
+
+  get scheduler(): CoachScheduler {
+    return this._scheduler
+  }
+
+  get lastComparison(): TeamComparisonResult | null {
+    return this._lastComparison
   }
 
   generateAdvices(params: {
@@ -758,6 +960,8 @@ export class CoachEngine {
     gameMode: string
     queueType: string
     inferredPremadeTeams?: Record<string, string[][]>
+    queryPhase?: string
+    gameTimeSeconds?: number
   }): CoachAdvice[] {
     if (!params.playerStats) return []
 
@@ -780,6 +984,38 @@ export class CoachEngine {
       }
     }
 
+    const gamePhase = mapQueryPhaseToGamePhase(
+      params.queryPhase || 'champ-select',
+      params.gameTimeSeconds
+    )
+    this._scheduler.transitionPhase(gamePhase)
+
+    const batchCtx = new BatchAggregationContext()
+    const allyPuuids = params.allyMembers.filter((p) => p !== params.selfPuuid)
+    const allAllyPuuids = [params.selfPuuid, ...allyPuuids]
+
+    const teamComparison = compareTeams(
+      allAllyPuuids,
+      params.enemyMembers,
+      params.playerStats.players
+    )
+    this._lastComparison = teamComparison
+
+    const allyProfile = aggregateTeamProfile(allAllyPuuids, params.playerStats.players)
+    const enemyProfile = aggregateTeamProfile(params.enemyMembers, params.playerStats.players)
+
+    batchCtx.stage('teamComparison', teamComparison)
+    batchCtx.stage('allyProfile', allyProfile)
+    batchCtx.stage('enemyProfile', enemyProfile)
+    batchCtx.commit()
+
+    for (const puuid of allAllyPuuids) {
+      const analysis = params.playerStats.players[puuid]
+      if (analysis) {
+        this._aggregationReducer.push(puuid, analysis.akariScore.total)
+      }
+    }
+
     const ctx: PipelineStageContext = {
       stage: 'init',
       advices: [],
@@ -790,15 +1026,21 @@ export class CoachEngine {
       positionAssignments: params.positionAssignments,
       rankedStats: params.rankedStats,
       selfPuuid: params.selfPuuid,
-      allyPuuids: params.allyMembers.filter((p) => p !== params.selfPuuid),
+      allyPuuids,
       enemyPuuids: params.enemyMembers,
       gameMode: params.gameMode,
-      queueType: params.queueType
+      queueType: params.queueType,
+      teamComparison,
+      allyProfile,
+      enemyProfile,
+      currentGamePhase: gamePhase
     }
 
     const result = this._pipeline.execute(ctx)
     const sorted = result.advices.sort((a, b) => a.priority - b.priority)
     const deduped = this._deduplicateAdvices(sorted)
+
+    this._scheduler.enqueue(deduped)
 
     this._layers.writeTruth(cacheKey, deduped)
     this._completeness.set(cacheKey, newCompleteness)
@@ -870,11 +1112,66 @@ export class CoachEngine {
     this._layers.clearAll()
     this._refCounts.clear()
     this._completeness.clear()
+    this._scheduler.clear()
+    this._aggregationReducer.clear()
+    this._lastComparison = null
   }
 
     dispose() {
     this._refCounts.stopAutoGc()
     this.clearCache()
+  }
+
+  getScheduledAdvices(count: number): CoachAdvice[] {
+    const scheduled = this._scheduler.dequeue(count)
+    return scheduled.map((s) => s.advice)
+  }
+
+  peekScheduledAdvices(count: number): CoachAdvice[] {
+    const peeked = this._scheduler.peek(count)
+    return peeked.map((s) => s.advice)
+  }
+
+  getSchedulerStats(): {
+    totalQueued: number
+    delivered: number
+    expired: number
+    suppressed: number
+    avgRelevance: number
+    currentPhase: GamePhase
+    phaseTransitions: number
+  } {
+    const stats = this._scheduler.getStats()
+    return {
+      ...stats,
+      currentPhase: this._scheduler.currentPhase,
+      phaseTransitions: this._scheduler.phaseHistory.length
+    }
+  }
+
+  suppressAdviceType(type: string): void {
+    this._scheduler.suppressType(type)
+  }
+
+  unsuppressAdviceType(type: string): void {
+    this._scheduler.unsuppressType(type)
+  }
+
+  getTeamComparisonSummary(): {
+    allyProfile: AggregatedTeamProfile
+    enemyProfile: AggregatedTeamProfile
+    overallDelta: number
+    confidence: number
+    aggregatedTeamScore: number
+  } | null {
+    if (!this._lastComparison) return null
+    return {
+      allyProfile: this._lastComparison.allyProfile,
+      enemyProfile: this._lastComparison.enemyProfile,
+      overallDelta: this._lastComparison.overallDelta,
+      confidence: this._lastComparison.confidence,
+      aggregatedTeamScore: this._aggregationReducer.reduce()
+    }
   }
 
     private _deduplicateAdvices(advices: CoachAdvice[]): CoachAdvice[] {
@@ -890,6 +1187,6 @@ export class CoachEngine {
   }
 }
 
-export function createCoachEngine(): CoachEngine {
-  return new CoachEngine()
+export function createCoachEngine(schedulerConfig?: Partial<SchedulerConfig>): CoachEngine {
+  return new CoachEngine(schedulerConfig)
 }

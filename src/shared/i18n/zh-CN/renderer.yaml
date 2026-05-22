@@ -2322,3 +2322,12 @@ CoachAdvisorSettings:
 
   showComposition:
     label: 阵容分析
+
+  showItemization:
+    label: 出装提示
+
+  showObjectiveTiming:
+    label: 目标争夺建议
+
+  showPlaystyleAdaptation:
+    label: 风格适配建议

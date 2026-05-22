@@ -2318,3 +2318,12 @@ CoachAdvisorSettings:
 
   showComposition:
     label: Composition Analysis
+
+  showItemization:
+    label: Itemization Hints
+
+  showObjectiveTiming:
+    label: Objective Timing
+
+  showPlaystyleAdaptation:
+    label: Playstyle Adaptation

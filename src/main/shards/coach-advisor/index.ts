@@ -8,6 +8,8 @@ import {
 } from '@shared/utils/coach-engine'
 import { CoachDataTracker } from '@shared/utils/coach-cache'
 import type { CoachDataType, CoachQueryStatus } from '@shared/utils/coach-cache'
+import type { GamePhase } from '@shared/utils/coach-scheduler'
+import { mapQueryPhaseToGamePhase } from '@shared/utils/coach-scheduler'
 import { comparer } from 'mobx'
 import { makeAutoObservable, observable, runInAction } from 'mobx'
 
@@ -32,6 +34,9 @@ export class CoachAdvisorSettings {
   showLaneMatchup: boolean = true
   showRankDisparity: boolean = true
   showComposition: boolean = true
+  showItemization: boolean = true
+  showObjectiveTiming: boolean = true
+  showPlaystyleAdaptation: boolean = true
 
   setEnabled(v: boolean) {
     this.enabled = v
@@ -52,6 +57,16 @@ export class CoachAdvisorState {
     enemyAvgScore: number
     scoreDiff: number
   } | null = null
+  currentGamePhase: GamePhase = 'unknown'
+  schedulerStats: {
+    totalQueued: number
+    delivered: number
+    avgRelevance: number
+  } | null = null
+  teamComparisonSummary: {
+    overallDelta: number
+    confidence: number
+  } | null = null
 
   setAdvices(advices: CoachAdvice[]) {
     this.advices = advices
@@ -71,6 +86,9 @@ export class CoachAdvisorState {
     this.isGenerating = false
     this.lastGeneratedAt = 0
     this.pipelineInfo = null
+    this.currentGamePhase = 'unknown'
+    this.schedulerStats = null
+    this.teamComparisonSummary = null
   }
 
   constructor() {
@@ -118,7 +136,10 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         showMentalAdvice: { default: this.settings.showMentalAdvice },
         showLaneMatchup: { default: this.settings.showLaneMatchup },
         showRankDisparity: { default: this.settings.showRankDisparity },
-        showComposition: { default: this.settings.showComposition }
+        showComposition: { default: this.settings.showComposition },
+        showItemization: { default: this.settings.showItemization },
+        showObjectiveTiming: { default: this.settings.showObjectiveTiming },
+        showPlaystyleAdaptation: { default: this.settings.showPlaystyleAdaptation }
       },
       this.settings
     )
@@ -151,14 +172,20 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       'showMentalAdvice',
       'showLaneMatchup',
       'showRankDisparity',
-      'showComposition'
+      'showComposition',
+      'showItemization',
+      'showObjectiveTiming',
+      'showPlaystyleAdaptation'
     ])
     this._mobx.propSync(CoachAdvisorMain.id, 'state', this.state, [
       'advices',
       'formattedMessages',
       'isGenerating',
       'lastGeneratedAt',
-      'pipelineInfo'
+      'pipelineInfo',
+      'currentGamePhase',
+      'schedulerStats',
+      'teamComparisonSummary'
     ])
   }
 
@@ -282,7 +309,8 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         enemyMembers,
         gameMode: gameInfo?.gameMode || '',
         queueType: gameInfo?.queueType || '',
-        inferredPremadeTeams: this._og.state.inferredPremadeTeams
+        inferredPremadeTeams: this._og.state.inferredPremadeTeams,
+        queryPhase: this._og.state.queryStage.phase
       }
 
       const advices = this._engine.generateAdvices(generateParams)
@@ -302,6 +330,12 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         filtered = filtered.filter((a) => a.type !== CoachAdviceType.RANK_DISPARITY)
       if (!this.settings.showComposition)
         filtered = filtered.filter((a) => a.type !== CoachAdviceType.COMPOSITION)
+      if (!this.settings.showItemization)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.ITEMIZATION_HINT)
+      if (!this.settings.showObjectiveTiming)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.OBJECTIVE_TIMING)
+      if (!this.settings.showPlaystyleAdaptation)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.PLAYSTYLE_ADAPTATION)
 
       const truncated = filtered.slice(0, this.settings.maxAdviceCount)
       const messages = this._engine.formatAsMessages(truncated, {
@@ -316,12 +350,24 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         selfPuuid
       })
 
+      const schedulerStats = this._engine.getSchedulerStats()
+      const teamComparisonSummary = this._engine.getTeamComparisonSummary()
+
       runInAction(() => {
         this.state.advices = truncated
         this.state.formattedMessages = messages
         this.state.lastGeneratedAt = Date.now()
         this.state.isGenerating = false
         this.state.pipelineInfo = pipelineInfo
+        this.state.currentGamePhase = schedulerStats.currentPhase as any
+        this.state.schedulerStats = {
+          totalQueued: schedulerStats.totalQueued,
+          delivered: schedulerStats.delivered,
+          avgRelevance: schedulerStats.avgRelevance
+        }
+        this.state.teamComparisonSummary = teamComparisonSummary
+          ? { overallDelta: teamComparisonSummary.overallDelta, confidence: teamComparisonSummary.confidence }
+          : null
       })
 
       this._ipc.sendEvent(CoachAdvisorMain.id, 'advices-generated', truncated, messages)
@@ -377,5 +423,37 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         isFullyLoaded: this._dataTracker.isFullyLoaded(puuid)
       }
     })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getSchedulerStats', () => {
+      return this._engine.getSchedulerStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getTeamComparison', () => {
+      return this._engine.getTeamComparisonSummary()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getScheduledAdvices', (_, count?: number) => {
+      const scheduled = this._engine.peekScheduledAdvices(count || 6)
+      return this._engine.formatAsMessages(scheduled, {
+        maxLines: count || 6,
+        minPriority: this.settings.minPriority
+      })
+    })
+
+    this._ipc.onCall(
+      CoachAdvisorMain.id,
+      'suppressAdviceType',
+      (_, type: string) => {
+        this._engine.suppressAdviceType(type)
+      }
+    )
+
+    this._ipc.onCall(
+      CoachAdvisorMain.id,
+      'unsuppressAdviceType',
+      (_, type: string) => {
+        this._engine.unsuppressAdviceType(type)
+      }
+    )
   }
 }

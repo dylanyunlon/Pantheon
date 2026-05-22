@@ -138,6 +138,39 @@
           @update:value="(val) => ca.setShowComposition(val)"
         />
       </ControlItem>
+      <ControlItem
+        class="control-item-margin"
+        :label="t('CoachAdvisorSettings.showItemization.label')"
+        :label-width="400"
+      >
+        <NSwitch
+          size="small"
+          :value="cas.settings.showItemization"
+          @update:value="(val) => ca.setShowItemization(val)"
+        />
+      </ControlItem>
+      <ControlItem
+        class="control-item-margin"
+        :label="t('CoachAdvisorSettings.showObjectiveTiming.label')"
+        :label-width="400"
+      >
+        <NSwitch
+          size="small"
+          :value="cas.settings.showObjectiveTiming"
+          @update:value="(val) => ca.setShowObjectiveTiming(val)"
+        />
+      </ControlItem>
+      <ControlItem
+        class="control-item-margin"
+        :label="t('CoachAdvisorSettings.showPlaystyleAdaptation.label')"
+        :label-width="400"
+      >
+        <NSwitch
+          size="small"
+          :value="cas.settings.showPlaystyleAdaptation"
+          @update:value="(val) => ca.setShowPlaystyleAdaptation(val)"
+        />
+      </ControlItem>
     </NCard>
   </NScrollbar>
 </template>

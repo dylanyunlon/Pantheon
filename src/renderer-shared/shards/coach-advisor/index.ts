@@ -1,5 +1,6 @@
 import { Dep, IAkariShardInitDispose, Shard } from '@shared/akari-shard'
 import { CoachAdvice, CoachAdvicePriority } from '@shared/utils/coach-engine'
+import type { GamePhase } from '@shared/utils/coach-scheduler'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -22,7 +23,10 @@ export const useCoachAdvisorStore = defineStore('coach-advisor', () => {
     showMentalAdvice: true,
     showLaneMatchup: true,
     showRankDisparity: true,
-    showComposition: true
+    showComposition: true,
+    showItemization: true,
+    showObjectiveTiming: true,
+    showPlaystyleAdaptation: true
   })
 
   const state = ref({
@@ -34,6 +38,16 @@ export const useCoachAdvisorStore = defineStore('coach-advisor', () => {
       allyAvgScore: number
       enemyAvgScore: number
       scoreDiff: number
+    } | null,
+    currentGamePhase: 'unknown' as GamePhase,
+    schedulerStats: null as {
+      totalQueued: number
+      delivered: number
+      avgRelevance: number
+    } | null,
+    teamComparisonSummary: null as {
+      overallDelta: number
+      confidence: number
     } | null
   })
 
@@ -98,6 +112,18 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
     return this._setting.set(COACH_SHARD_NAMESPACE, 'showComposition', value)
   }
 
+  setShowItemization(value: boolean) {
+    return this._setting.set(COACH_SHARD_NAMESPACE, 'showItemization', value)
+  }
+
+  setShowObjectiveTiming(value: boolean) {
+    return this._setting.set(COACH_SHARD_NAMESPACE, 'showObjectiveTiming', value)
+  }
+
+  setShowPlaystyleAdaptation(value: boolean) {
+    return this._setting.set(COACH_SHARD_NAMESPACE, 'showPlaystyleAdaptation', value)
+  }
+
   generateAdvices() {
     return this._ipc.call(COACH_SHARD_NAMESPACE, 'generate') as Promise<{
       advices: CoachAdvice[]
@@ -141,6 +167,38 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
     }>
   }
 
+  getSchedulerStats() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getSchedulerStats') as Promise<{
+      totalQueued: number
+      delivered: number
+      expired: number
+      suppressed: number
+      avgRelevance: number
+      currentPhase: string
+      phaseTransitions: number
+    }>
+  }
+
+  getTeamComparison() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getTeamComparison') as Promise<{
+      overallDelta: number
+      confidence: number
+      aggregatedTeamScore: number
+    } | null>
+  }
+
+  getScheduledAdvices(count?: number) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getScheduledAdvices', count) as Promise<string[]>
+  }
+
+  suppressAdviceType(type: string) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'suppressAdviceType', type)
+  }
+
+  unsuppressAdviceType(type: string) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'unsuppressAdviceType', type)
+  }
+
   async onInit() {
     const store = useCoachAdvisorStore()
     this._pm.sync(COACH_SHARD_NAMESPACE, 'settings', store.settings, [
@@ -155,14 +213,20 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
       'showMentalAdvice',
       'showLaneMatchup',
       'showRankDisparity',
-      'showComposition'
+      'showComposition',
+      'showItemization',
+      'showObjectiveTiming',
+      'showPlaystyleAdaptation'
     ])
     this._pm.sync(COACH_SHARD_NAMESPACE, 'state', store.state, [
       'advices',
       'formattedMessages',
       'isGenerating',
       'lastGeneratedAt',
-      'pipelineInfo'
+      'pipelineInfo',
+      'currentGamePhase',
+      'schedulerStats',
+      'teamComparisonSummary'
     ])
   }
 }
