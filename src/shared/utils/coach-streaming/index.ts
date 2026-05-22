@@ -6,4 +6,4 @@ export {
   type StreamSubscription,
   type StreamClientInfo,
   type StreamServerConfig
-} from './stream-server'
+} from './streaming-server'

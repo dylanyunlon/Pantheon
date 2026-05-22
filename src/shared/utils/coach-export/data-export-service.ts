@@ -1,4 +1,4 @@
-import type { TrainingSample, FeatureVector, CaptureEvent } from './coach-capture/experiment-capture'
+import type { TrainingSample, FeatureVector, CaptureEvent } from '../coach-capture/experiment-capture'
 
 export interface ExportOptions {
   format: 'json' | 'csv'

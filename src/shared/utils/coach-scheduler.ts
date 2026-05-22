@@ -47,7 +47,7 @@ const DEFAULT_SCHEDULER_CONFIG: SchedulerConfig = {
   maxQueueSize: 20,
   deduplicationWindowMs: 30_000,
   phaseTransitionCooldownMs: 5_000,
-  minRelevanceThreshold: 0.12
+  minRelevanceThreshold: 0.12,
   maxRetries: 2,
   batchCooldownMs: 3_000,
   urgentPhaseBoost: 1.3

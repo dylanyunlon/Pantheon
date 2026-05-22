@@ -1486,11 +1486,6 @@ export class CoachEngine {
     this._observableStore.write(`advices:${cacheKey}`, deduped, 'loaded')
     this._observableStore.write(`phase:${params.selfPuuid}`, gamePhase, 'loaded')
 
-    if (this._streamServer.isRunning) {
-      this._streamServer.broadcastAdvices(deduped, gamePhase)
-      this._streamServer.broadcastFeatureSnapshot(featureVector, gamePhase)
-    }
-
     if (teamComparison) {
       this._capture.captureTeamComparison(teamComparison, gamePhase)
     }
@@ -1554,6 +1549,11 @@ export class CoachEngine {
 
     this._capture.captureFeatureSnapshot(featureVector, gamePhase)
     this._capture.buildTrainingSample(featureVector, deduped, gamePhase)
+
+    if (this._streamServer.isRunning) {
+      this._streamServer.broadcastAdvices(deduped, gamePhase)
+      this._streamServer.broadcastFeatureSnapshot(featureVector, gamePhase)
+    }
 
     return deduped
   }
