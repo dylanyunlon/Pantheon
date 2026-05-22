@@ -5,6 +5,7 @@ import { initAppLogger } from '@main/logger'
 import { AkariProtocolMain } from '@main/shards/akari-protocol'
 import { AppCommonMain } from '@main/shards/app-common'
 import { AutoChampionConfigMain } from '@main/shards/auto-champ-config'
+import { CoachAdvisorMain } from '@main/shards/coach-advisor'
 import { AutoGameflowMain } from '@main/shards/auto-gameflow'
 import { AutoReplyMain } from '@main/shards/auto-reply'
 import { AutoSelectMain } from '@main/shards/auto-select'
@@ -266,6 +267,7 @@ export function bootstrap() {
     manager.use(AutoSelectMain)
     manager.use(InGameSendMain)
     manager.use(OngoingGameMain)
+    manager.use(CoachAdvisorMain)
     manager.use(RemoteConfigMain)
     manager.use(RespawnTimerMain)
     manager.use(SavedPlayerMain)

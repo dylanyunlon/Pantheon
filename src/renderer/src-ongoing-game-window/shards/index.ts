@@ -1,5 +1,6 @@
 import { createManager } from '@renderer-shared/shards'
 import { AppCommonRenderer } from '@renderer-shared/shards/app-common'
+import { CoachAdvisorRenderer } from '@renderer-shared/shards/coach-advisor'
 import { AkariIpcRenderer } from '@renderer-shared/shards/ipc'
 import { LeagueClientRenderer } from '@renderer-shared/shards/league-client'
 import { LoggerRenderer } from '@renderer-shared/shards/logger'
@@ -14,6 +15,7 @@ const manager = createManager()
 
 manager.use(AkariIpcRenderer)
 manager.use(AppCommonRenderer)
+manager.use(CoachAdvisorRenderer)
 manager.use(LeagueClientRenderer)
 manager.use(LoggerRenderer)
 manager.use(OngoingGameRenderer)

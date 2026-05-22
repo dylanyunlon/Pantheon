@@ -44,6 +44,15 @@
         </template>
         <OngoingGameSettings />
       </NTabPane>
+      <NTabPane name="coach-advisor">
+        <template #tab>
+          <div class="tab-icon-title">
+            <NIcon class="icon"><AiStatusIcon /> </NIcon>
+            <span>{{ t('CoachAdvisorSettings.title') }}</span>
+          </div>
+        </template>
+        <CoachAdvisorSettings />
+      </NTabPane>
       <NTabPane name="multi-window">
         <template #tab>
           <div class="tab-icon-title">
@@ -95,7 +104,7 @@
 
 <script setup lang="ts">
 import { useAppCommonStore } from '@renderer-shared/shards/app-common/store'
-import { Debug as DebugIcon, Layers as LayersIcon, ToolKit as ToolkitIcon } from '@vicons/carbon'
+import { Debug as DebugIcon, Layers as LayersIcon, ToolKit as ToolkitIcon, AiStatus as AiStatusIcon } from '@vicons/carbon'
 import {
   Games24Filled as Games24FilledIcon,
   Settings16Filled as Settings16FilledIcon,
@@ -109,6 +118,7 @@ import { useCssModule, useTemplateRef, watch } from 'vue'
 
 import AboutPane from './AboutPane.vue'
 import AppSettings from './AppSettings.vue'
+import CoachAdvisorSettings from './CoachAdvisorSettings.vue'
 import DebugSettings from './DebugSettings.vue'
 import MatchHistorySettings from './MatchHistorySettings.vue'
 import MiscSettings from './MiscSettings.vue'

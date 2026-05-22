@@ -51,6 +51,7 @@
           :key="team"
           :players="players"
         />
+        <CoachPanel />
       </div>
     </NScrollbar>
     <div v-else class="no-ongoing-game">
@@ -96,6 +97,7 @@ import {
   useIdleState
 } from './ongoing-game-utils'
 import TeamTagsArea from './widgets/TeamTagsArea.vue'
+import CoachPanel from './widgets/CoachPanel.vue'
 
 const { showEasyToLaunch = true } = defineProps<{
   showEasyToLaunch?: boolean

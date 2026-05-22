@@ -2271,3 +2271,54 @@ self-update-renderer:
     unpack-failed: 解压更新包失败
     waiting-for-restart: 更新包解压完成，应用关闭后将自动应用更新流程
     cancelButton: 取消
+
+CoachPanel:
+  title: 教练建议
+  analyzing: 正在分析对局数据...
+  teamAdvantage: 己方占优
+  teamDisadvantage: 对方占优
+  teamBalanced: 实力接近
+  pipelineTooltip: 基于双方近期数据的综合评估
+  generatedAt: '生成于 {{time}}'
+
+CoachAdvisorSettings:
+  title: 教练系统
+  titleCommon: 基础设置
+  titleCategories: 建议类型
+
+  enabled:
+    label: 启用教练系统
+    description: 在对局分析中自动生成教练建议，帮助制定对局策略
+
+  maxAdviceCount:
+    label: 最大建议数量
+    description: 每次分析生成的最大建议条数
+
+  autoGenerateInChampSelect:
+    label: 英雄选择时自动生成
+    description: 在英雄选择阶段自动分析并生成建议
+
+  autoGenerateInGame:
+    label: 对局中自动生成
+    description: 在对局进行中自动分析并生成建议
+
+  showEnemyWeakness:
+    label: 对手弱点分析
+
+  showTeamSynergy:
+    label: 队友状态分析
+
+  showMacroStrategy:
+    label: 宏观策略建议
+
+  showMentalAdvice:
+    label: 心态提示
+
+  showLaneMatchup:
+    label: 对线分析
+
+  showRankDisparity:
+    label: 段位差距提示
+
+  showComposition:
+    label: 阵容分析

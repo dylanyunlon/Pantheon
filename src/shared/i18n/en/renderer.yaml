@@ -2267,3 +2267,54 @@ self-update-renderer:
     unpack-failed: Failed to unpack the archive file
     waiting-for-restart: Updated applied. Restart the application to apply the update
     cancelButton: Cancel
+
+CoachPanel:
+  title: Coach Advisor
+  analyzing: Analyzing match data...
+  teamAdvantage: Team Ahead
+  teamDisadvantage: Team Behind
+  teamBalanced: Even Match
+  pipelineTooltip: Comprehensive assessment based on recent data from both teams
+  generatedAt: 'Generated at {{time}}'
+
+CoachAdvisorSettings:
+  title: Coach Advisor
+  titleCommon: General
+  titleCategories: Advice Categories
+
+  enabled:
+    label: Enable Coach Advisor
+    description: Automatically generate coaching advice during match analysis
+
+  maxAdviceCount:
+    label: Maximum Advice Count
+    description: Maximum number of advice entries per analysis
+
+  autoGenerateInChampSelect:
+    label: Auto-generate in Champion Select
+    description: Automatically analyze and generate advice during champion select
+
+  autoGenerateInGame:
+    label: Auto-generate in Game
+    description: Automatically analyze and generate advice during the game
+
+  showEnemyWeakness:
+    label: Enemy Weakness Analysis
+
+  showTeamSynergy:
+    label: Teammate Performance Analysis
+
+  showMacroStrategy:
+    label: Macro Strategy Advice
+
+  showMentalAdvice:
+    label: Mental Reminders
+
+  showLaneMatchup:
+    label: Lane Matchup Analysis
+
+  showRankDisparity:
+    label: Rank Disparity Alerts
+
+  showComposition:
+    label: Composition Analysis
