@@ -27,6 +27,9 @@ export class CoachAdvisorSettings {
   showTeamSynergy: boolean = true
   showMacroStrategy: boolean = true
   showMentalAdvice: boolean = true
+  showLaneMatchup: boolean = true
+  showRankDisparity: boolean = true
+  showComposition: boolean = true
 
   setEnabled(v: boolean) {
     this.enabled = v
@@ -108,7 +111,10 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         showEnemyWeakness: { default: this.settings.showEnemyWeakness },
         showTeamSynergy: { default: this.settings.showTeamSynergy },
         showMacroStrategy: { default: this.settings.showMacroStrategy },
-        showMentalAdvice: { default: this.settings.showMentalAdvice }
+        showMentalAdvice: { default: this.settings.showMentalAdvice },
+        showLaneMatchup: { default: this.settings.showLaneMatchup },
+        showRankDisparity: { default: this.settings.showRankDisparity },
+        showComposition: { default: this.settings.showComposition }
       },
       this.settings
     )
@@ -121,7 +127,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
   }
 
   async onDispose() {
-    this._engine.clearCache()
+    this._engine.dispose()
     this.state.clear()
   }
 
@@ -136,7 +142,10 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       'showEnemyWeakness',
       'showTeamSynergy',
       'showMacroStrategy',
-      'showMentalAdvice'
+      'showMentalAdvice',
+      'showLaneMatchup',
+      'showRankDisparity',
+      'showComposition'
     ])
     this._mobx.propSync(CoachAdvisorMain.id, 'state', this.state, [
       'advices',
@@ -193,7 +202,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
 
       const gameInfo = this._og.state.queryStage.gameInfo
 
-      const advices = this._engine.generateAdvices({
+      const generateParams = {
         playerStats: this._og.state.playerStats,
         championSelections: this._og.state.championSelections,
         positionAssignments: this._og.state.positionAssignments,
@@ -204,7 +213,9 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         gameMode: gameInfo?.gameMode || '',
         queueType: gameInfo?.queueType || '',
         inferredPremadeTeams: this._og.state.inferredPremadeTeams
-      })
+      }
+
+      const advices = this._engine.generateAdvices(generateParams)
 
       let filtered = advices
       if (!this.settings.showEnemyWeakness)
@@ -215,6 +226,12 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         filtered = filtered.filter((a) => a.type !== CoachAdviceType.MACRO_STRATEGY)
       if (!this.settings.showMentalAdvice)
         filtered = filtered.filter((a) => a.type !== CoachAdviceType.MENTAL)
+      if (!this.settings.showLaneMatchup)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.LANE_MATCHUP)
+      if (!this.settings.showRankDisparity)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.RANK_DISPARITY)
+      if (!this.settings.showComposition)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.COMPOSITION)
 
       const truncated = filtered.slice(0, this.settings.maxAdviceCount)
       const messages = this._engine.formatAsMessages(truncated, {
@@ -222,11 +239,19 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         minPriority: this.settings.minPriority
       })
 
+      const pipelineInfo = this._engine.getLastPipelineInfo({
+        playerStats: this._og.state.playerStats,
+        allyMembers,
+        enemyMembers,
+        selfPuuid
+      })
+
       runInAction(() => {
         this.state.advices = truncated
         this.state.formattedMessages = messages
         this.state.lastGeneratedAt = Date.now()
         this.state.isGenerating = false
+        this.state.pipelineInfo = pipelineInfo
       })
 
       this._ipc.sendEvent(CoachAdvisorMain.id, 'advices-generated', truncated, messages)

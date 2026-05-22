@@ -1,3 +1,4 @@
+
 import {
   MatchHistoryGamesAnalysisAll,
   MatchHistoryChampionAnalysis,
@@ -5,6 +6,14 @@ import {
   calculateAkariScore
 } from './analysis'
 import { RankedStats } from '@shared/types/league-client/ranked'
+import {
+  CoachCacheLayers,
+  CoachRefCounts,
+  canonicalizeCacheKey,
+  computeDataCompleteness,
+  shouldReplace
+} from './coach-cache'
+import type { CoachCacheKeyParams } from './coach-cache'
 
 export const enum CoachAdvicePriority {
   CRITICAL = 0,
@@ -24,7 +33,10 @@ export const enum CoachAdviceType {
   TEAM_SYNERGY = 'team_synergy',
   RISK_WARNING = 'risk_warning',
   MACRO_STRATEGY = 'macro_strategy',
-  MENTAL = 'mental'
+  MENTAL = 'mental',
+  LANE_MATCHUP = 'lane_matchup',
+  RANK_DISPARITY = 'rank_disparity',
+  COMPOSITION = 'composition'
 }
 
 export interface CoachAdvice {
@@ -55,8 +67,6 @@ export interface PipelineStageContext {
 
 type PipelineStageHandler = (ctx: PipelineStageContext) => PipelineStageContext
 
-// Ring-reduce weighted dimensions into a scalar score.
-// Modeled after NCCL AllReduce ring topology (nccl/src/collectives.cc).
 export class RingAggregator {
   private _dims: { name: string; weight: number; value: number }[] = []
 
@@ -84,8 +94,45 @@ export class RingAggregator {
   }
 }
 
-// Extracted standalone team-score pass. Analogous to CCCL f984c90 extracting
-// DeviceTopKHistogramKernel from the fused filter_and_histogram.
+const TIER_ORDER: Record<string, number> = {
+  IRON: 0, BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4,
+  EMERALD: 5, DIAMOND: 6, MASTER: 7, GRANDMASTER: 8, CHALLENGER: 9
+}
+const DIVISION_ORDER: Record<string, number> = { IV: 0, III: 1, II: 2, I: 3 }
+
+function rankToNumeric(tier: string, division: string): number {
+  const t = TIER_ORDER[tier] ?? -1
+  if (t < 0) return -1
+  return t * 4 + (DIVISION_ORDER[division] ?? 0)
+}
+
+function getRankNumeric(
+  rankedStats: Record<string, { data: RankedStats }>,
+  puuid: string
+): number {
+  const entry = rankedStats[puuid]
+  if (!entry?.data?.queueMap?.RANKED_SOLO_5x5) return -1
+  const solo = entry.data.queueMap.RANKED_SOLO_5x5
+  if (!solo.tier || solo.tier === 'UNRANKED' || solo.tier === '') return -1
+  return rankToNumeric(solo.tier, solo.division)
+}
+
+function getRankLabel(
+  rankedStats: Record<string, { data: RankedStats }>,
+  puuid: string
+): string {
+  const entry = rankedStats[puuid]
+  if (!entry?.data?.queueMap?.RANKED_SOLO_5x5) return '未定级'
+  const solo = entry.data.queueMap.RANKED_SOLO_5x5
+  if (!solo.tier || solo.tier === 'UNRANKED' || solo.tier === '') return '未定级'
+  const tierCN: Record<string, string> = {
+    IRON: '黑铁', BRONZE: '青铜', SILVER: '白银', GOLD: '黄金',
+    PLATINUM: '铂金', EMERALD: '翡翠', DIAMOND: '钻石',
+    MASTER: '大师', GRANDMASTER: '宗师', CHALLENGER: '王者'
+  }
+  return `${tierCN[solo.tier] || solo.tier}${solo.division}`
+}
+
 function computeTeamScorePass(
   puuids: string[],
   analyses: Record<string, MatchHistoryGamesAnalysisAll>
@@ -104,8 +151,6 @@ function computeTeamScorePass(
   return { total, count, perPlayer }
 }
 
-// Common stage finalization. Mirrors CCCL's finalize_pass: shared skeleton
-// with a caller-supplied updater for stage-specific intermediate state.
 function finalizeStage(
   ctx: PipelineStageContext,
   newAdvices: CoachAdvice[],
@@ -117,7 +162,6 @@ function finalizeStage(
     intermediates: { ...ctx.intermediates, ...intermediateUpdates }
   }
 }
-
 function stageEnemyWeakness(ctx: PipelineStageContext): PipelineStageContext {
   const advices: CoachAdvice[] = []
 
@@ -273,6 +317,8 @@ function stageMacroStrategy(ctx: PipelineStageContext): PipelineStageContext {
     allyAvgScore: allyAvg,
     enemyAvgScore: enemyAvg,
     scoreDiff: diff,
+    allyPerPlayer: allyPass.perPlayer,
+    enemyPerPlayer: enemyPass.perPlayer,
     macroStrategyCompleted: true
   })
 }
@@ -413,8 +459,242 @@ function stagePremadeDetection(ctx: PipelineStageContext): PipelineStageContext 
   return finalizeStage(ctx, advices, { premadeDetectionCompleted: true })
 }
 
-// Sequential pipeline scheduler. Modeled after Megatron-LM's
-// get_forward_backward_func (pipeline_parallel/schedules.py:47).
+function stageRankDisparity(ctx: PipelineStageContext): PipelineStageContext {
+  if (ctx.gameMode === 'ARAM') return ctx
+  const advices: CoachAdvice[] = []
+
+  const selfRank = getRankNumeric(ctx.rankedStats, ctx.selfPuuid)
+
+  let highestEnemyRank = -1
+  let highestEnemyPuuid = ''
+  for (const puuid of ctx.enemyPuuids) {
+    const r = getRankNumeric(ctx.rankedStats, puuid)
+    if (r > highestEnemyRank) {
+      highestEnemyRank = r
+      highestEnemyPuuid = puuid
+    }
+  }
+
+  if (selfRank >= 0 && highestEnemyRank >= 0) {
+    const gap = highestEnemyRank - selfRank
+    if (gap >= 8) {
+      advices.push({
+        type: CoachAdviceType.RANK_DISPARITY,
+        priority: CoachAdvicePriority.HIGH,
+        title: '对方有高段位玩家',
+        message: `对方有${getRankLabel(ctx.rankedStats, highestEnemyPuuid)}段位玩家，注意避免正面硬刚，利用团队配合`,
+        evidence: ['rankNumeric_gap'],
+        confidence: 0.85,
+        audience: 'team'
+      })
+    } else if (gap <= -8) {
+      advices.push({
+        type: CoachAdviceType.RANK_DISPARITY,
+        priority: CoachAdvicePriority.LOW,
+        title: '段位优势',
+        message: '我方段位整体占优，自信发挥但不要轻敌',
+        evidence: ['rankNumeric_advantage'],
+        confidence: 0.7,
+        audience: 'self'
+      })
+    }
+  }
+
+  const selfPos = ctx.positionAssignments[ctx.selfPuuid]?.position
+  if (selfPos && selfRank >= 0) {
+    for (const puuid of ctx.enemyPuuids) {
+      const enemyPos = ctx.positionAssignments[puuid]?.position
+      if (enemyPos === selfPos) {
+        const enemyRank = getRankNumeric(ctx.rankedStats, puuid)
+        if (enemyRank >= 0) {
+          const laneGap = enemyRank - selfRank
+          if (laneGap >= 6) {
+            advices.push({
+              type: CoachAdviceType.LANE_MATCHUP,
+              priority: CoachAdvicePriority.HIGH,
+              title: '对线对手段位较高',
+              message: `你的对线是${getRankLabel(ctx.rankedStats, puuid)}，对线可以更谨慎，优先保证不亏`,
+              evidence: ['laneRankGap'],
+              confidence: 0.8,
+              audience: 'self'
+            })
+          } else if (laneGap <= -6) {
+            advices.push({
+              type: CoachAdviceType.LANE_MATCHUP,
+              priority: CoachAdvicePriority.LOW,
+              title: '对线段位优势',
+              message: `对线对手段位较低（${getRankLabel(ctx.rankedStats, puuid)}），可以积极打出优势`,
+              evidence: ['laneRankAdvantage'],
+              confidence: 0.75,
+              audience: 'self'
+            })
+          }
+        }
+        break // only one lane opponent
+      }
+    }
+  }
+
+  return finalizeStage(ctx, advices, { rankDisparityCompleted: true })
+}
+
+function stageLaneMatchup(ctx: PipelineStageContext): PipelineStageContext {
+  if (ctx.gameMode === 'ARAM') return ctx
+  const advices: CoachAdvice[] = []
+
+  const selfPos = ctx.positionAssignments[ctx.selfPuuid]?.position
+  if (!selfPos) return finalizeStage(ctx, advices, { laneMatchupCompleted: true })
+
+  let enemyLanerPuuid: string | null = null
+  for (const puuid of ctx.enemyPuuids) {
+    if (ctx.positionAssignments[puuid]?.position === selfPos) {
+      enemyLanerPuuid = puuid
+      break
+    }
+  }
+
+  if (!enemyLanerPuuid) {
+    return finalizeStage(ctx, advices, { laneMatchupCompleted: true })
+  }
+
+  const enemyAnalysis = ctx.playerAnalyses[enemyLanerPuuid]
+  const selfAnalysis = ctx.playerAnalyses[ctx.selfPuuid]
+  if (!enemyAnalysis || !selfAnalysis) {
+    return finalizeStage(ctx, advices, { laneMatchupCompleted: true })
+  }
+
+  const enemyChampId = ctx.championSelections[enemyLanerPuuid]
+  const selfChampId = ctx.championSelections[ctx.selfPuuid]
+
+  if (enemyChampId) {
+    const enemyChampData = enemyAnalysis.champions[enemyChampId]
+    if (enemyChampData && enemyChampData.count >= 5) {
+      const wr = enemyChampData.win / enemyChampData.count
+      if (wr > 0.65) {
+        advices.push({
+          type: CoachAdviceType.LANE_MATCHUP,
+          priority: CoachAdvicePriority.HIGH,
+          title: '对线对手英雄熟练度高',
+          message: `对方该英雄${enemyChampData.count}场胜率${(wr * 100).toFixed(0)}%，是其拿手英雄，对线需谨慎`,
+          evidence: ['enemyChampionMastery'],
+          confidence: Math.min(enemyChampData.count / 10, 1.0) * 0.8,
+          audience: 'self'
+        })
+      } else if (wr < 0.35) {
+        advices.push({
+          type: CoachAdviceType.LANE_MATCHUP,
+          priority: CoachAdvicePriority.MEDIUM,
+          title: '对线对手该英雄胜率低',
+          message: `对方该英雄近期${enemyChampData.count}场胜率仅${(wr * 100).toFixed(0)}%，可寻找机会建立优势`,
+          evidence: ['enemyChampionWeakness'],
+          confidence: Math.min(enemyChampData.count / 8, 1.0) * 0.7,
+          audience: 'self'
+        })
+      }
+    } else if (!enemyChampData) {
+      advices.push({
+        type: CoachAdviceType.LANE_MATCHUP,
+        priority: CoachAdvicePriority.MEDIUM,
+        title: '对线对手近期未用该英雄',
+        message: '对方近期没有使用该英雄的记录，可能不够熟练，可考虑主动压制',
+        evidence: ['enemyNoRecentChampData'],
+        confidence: 0.55,
+        audience: 'self'
+      })
+    }
+  }
+
+  if (selfPos !== 'JUNGLE') {
+    const selfCsPM = selfAnalysis.summary.averageCsPerMinute
+    const enemyCsPM = enemyAnalysis.summary.averageCsPerMinute
+    if (enemyCsPM > 0 && selfCsPM > 0) {
+      const csRatio = selfCsPM / enemyCsPM
+      if (csRatio < 0.75) {
+        advices.push({
+          type: CoachAdviceType.LANING_PHASE,
+          priority: CoachAdvicePriority.MEDIUM,
+          title: '对线对手补刀能力较强',
+          message: `对方场均每分钟补兵${enemyCsPM.toFixed(1)}，高于你的${selfCsPM.toFixed(1)}，注意补刀不要落后太多`,
+          evidence: ['csPerMinute_lane_comparison'],
+          confidence: 0.65,
+          audience: 'self'
+        })
+      }
+    }
+  }
+
+  return finalizeStage(ctx, advices, {
+    laneMatchupCompleted: true,
+    selfLanePosition: selfPos,
+    enemyLanerPuuid
+  })
+}
+
+function stageComposition(ctx: PipelineStageContext): PipelineStageContext {
+  if (ctx.gameMode === 'ARAM') return ctx
+  const advices: CoachAdvice[] = []
+
+  let totalPhysShare = 0
+  let totalMagicShare = 0
+  let totalTankShare = 0
+  let allyCount = 0
+
+  const allAlly = [ctx.selfPuuid, ...ctx.allyPuuids]
+  for (const puuid of allAlly) {
+    const analysis = ctx.playerAnalyses[puuid]
+    if (!analysis) continue
+    totalPhysShare += analysis.summary.averagePhysicalDamageDealtToChampionShareOfTeam
+    totalMagicShare += analysis.summary.averageMagicDamageDealtToChampionShareOfTeam
+    totalTankShare += analysis.summary.averageDamageTakenShareOfTeam
+    allyCount++
+  }
+
+  if (allyCount >= 3) {
+    const avgPhys = totalPhysShare / allyCount
+    const avgMagic = totalMagicShare / allyCount
+
+    if (avgPhys > 0.7 && avgMagic < 0.2) {
+      advices.push({
+        type: CoachAdviceType.COMPOSITION,
+        priority: CoachAdvicePriority.MEDIUM,
+        title: '阵容物理伤害占比过高',
+        message: '我方阵容以物理伤害为主，对方可能出护甲装堆叠，中后期需注意穿透装备',
+        evidence: ['teamPhysicalDamageShare'],
+        confidence: 0.65,
+        audience: 'team'
+      })
+    } else if (avgMagic > 0.7 && avgPhys < 0.2) {
+      advices.push({
+        type: CoachAdviceType.COMPOSITION,
+        priority: CoachAdvicePriority.MEDIUM,
+        title: '阵容魔法伤害占比过高',
+        message: '我方阵容以魔法伤害为主，对方可能出魔抗装堆叠，注意法术穿透',
+        evidence: ['teamMagicDamageShare'],
+        confidence: 0.65,
+        audience: 'team'
+      })
+    }
+
+    const maxTankShare = Math.max(
+      ...allAlly
+        .map((p) => ctx.playerAnalyses[p]?.summary.averageDamageTakenShareOfTeam ?? 0)
+    )
+    if (maxTankShare < 0.25 && allyCount >= 4) {
+      advices.push({
+        type: CoachAdviceType.COMPOSITION,
+        priority: CoachAdvicePriority.LOW,
+        title: '阵容缺少前排',
+        message: '我方近期数据显示缺少承伤能力，团战注意站位，避免被秒',
+        evidence: ['teamTankDeficiency'],
+        confidence: 0.5,
+        audience: 'team'
+      })
+    }
+  }
+
+  return finalizeStage(ctx, advices, { compositionCompleted: true })
+}
+
 export class CoachPipeline {
   private _stages: { name: string; handler: PipelineStageHandler }[] = []
 
@@ -438,7 +718,9 @@ export class CoachPipeline {
 
 export class CoachEngine {
   private _pipeline: CoachPipeline
-  private _cache: Map<string, { advices: CoachAdvice[]; timestamp: number }> = new Map()
+  private _layers: CoachCacheLayers<CoachAdvice[]>
+  private _refCounts: CoachRefCounts<string>
+  private _completeness: Map<string, number> = new Map()
   private _cacheMaxAge = 60_000
 
   constructor() {
@@ -448,6 +730,18 @@ export class CoachEngine {
     this._pipeline.addStage('macro_strategy', stageMacroStrategy)
     this._pipeline.addStage('self_analysis', stageSelfAnalysis)
     this._pipeline.addStage('premade_detection', stagePremadeDetection)
+    this._pipeline.addStage('rank_disparity', stageRankDisparity)
+    this._pipeline.addStage('lane_matchup', stageLaneMatchup)
+    this._pipeline.addStage('composition', stageComposition)
+
+    this._layers = new CoachCacheLayers<CoachAdvice[]>()
+    this._refCounts = new CoachRefCounts<string>(
+      30_000, // 30s keepAlive (OSDK uses 60s; ours shorter for game phases)
+      (key) => {
+        this._completeness.delete(key)
+      }
+    )
+    this._refCounts.startAutoGc(5000)
   }
 
   generateAdvices(params: {
@@ -467,10 +761,23 @@ export class CoachEngine {
   }): CoachAdvice[] {
     if (!params.playerStats) return []
 
-    const cacheKey = this._computeCacheKey(params)
-    const cached = this._cache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < this._cacheMaxAge) {
-      return cached.advices
+    const keyParams: CoachCacheKeyParams = {
+      selfPuuid: params.selfPuuid,
+      championSelections: params.championSelections,
+      gameMode: params.gameMode,
+      rankedAvailability: Object.keys(params.rankedStats || {}),
+      analysisAvailability: Object.keys(params.playerStats.players)
+    }
+    const cacheKey = canonicalizeCacheKey(keyParams)
+    const newCompleteness = computeDataCompleteness(keyParams)
+
+    const cached = this._layers.read(cacheKey)
+    if (cached) {
+      const existingCompleteness = this._completeness.get(cacheKey) ?? 0
+      if (!shouldReplace(existingCompleteness, newCompleteness, cached.lastUpdated, this._cacheMaxAge)) {
+        this._refCounts.retain(cacheKey)
+        return cached.value
+      }
     }
 
     const ctx: PipelineStageContext = {
@@ -492,8 +799,47 @@ export class CoachEngine {
     const result = this._pipeline.execute(ctx)
     const sorted = result.advices.sort((a, b) => a.priority - b.priority)
     const deduped = this._deduplicateAdvices(sorted)
-    this._cache.set(cacheKey, { advices: deduped, timestamp: Date.now() })
+
+    this._layers.writeTruth(cacheKey, deduped)
+    this._completeness.set(cacheKey, newCompleteness)
+    this._refCounts.register(cacheKey)
+    this._refCounts.retain(cacheKey)
+
     return deduped
+  }
+
+    pushOptimisticAdvices(key: string, advices: CoachAdvice[]): string {
+    const layerId = `optimistic-${Date.now()}`
+    this._layers.pushOptimistic(layerId)
+    this._layers.writeOptimistic(key, advices)
+    return layerId
+  }
+
+    removeOptimistic(layerId: string): void {
+    this._layers.removeOptimistic(layerId)
+  }
+
+    getLastPipelineInfo(params: {
+    playerStats: {
+      players: Record<string, MatchHistoryGamesAnalysisAll>
+      teams: Record<string, any>
+    } | null
+    allyMembers: string[]
+    enemyMembers: string[]
+    selfPuuid: string
+  }): { allyAvgScore: number; enemyAvgScore: number; scoreDiff: number } | null {
+    if (!params.playerStats) return null
+    const allyPass = computeTeamScorePass(
+      params.allyMembers.filter((p) => p !== params.selfPuuid),
+      params.playerStats.players
+    )
+    const enemyPass = computeTeamScorePass(
+      params.enemyMembers,
+      params.playerStats.players
+    )
+    const allyAvg = allyPass.count > 0 ? allyPass.total / allyPass.count : 0
+    const enemyAvg = enemyPass.count > 0 ? enemyPass.total / enemyPass.count : 0
+    return { allyAvgScore: allyAvg, enemyAvgScore: enemyAvg, scoreDiff: allyAvg - enemyAvg }
   }
 
   formatAsMessages(
@@ -520,22 +866,21 @@ export class CoachEngine {
     })
   }
 
-  clearCache() {
-    this._cache.clear()
+    clearCache() {
+    this._layers.clearAll()
+    this._refCounts.clear()
+    this._completeness.clear()
   }
 
-  private _computeCacheKey(params: any): string {
-    const champStr = Object.entries(params.championSelections)
-      .sort()
-      .map(([k, v]) => `${k}:${v}`)
-      .join(',')
-    return `${params.selfPuuid}|${champStr}|${params.gameMode}`
+    dispose() {
+    this._refCounts.stopAutoGc()
+    this.clearCache()
   }
 
-  private _deduplicateAdvices(advices: CoachAdvice[]): CoachAdvice[] {
+    private _deduplicateAdvices(advices: CoachAdvice[]): CoachAdvice[] {
     const seen = new Map<string, CoachAdvice>()
     for (const advice of advices) {
-      const key = `${advice.type}:${advice.priority}`
+      const key = `${advice.type}:${advice.title}`
       const existing = seen.get(key)
       if (!existing || advice.confidence > existing.confidence) {
         seen.set(key, advice)

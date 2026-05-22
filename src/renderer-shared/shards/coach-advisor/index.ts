@@ -16,7 +16,10 @@ export const useCoachAdvisorStore = defineStore('coach-advisor', () => {
     showEnemyWeakness: true,
     showTeamSynergy: true,
     showMacroStrategy: true,
-    showMentalAdvice: true
+    showMentalAdvice: true,
+    showLaneMatchup: true,
+    showRankDisparity: true,
+    showComposition: true
   })
 
   const state = ref({
@@ -54,7 +57,10 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
       'showEnemyWeakness',
       'showTeamSynergy',
       'showMacroStrategy',
-      'showMentalAdvice'
+      'showMentalAdvice',
+      'showLaneMatchup',
+      'showRankDisparity',
+      'showComposition'
     ])
     this._pm.sync('coach-advisor-main', 'state', store.state, [
       'advices',
