@@ -1,35 +1,23 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
-export { augment } from "../coach-object/fetchPage.js";
-export { getWireObjectSet, isObjectSet } from "../coach-pipeline/createObjectSet.js";
+export { augment } from '../coach-object/fetchPage'
+export { getWireObjectSet, isObjectSet } from '../coach-pipeline/createObjectSet'
 
 export {
   getMetaTagContent,
-  getOsdkConfig,
-} from "../coach-public-utils/coachConfig.js";
-export type { OsdkConfig } from "../coach-public-utils/coachConfig.js";
+  getCoachConfig
+} from '../coach-public-utils/coachConfig'
+export type { CoachConfig } from '../coach-public-utils/coachConfig'
 
-export { createClientWithTransaction } from "../createClient.js";
+export { createCoachClientFullWithTransaction } from '../coach-client/createCoachClientFull'
 
 export {
   applyShapeTransformations,
   applyShapeTransformationsToArray,
-  buildObjectSetFromLinkDefByType,
-  getLinkQueryOptions,
-} from "../coach-shapes/index.js";
+  buildPipelineFromRelationDef,
+  getRelationQueryOptions
+} from '../coach-shapes/index'
 
-/** @deprecated Import from `@shared/utils/coach-client/observable` instead. */
-export type { ActionSignatureFromDef } from "../coach-actions/applyAction.js";
-/** @deprecated Import from `@shared/utils/coach-client/observable` instead. */
-export { createObservableClient } from "../coach-observable/observable/ObservableClient.js";
-/** @deprecated Import from `@shared/utils/coach-client/observable` instead. */
+export type { ActionSignatureFromDef } from '../coach-actions/applyAction'
+export { createObservableClient } from '../coach-observable/observable/ObservableClient'
 export type {
   CacheEntry,
   CacheSnapshot,
@@ -42,11 +30,8 @@ export type {
   ObserveObjectCallbackArgs,
   ObserveObjectsCallbackArgs,
   ObserveObjectSetArgs,
-  Unsubscribable,
-} from "../coach-observable/observable/ObservableClient.js";
-/** @deprecated Import from `@shared/utils/coach-client/observable` instead. */
-export type { Observer } from "../coach-observable/observable/ObservableClient/common.js";
-/** @deprecated Import from `@shared/utils/coach-client/observable` instead. */
-export type { ObserveLinks } from "../coach-observable/observable/ObservableClient/ObserveLink.js";
-/** @deprecated Import from `@shared/utils/coach-client/observable` instead. */
-export type { QueryParameterType, QueryReturnType } from "../coach-queries/types.js";
+  Unsubscribable
+} from '../coach-observable/observable/ObservableClient'
+export type { Observer } from '../coach-observable/observable/ObservableClient/common'
+export type { ObserveLinks } from '../coach-observable/observable/ObservableClient/ObserveLink'
+export type { QueryParameterType, QueryReturnType } from '../coach-queries/types'

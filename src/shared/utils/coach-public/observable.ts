@@ -1,14 +1,5 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
-export type { ActionSignatureFromDef } from "../coach-actions/applyAction.js";
-export { createObservableClient } from "../coach-observable/observable/ObservableClient.js";
+export type { ActionSignatureFromDef } from '../coach-actions/applyAction'
+export { createObservableClient } from '../coach-observable/observable/ObservableClient'
 export type {
   CacheEntry,
   CacheSnapshot,
@@ -21,8 +12,8 @@ export type {
   ObserveObjectCallbackArgs,
   ObserveObjectsCallbackArgs,
   ObserveObjectSetArgs,
-  Unsubscribable,
-} from "../coach-observable/observable/ObservableClient.js";
-export type { Observer } from "../coach-observable/observable/ObservableClient/common.js";
-export type { ObserveLinks } from "../coach-observable/observable/ObservableClient/ObserveLink.js";
-export type { QueryParameterType, QueryReturnType } from "../coach-queries/types.js";
+  Unsubscribable
+} from '../coach-observable/observable/ObservableClient'
+export type { Observer } from '../coach-observable/observable/ObservableClient/common'
+export type { ObserveLinks } from '../coach-observable/observable/ObservableClient/ObserveLink'
+export type { QueryParameterType, QueryReturnType } from '../coach-queries/types'

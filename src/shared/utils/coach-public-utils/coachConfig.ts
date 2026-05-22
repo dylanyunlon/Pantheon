@@ -27,7 +27,7 @@ function getGameStateId(gameStateId: string): string {
 export function getCoachConfig(gameStateId: string): CoachConfig {
   if (isProduction()) {
     return {
-      baseUrl: getMetaTagContent('coach-foundryUrl'),
+      baseUrl: getMetaTagContent('coach-baseUrl'),
       clientId: getMetaTagContent('coach-clientId'),
       gameStateId: getGameStateId(gameStateId)
     }

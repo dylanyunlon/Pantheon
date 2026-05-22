@@ -82,7 +82,7 @@ export interface CompileTimeMetadata<T = unknown> {
 
 export type Coach = CoachAdvice
 
-export interface OsdkBase {
+export interface CoachRecordBase {
   $objectType: string
   $primaryKey: string
   $apiName: string
@@ -323,7 +323,7 @@ export const MediaSets = {
   getUrl: (_client: unknown, _ref: MediaReference) => ''
 }
 
-export type CoachBase = OsdkBase
+export type CoachBase = CoachRecordBase
 
 export type MinimalPipelineSet = MinimalObjectSet
 

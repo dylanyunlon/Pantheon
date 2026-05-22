@@ -1,41 +1,27 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
 import type {
-  CompileTimeMetadata,
-  ObjectOrInterfaceDefinition,
-  ObjectSet,
-} from "@shared/utils/coach-types";
-import * as OntologyObjectSets from "@shared/utils/coach-types/OntologyObjectSet";
-import { additionalContext, type Client } from "../Client";
-import { getWireObjectSet } from "../coach-pipeline/createObjectSet";
+  ObjectSet
+} from '../coach-types'
+import type { CoachClientFull } from '../coach-client/createCoachClientFull'
+import { getWireObjectSet } from '../coach-pipeline/createObjectSet'
 
-/**
- * Fetches a temporary object set RID from the Pantheon stack for the given object set.
- *
- * @param client - An COACH client.
- * @param objectSet - The object set to fetch a RID for.
- * @returns A promise that resolves to the RID of the temporary object set.
- */
-export async function createAndFetchTempObjectSetRid<
-  Q extends ObjectOrInterfaceDefinition,
->(
-  client: Client,
-  objectSet: unknown extends CompileTimeMetadata<Q>["objectSet"] ? ObjectSet<Q>
-    : CompileTimeMetadata<Q>["objectSet"],
+export async function createAndFetchTempObjectSetRid(
+  client: CoachClientFull,
+  objectSet: ObjectSet
 ): Promise<string> {
-  const response = await OntologyObjectSets.createTemporary(
-    client,
-    await client[additionalContext].gameStateId,
+  const ctx = client._ctx
+  const gameStateId = typeof ctx.gameStateId === 'string'
+    ? ctx.gameStateId
+    : await ctx.gameStateId
+  const token = await ctx.tokenProvider()
+  const resp = await ctx.fetchFn(
+    `${ctx.baseUrl}/api/v2/coach/gameStates/${encodeURIComponent(gameStateId)}/objectSets/createTemporary`,
     {
-      objectSet: getWireObjectSet(objectSet),
-    },
-  );
-  return response.objectSetRid;
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ objectSet: getWireObjectSet(objectSet) })
+    }
+  )
+  if (!resp.ok) throw new Error(`createAndFetchTempObjectSetRid failed: ${resp.status}`)
+  const data = await resp.json()
+  return data.objectSetRid
 }

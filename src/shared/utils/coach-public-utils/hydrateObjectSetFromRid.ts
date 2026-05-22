@@ -8,8 +8,8 @@
  */
 
 import type { ObjectOrInterfaceDefinition, ObjectSet } from "@shared/utils/coach-types";
-import type { Client } from "../coach-client/CoachClient";
-import { coachClientContext } from "../coach-client/CoachClient";
+import type { CoachCoachClient } from "../coach-client/CoachCoachClient";
+import { coachClientContext } from "../coach-client/CoachCoachClient";
 import { createObjectSet } from "../coach-pipeline/createObjectSet";
 
 /**
@@ -20,7 +20,7 @@ import { createObjectSet } from "../coach-pipeline/createObjectSet";
  * @returns An COACH object set.
  */
 export function hydrateObjectSetFromRid<T extends ObjectOrInterfaceDefinition>(
-  client: Client,
+  client: CoachClient,
   definition: T,
   rid: string,
 ): ObjectSet<T> {
