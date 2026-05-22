@@ -42,3 +42,29 @@ export {
 export {
   createCoachClientFromWriteable
 } from './createCoachClientFromWriteable'
+
+export {
+  type ResultOrError,
+  type CoachResult,
+  type CoachError
+} from './ResultOrError'
+
+export {
+  type SatisfiesSemver
+} from './SatisfiesSemver'
+
+export {
+  createGeotimeSeriesProperty
+} from './createGeotimeSeriesProperty'
+
+export {
+  createMediaFromReference
+} from './createMediaFromReference'
+
+export {
+  createMediaReferenceProperty
+} from './createMediaReferenceProperty'
+
+export {
+  createTimeseriesProperty
+} from './createTimeseriesProperty'
