@@ -1,29 +1,18 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
-import type { ActionMetadata } from "@shared/utils/coach-types";
-import * as ActionTypesV2 from "@shared/utils/coach-types/ActionTypeV2";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { ActionDefinition } from '../coach-types'
+import type { MinimalCoachClient } from '../coach-client/MinimalCoachClientContext'
 
 export async function loadActionMetadata(
-  client: MinimalClient,
-  actionType: string,
-): Promise<ActionMetadata> {
-  const r = await ActionTypesV2.get(
-    client,
-    await client.ontologyRid,
-    actionType,
-    { branch: client.branch },
-  );
-
-  const { wireActionTypeV2ToSdkActionMetadata } = await import(
-    "@shared/utils/coach-types"
-  );
-  return wireActionTypeV2ToSdkActionMetadata(r);
+  client: MinimalCoachClient,
+  apiName: string
+): Promise<ActionDefinition> {
+  const token = await client.tokenProvider()
+  const gameStateId = typeof client.gameStateId === 'string'
+    ? client.gameStateId
+    : await client.gameStateId
+  const resp = await client.fetchFn(
+    `${client.baseUrl}/api/v2/coach/gameStates/${encodeURIComponent(gameStateId)}/actionTypes/${encodeURIComponent(apiName)}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  if (!resp.ok) throw new Error(`Failed to load action metadata for ${apiName}: ${resp.status}`)
+  return resp.json()
 }

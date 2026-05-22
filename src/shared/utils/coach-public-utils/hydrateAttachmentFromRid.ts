@@ -9,8 +9,8 @@
 
 import type { Attachment } from "@shared/utils/coach-types";
 import * as Attachments from "@shared/utils/coach-types/Attachment";
-import { additionalContext, type Client } from "../Client.js";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import { coachClientContext, type Client } from "../coach-client/CoachClient";
+import type { MinimalCoachClient } from "../coach-client/MinimalCoachClientContext";
 
 /**
  * Helper function to create an attachment type from a rid
@@ -22,12 +22,12 @@ export function hydrateAttachmentFromRid(
   client: Client,
   rid: string,
 ): Attachment {
-  return hydrateAttachmentFromRidInternal(client[additionalContext], rid);
+  return hydrateAttachmentFromRidInternal(client[coachClientContext], rid);
 }
 
 /** @internal */
 export function hydrateAttachmentFromRidInternal(
-  client: MinimalClient,
+  client: MinimalCoachClient,
   rid: string,
 ): Attachment {
   return {

@@ -168,7 +168,7 @@ async function getTsServerPath() {
   });
   const possibleTsServerPaths = await pMap(
     nodeModuleDirs,
-    (dir) => path.join(dir, "typescript", "lib", "tsserver.js"),
+    (dir) => path.join(dir, "typescript", "lib", "tsserver"),
   );
 
   const tsServerPath = await pLocate(

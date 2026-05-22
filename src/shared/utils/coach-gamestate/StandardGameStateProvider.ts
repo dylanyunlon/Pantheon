@@ -1,128 +1,95 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
 import type {
-  ActionMetadata,
+  ActionDefinition,
   InterfaceMetadata,
-  ObjectOrInterfaceDefinition,
-  QueryMetadata,
-} from "@shared/utils/coach-types";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { createAsyncClientCache } from "../coach-object/Cache.js";
-import { deepFreeze } from "../coach-util/deepFreeze.js";
-import { loadActionMetadata } from "./loadActionMetadata.js";
-import { loadFullObjectMetadata } from "./loadFullObjectMetadata.js";
-import { loadInterfaceMetadata } from "./loadInterfaceMetadata.js";
-import { loadQueryMetadata } from "./loadQueryMetadata.js";
+  QueryDefinition
+} from '../coach-types'
+import type { MinimalCoachClient } from '../coach-client/MinimalCoachClientContext'
+import { createAsyncClientCache } from '../coach-object/Cache'
+import { deepFreeze } from '../coach-util/deepFreeze'
+import { loadActionMetadata } from './loadActionMetadata'
+import { loadFullObjectMetadata } from './loadFullObjectMetadata'
+import { loadInterfaceMetadata } from './loadInterfaceMetadata'
+import { loadQueryMetadata } from './loadQueryMetadata'
 import {
   type FetchedObjectTypeDefinition,
   InterfaceDefinitions,
-  type OntologyProviderFactory,
-} from "./GameStateProvider.js";
+  type GameStateProviderFactory
+} from './GameStateProvider'
 
-export interface OntologyCachingOptions {
+export interface GameStateCachingOptions {
+  logger?: { info(...args: unknown[]): void }
 }
 
-export const createStandardOntologyProviderFactory: (
-  opts: OntologyCachingOptions,
-) => OntologyProviderFactory = (client) => {
+export const createStandardGameStateProviderFactory: (
+  opts: GameStateCachingOptions
+) => GameStateProviderFactory = (_opts) => {
   return (client) => {
     async function loadObject(
-      client: MinimalClient,
-      key: string,
+      client: MinimalCoachClient,
+      key: string
     ): Promise<FetchedObjectTypeDefinition> {
-      const objectDef = await loadFullObjectMetadata(client, key);
-
-      // ensure we have all of the interfaces loaded
-      const interfaceDefs = Object.fromEntries<
-        { def: InterfaceMetadata; handler: undefined }
-      >(
-        (await Promise.all<InterfaceMetadata>(
-          objectDef.implements?.map((i) => ret.getInterfaceDefinition(i)) ?? [],
-        )).map(i => [i.apiName, { def: i, handler: undefined }]),
-      );
+      const objectDef = await loadFullObjectMetadata(client, key)
+      const interfaceDefs = Object.fromEntries<{ def: InterfaceMetadata }>(
+        (
+          await Promise.all<InterfaceMetadata>(
+            (objectDef as any).implements?.map((i: string) =>
+              ret.getInterfaceDefinition(i)
+            ) ?? []
+          )
+        ).map((i) => [i.apiName, { def: i }])
+      )
 
       const fullObjectDef = {
         ...objectDef,
-        [InterfaceDefinitions]: interfaceDefs,
-      };
+        [InterfaceDefinitions]: interfaceDefs
+      }
 
-      return deepFreeze(fullObjectDef);
+      return deepFreeze(fullObjectDef) as FetchedObjectTypeDefinition
     }
 
     async function loadInterface(
-      client: MinimalClient,
-      key: string,
+      client: MinimalCoachClient,
+      key: string
     ) {
-      return deepFreeze(await loadInterfaceMetadata(client, key));
+      return deepFreeze(await loadInterfaceMetadata(client, key)) as InterfaceMetadata
     }
 
-    async function loadQuery(
-      client: MinimalClient,
-      key: string,
-    ) {
-      return loadQueryMetadata(client, key);
+    async function loadQuery(client: MinimalCoachClient, key: string) {
+      return loadQueryMetadata(client, key)
     }
 
-    async function loadAction(
-      client: MinimalClient,
-      key: string,
-    ) {
-      const r = await loadActionMetadata(client, key);
-      return r;
+    async function loadAction(client: MinimalCoachClient, key: string) {
+      return loadActionMetadata(client, key)
     }
 
-    function makeGetter<
-      N extends
-        | ObjectOrInterfaceDefinition
-        | QueryMetadata
-        | ActionMetadata,
-    >(
-      fn: (
-        client: MinimalClient,
-        key: string,
-        skipCache?: boolean,
-      ) => Promise<N>,
+    function makeGetter<N>(
+      fn: (client: MinimalCoachClient, key: string) => Promise<N>
     ) {
-      const cache = createAsyncClientCache<string, N>((client, key) =>
-        fn(client, key, false)
-      );
+      const cache = createAsyncClientCache<string, N>((c, key) => fn(c, key))
       return async (apiName: string) => {
-        return await cache.get(client, apiName);
-      };
+        return await cache.get(client, apiName)
+      }
     }
 
     function makeQueryGetter(
-      client: MinimalClient,
-      fn: (
-        client: MinimalClient,
-        key: string,
-        skipCache?: boolean,
-      ) => Promise<QueryMetadata>,
+      client: MinimalCoachClient,
+      fn: (client: MinimalCoachClient, key: string) => Promise<QueryDefinition>
     ) {
-      const queryCache = createAsyncClientCache<string, QueryMetadata>(
-        (client, key) => {
-          return fn(client, key);
-        },
-      );
+      const queryCache = createAsyncClientCache<string, QueryDefinition>(
+        (c, key) => fn(c, key)
+      )
       return async (apiName: string, version?: string) => {
-        const key = version ? `${apiName}:${version}` : apiName;
-        return await queryCache.get(client, key);
-      };
+        const key = version ? `${apiName}:${version}` : apiName
+        return await queryCache.get(client, key)
+      }
     }
 
     const ret = {
       getObjectDefinition: makeGetter(loadObject),
       getInterfaceDefinition: makeGetter(loadInterface),
       getActionDefinition: makeGetter(loadAction),
-      getQueryDefinition: makeQueryGetter(client, loadQuery),
-    };
-    return ret;
-  };
-};
+      getQueryDefinition: makeQueryGetter(client, loadQuery)
+    }
+    return ret
+  }
+}

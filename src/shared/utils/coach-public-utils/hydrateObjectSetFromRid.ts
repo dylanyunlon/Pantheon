@@ -8,9 +8,9 @@
  */
 
 import type { ObjectOrInterfaceDefinition, ObjectSet } from "@shared/utils/coach-types";
-import type { Client } from "../Client.js";
-import { additionalContext } from "../Client.js";
-import { createObjectSet } from "../coach-pipeline/createObjectSet.js";
+import type { Client } from "../coach-client/CoachClient";
+import { coachClientContext } from "../coach-client/CoachClient";
+import { createObjectSet } from "../coach-pipeline/createObjectSet";
 
 /**
  * Creates an COACH object set from an object set RID.
@@ -26,7 +26,7 @@ export function hydrateObjectSetFromRid<T extends ObjectOrInterfaceDefinition>(
 ): ObjectSet<T> {
   return createObjectSet(
     definition,
-    client[additionalContext],
+    client[coachClientContext],
     {
       type: "intersect",
       objectSets: [

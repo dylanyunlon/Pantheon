@@ -1,23 +1,23 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
+import type { MinimalCoachClient } from '../coach-client/MinimalCoachClientContext'
 
-import type { SharedClientContext } from "@shared/utils/coach-stubs/shared-client-impl";
-import type { LcuBridgeContext } from "lcuBridge-lite";
+export interface LcuBridgeContext {
+  baseUrl: string
+  tokenProvider: () => Promise<string>
+  fetchFn: typeof globalThis.fetch
+  gameStateId: string
+}
 
-export function makeConjureContext(
-  { baseUrl, fetch: fetchFn, tokenProvider }: SharedClientContext,
-  servicePath: string,
-): LcuBridgeContext {
+export async function makeLcuBridgeContext(
+  client: MinimalCoachClient
+): Promise<LcuBridgeContext> {
+  const gameStateId = typeof client.gameStateId === 'string'
+    ? client.gameStateId
+    : await client.gameStateId
+
   return {
-    baseUrl,
-    servicePath,
-    fetchFn,
-    tokenProvider,
-  };
+    baseUrl: client.baseUrl,
+    tokenProvider: client.tokenProvider,
+    fetchFn: client.fetchFn,
+    gameStateId
+  }
 }

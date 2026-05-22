@@ -21,7 +21,7 @@ import type { MinimalClient } from "../MinimalClientContext";
 
 export const addUserAgentAndRequestContextHeaders = (
   client: MinimalClient,
-  withMetadata: Pick<ObjectOrInterfaceDefinition, "osdkMetadata">,
+  withMetadata: Pick<ObjectOrInterfaceDefinition, "coachMetadata">,
 ): MinimalClient => ({
   ...client,
   fetch: createFetchHeaderMutator(
@@ -32,12 +32,12 @@ export const addUserAgentAndRequestContextHeaders = (
         JSON.stringify(client.requestContext),
       );
 
-      if (withMetadata.osdkMetadata) {
+      if (withMetadata.coachMetadata) {
         headers.set(
           USER_AGENT_HEADER,
           [
             headers.get(USER_AGENT_HEADER),
-            withMetadata.osdkMetadata.extraUserAgent,
+            withMetadata.coachMetadata.extraUserAgent,
           ].filter(x => x && x?.length > 0).join(" "),
         );
       }

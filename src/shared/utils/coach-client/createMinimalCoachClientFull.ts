@@ -1,87 +1,55 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
-import type { Logger } from "@shared/utils/coach-types";
-import { createSharedClientContext } from "@shared/utils/coach-stubs/shared-client-impl";
+import type { Logger } from '../coach-types'
 import type {
-  ClientCacheKey,
-  MinimalClient,
-  MinimalClientParams,
-} from "./MinimalClientContext.js";
-import { convertWireToOsdkObjects } from "./object/convertWireToOsdkObjects.js";
-import { createObjectSet } from "./objectSet/createObjectSet.js";
-import type { ObjectSetFactory } from "./objectSet/ObjectSetFactory.js";
-import type { GameStateProvider } from "./gameState/GameStateProvider.js";
+  CoachCacheKey,
+  MinimalCoachClient,
+  MinimalCoachClientParams
+} from './MinimalCoachClientContext'
+import type { PipelineFactory } from '../coach-pipeline/PipelineFactory'
+import type { GameStateProvider } from '../coach-gamestate/GameStateProvider'
 import {
-  createStandardOntologyProviderFactory,
-  type OntologyCachingOptions,
-} from "./gameState/StandardGameStateProvider.js";
-import { USER_AGENT } from "./util/UserAgent.js";
+  createStandardGameStateProviderFactory,
+} from '../coach-gamestate/StandardGameStateProvider'
+import { USER_AGENT_HEADER } from '../coach-types'
+import { createPipeline } from '../coach-pipeline/createPipeline'
 
-/** @internal */
-export function createMinimalClient(
-  metadata: MinimalClientParams["metadata"],
+export function createMinimalCoachClientFull(
+  metadata: { gameStateId: string | Promise<string> },
   baseUrl: string,
   tokenProvider: () => Promise<string>,
-  options: OntologyCachingOptions & {
-    logger?: Logger;
-    transactionId?: string;
-    flushEdits?: () => Promise<void>;
-    branch?: string;
-    headers?: Record<string, string>;
+  options: {
+    logger?: Logger
+    transactionId?: string
+    flushEdits?: () => Promise<void>
+    branch?: string
+    headers?: Record<string, string>
   } = {},
   fetchFn: (
     input: Request | URL | string,
-    init?: RequestInit | undefined,
-  ) => Promise<Response> = global.fetch,
-  objectSetFactory: ObjectSetFactory<any, any> = createObjectSet,
-  createOntologyProviderFactory: (
-    a: OntologyCachingOptions & { logger?: Logger },
-  ) => (minimalClient: MinimalClient) => GameStateProvider =
-    createStandardOntologyProviderFactory,
-) {
-  if (process.env.NODE_ENV !== "production") {
-    try {
-      new URL(baseUrl);
-    } catch (e) {
-      const hint =
-        !baseUrl.startsWith("http://") || !baseUrl.startsWith("https://")
-          ? ". Did you forget to add 'http://' or 'https://'?"
-          : "";
-      throw new Error(`Invalid stack URL: ${baseUrl}${hint}`);
-    }
-  }
-  const minimalClient: MinimalClient = {
-    ...createSharedClientContext(
-      baseUrl,
-      tokenProvider,
-      USER_AGENT,
-      fetchFn,
-      options.headers,
-    ),
-    objectSetFactory,
-    objectFactory: convertWireToOsdkObjects,
-    ontologyRid: metadata.ontologyRid,
+    init?: RequestInit | undefined
+  ) => Promise<Response> = globalThis.fetch,
+  pipelineFactory?: PipelineFactory,
+  createGameStateProviderFactory: (
+    opts: { logger?: Logger }
+  ) => (client: MinimalCoachClient) => GameStateProvider = createStandardGameStateProviderFactory
+): MinimalCoachClient {
+  const minimalClient: MinimalCoachClient = {
+    baseUrl,
+    tokenProvider,
+    fetchFn,
+    gameStateId: metadata.gameStateId,
+    pipelineFactory: (pipelineFactory || createPipeline) as unknown as PipelineFactory,
     logger: options.logger,
     transactionId: options.transactionId,
-    clientCacheKey: {} as ClientCacheKey,
-    requestContext: {},
+    flushEdits: options.flushEdits,
     branch: options.branch,
-    narrowTypeInterfaceOrObjectMapping: {},
-  } satisfies Omit<
-    MinimalClient,
-    "ontologyProvider"
-  > as any;
+    clientCacheKey: {} as CoachCacheKey,
+    requestContext: {},
+    narrowTypeMapping: {},
+    gameStateProvider: undefined as any
+  }
 
-  return Object.freeze(Object.assign(minimalClient, {
-    ontologyProvider: createOntologyProviderFactory(
-      options,
-    )(minimalClient),
-  }));
+  const provider = createGameStateProviderFactory({ logger: options.logger })(minimalClient)
+  ;(minimalClient as any).gameStateProvider = provider
+
+  return Object.freeze(minimalClient) as MinimalCoachClient
 }

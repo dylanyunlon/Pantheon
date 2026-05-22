@@ -1,62 +1,34 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
 import type {
   ActionDefinition,
-  ActionMetadata,
-  InterfaceDefinition,
   InterfaceMetadata,
   ObjectMetadata,
   ObjectTypeDefinition,
-  QueryDefinition,
-  QueryMetadata,
-} from "@shared/utils/coach-types";
-import type { MinimalClient } from "./MinimalClientContext.js";
-import { InterfaceDefinitions } from "./gameState/GameStateProvider.js";
+  QueryDefinition
+} from '../coach-types'
+import type { MinimalCoachClient } from './MinimalCoachClientContext'
 
-/** @internal */
-export const fetchMetadataInternal = async <
-  Q extends (
-    | ObjectTypeDefinition
-    | InterfaceDefinition
-    | ActionDefinition<any>
-    | QueryDefinition<any>
-  ),
+export const fetchCoachMetadataInternal = async <
+  Q extends ObjectTypeDefinition | ActionDefinition | QueryDefinition
 >(
-  client: MinimalClient,
-  definition: Q,
+  client: MinimalCoachClient,
+  definition: Q
 ): Promise<
   Q extends ObjectTypeDefinition ? ObjectMetadata
-    : Q extends InterfaceDefinition ? InterfaceMetadata
-    : Q extends ActionDefinition<any> ? ActionMetadata
-    : Q extends QueryDefinition<any> ? QueryMetadata
+    : Q extends ActionDefinition ? ActionDefinition
+    : Q extends QueryDefinition ? QueryDefinition
     : never
 > => {
-  if (definition.type === "object") {
-    const { [InterfaceDefinitions]: interfaceDefs, ...objectTypeDef } =
-      await client.ontologyProvider
-        .getObjectDefinition(definition.apiName);
-    return objectTypeDef as any;
-  } else if (definition.type === "interface") {
-    return client.ontologyProvider.getInterfaceDefinition(
-      definition.apiName,
-    ) as any;
-  } else if (definition.type === "action") {
-    return client.ontologyProvider.getActionDefinition(
-      definition.unsanitizedApiName ?? definition.apiName,
-    ) as any;
-  } else if (definition.type === "query") {
-    return client.ontologyProvider.getQueryDefinition(
-      definition.apiName,
-      definition.isFixedVersion ? definition.version : undefined,
-    ) as any;
-  } else {
-    throw new Error("Not implemented for given definition");
+  const defType = (definition as any).type
+  const apiName = (definition as any).apiName || (definition as any).unsanitizedApiName
+
+  if (defType === 'object') {
+    return client.gameStateProvider.getObjectDefinition(apiName) as any
+  } else if (defType === 'interface') {
+    return client.gameStateProvider.getInterfaceDefinition(apiName) as any
+  } else if (defType === 'action') {
+    return client.gameStateProvider.getActionDefinition(apiName) as any
+  } else if (defType === 'query') {
+    return client.gameStateProvider.getQueryDefinition(apiName) as any
   }
-};
+  throw new Error('Unsupported metadata definition type: ' + defType)
+}

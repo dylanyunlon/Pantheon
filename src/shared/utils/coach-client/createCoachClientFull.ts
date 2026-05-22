@@ -1,486 +1,177 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
 import type {
   ActionDefinition,
-  FetchPageArgs,
-  InterfaceDefinition,
+  InterfaceMetadata,
   Logger,
-  MediaReference,
-  NullabilityAdherence,
-  ObjectOrInterfaceDefinition,
+  ObjectMetadata,
   ObjectSet,
-  ObjectSetSubscription,
   ObjectTypeDefinition,
-  Coach,
-  OsdkBase,
-  PropertyKeys,
   QueryDefinition,
-  SelectArg,
-} from "@shared/utils/coach-types";
-import type {
-  Experiment,
-  ExperimentFns,
-  MediaTransformation,
-  MinimalObjectSet,
-  TransformOptions,
-} from "@shared/utils/coach-types/unstable";
-import {
-  __EXPERIMENTAL__NOT_SUPPORTED_YET__createMediaReference,
-  __EXPERIMENTAL__NOT_SUPPORTED_YET__executeStreamingFunction,
-  __EXPERIMENTAL__NOT_SUPPORTED_YET__fetchOneByRid,
-  __EXPERIMENTAL__NOT_SUPPORTED_YET__fetchPageByRid,
-  __EXPERIMENTAL__NOT_SUPPORTED_YET__getBulkLinks,
-  __EXPERIMENTAL__NOT_SUPPORTED_YET__subscribeToNoTypeObjectSet,
-  __EXPERIMENTAL__NOT_SUPPORTED_YET__transformAndWait,
-} from "@shared/utils/coach-types/unstable";
-import type { ObjectSet as PipelineObjectSet } from "@shared/utils/coach-types";
-import { symbolClientContext as oldSymbolClientContext } from "@shared/utils/coach-stubs/shared-client-impl";
-import type { ActionSignatureFromDef } from "./actions/applyAction.js";
-import { applyAction } from "./actions/applyAction.js";
-import { additionalContext, type Client } from "./Client.js";
-import { createMinimalClient } from "./createMinimalClient.js";
-import { fetchMetadataInternal } from "./fetchMetadata.js";
-import { makeMediaTransformation } from "./internal/conversions/makeMediaTransformation.js";
-import { MinimalLogger } from "./logger/MinimalLogger.js";
-import type { MinimalClient } from "./MinimalClientContext.js";
-import { fetchPage, fetchStaticRidPage } from "./object/fetchPage.js";
-import { fetchSingle } from "./object/fetchSingle.js";
-import { createObjectSet } from "./objectSet/createObjectSet.js";
-import type { ObjectSetFactory } from "./objectSet/ObjectSetFactory.js";
-import { ObjectSetListenerWebsocket } from "./objectSet/ObjectSetListenerWebsocket.js";
-import { applyQuery } from "./queries/applyQuery.js";
-import type { QuerySignatureFromDef } from "./queries/types.js";
+  PropertyKeys,
+} from '../coach-types'
+import type { CoachAdvice } from '../coach-engine'
+import type { GamePhase } from '../coach-scheduler'
+import { applyAction } from '../coach-actions/applyAction'
+import type { MinimalCoachClient } from './MinimalCoachClientContext'
+import { createMinimalCoachClientFull } from './createMinimalCoachClientFull'
+import { fetchCoachMetadataInternal } from './fetchCoachMetadataFull'
+import { MinimalLogger } from '../coach-logger/MinimalLogger'
+import { fetchPage } from '../coach-object/fetchPage'
+import { fetchSingle } from '../coach-object/fetchSingle'
+import { createPipeline } from '../coach-pipeline/createPipeline'
+import type { PipelineFactory } from '../coach-pipeline/PipelineFactory'
+import { PipelineListenerWebsocket } from '../coach-pipeline/PipelineListenerWebsocket'
+import { applyQuery } from '../coach-queries/applyQuery'
+import { applyStreamingQuery } from '../coach-queries/applyStreamingQuery'
 
-// We import it this way to keep compatible with CJS. If we referenced the
-// value of `symbolClientContext` directly, then we would have to a dynamic import
-// in `createClientInternal` which would make it async and a break.
-// Since this is just a string in `@shared/utils/coach-stubs/shared-client-impl` instead of a symbol,
-// we can safely perform this trick.
-type newSymbolClientContext =
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  typeof import("@shared/utils/coach-stubs/shared-client-impl").symbolClientContext;
+export const coachClientSymbol: unique symbol = Symbol('coachClientContext')
 
-class ActionInvoker<Q extends ActionDefinition<any>>
-  implements ActionSignatureFromDef<Q>
-{
-  constructor(
-    clientCtx: MinimalClient,
-    actionDef: ActionDefinition<any>,
-  ) {
-    // We type the property as a generic function as binding `applyAction`
-    // doesn't return a type thats all that useful anyway
-    // The implements covers us for the most part here as this exact type doesn't
-    // escape this file
-    this.applyAction = applyAction.bind(undefined, clientCtx, actionDef);
-    this.batchApplyAction = applyAction.bind(undefined, clientCtx, actionDef);
-  }
+export interface CoachClientFull {
+  <Q extends ObjectTypeDefinition>(o: Q): ObjectSet
 
-  applyAction: (...args: any[]) => any;
-  batchApplyAction: (...args: any[]) => any;
+  fetchMetadata<Q extends ObjectTypeDefinition | ActionDefinition | QueryDefinition>(
+    o: Q
+  ): Promise<Q extends ObjectTypeDefinition ? ObjectMetadata : Q extends ActionDefinition ? ActionDefinition : never>
+
+  readonly _ctx: MinimalCoachClient
 }
 
-class QueryInvoker<Q extends QueryDefinition<any>>
-  implements QuerySignatureFromDef<Q>
-{
-  constructor(
-    clientCtx: MinimalClient,
-    queryDef: QueryDefinition<any>,
-  ) {
-    this.executeFunction = applyQuery.bind(undefined, clientCtx, queryDef);
-  }
+class CoachActionInvoker {
+  applyAction: (...args: any[]) => any
+  batchApplyAction: (...args: any[]) => any
 
-  executeFunction: (...args: any[]) => any;
+  constructor(clientCtx: MinimalCoachClient, actionDef: ActionDefinition) {
+    this.applyAction = applyAction.bind(undefined, clientCtx, actionDef)
+    this.batchApplyAction = applyAction.bind(undefined, clientCtx, actionDef)
+  }
 }
 
-/** @internal */
-export function createClientInternal(
-  objectSetFactory: ObjectSetFactory<any, any>,
-  transactionRid: string | undefined,
+class CoachQueryInvoker {
+  executeFunction: (...args: any[]) => any
+
+  constructor(clientCtx: MinimalCoachClient, queryDef: QueryDefinition) {
+    this.executeFunction = applyQuery.bind(undefined, clientCtx, queryDef)
+  }
+}
+
+export function createCoachClientFullInternal(
+  pipelineFactory: PipelineFactory,
+  transactionId: string | undefined,
   flushEdits: (() => Promise<void>) | undefined,
   baseUrl: string,
-  ontologyRid: string | Promise<string>,
+  gameStateId: string | Promise<string>,
   tokenProvider: () => Promise<string>,
   options:
     | {
-      logger?: Logger;
-      UNSTABLE_DO_NOT_USE_BRANCH?: string;
-      headers?: Record<string, string>;
-    }
+        logger?: Logger
+        headers?: Record<string, string>
+      }
     | undefined = undefined,
-  fetchFn: typeof globalThis.fetch = fetch,
-): Client {
-  if (typeof ontologyRid === "string") {
-    if (!ontologyRid.startsWith("ri.")) {
-      throw new Error("Invalid gameState RID");
+  fetchFn: typeof globalThis.fetch = fetch
+): CoachClientFull {
+  if (typeof gameStateId === 'string') {
+    if (!gameStateId || gameStateId.length === 0) {
+      throw new Error('Invalid gameState ID: must be non-empty')
     }
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ontologyRid.then((ontologyRid) => {
-      if (!ontologyRid.startsWith("ri.")) {
-        // FIXME this promise is not await so this just shows up as an unhandled promise rejection
-        throw new Error("Invalid gameState RID");
+    gameStateId.then((resolved) => {
+      if (!resolved || resolved.length === 0) {
+        throw new Error('Invalid gameState ID: resolved to empty string')
       }
-    });
+    })
   }
 
-  const clientCtx: MinimalClient = createMinimalClient(
-    { ontologyRid },
+  const clientCtx: MinimalCoachClient = createMinimalCoachClientFull(
+    { gameStateId },
     baseUrl,
     tokenProvider,
     {
       ...options,
       logger: options?.logger ?? new MinimalLogger(),
-      transactionId: transactionRid,
+      transactionId,
       flushEdits,
-      branch: options?.UNSTABLE_DO_NOT_USE_BRANCH,
     },
     fetchFn,
-    objectSetFactory,
-  );
+    pipelineFactory
+  )
 
-  return createClientFromContext(clientCtx);
+  return createCoachClientFromCtx(clientCtx)
 }
 
-/**
- * @internal
- */
-export function createClientFromContext(clientCtx: MinimalClient) {
+export function createCoachClientFromCtx(clientCtx: MinimalCoachClient): CoachClientFull {
   function clientFn<
-    T extends
-      | ObjectOrInterfaceDefinition
-      | ActionDefinition<any>
-      | QueryDefinition<any>
-      | Experiment<"2.0.8">
-      | Experiment<"2.1.0">
-      | Experiment<"2.8.0">
-      | Experiment<"2.19.0">,
-  >(o: T): T extends ObjectTypeDefinition ? ObjectSet<T>
-    : T extends InterfaceDefinition ? MinimalObjectSet<T>
-    : T extends ActionDefinition<any> ? ActionSignatureFromDef<T>
-    : T extends QueryDefinition<any> ? QuerySignatureFromDef<T>
-    : T extends
-      | Experiment<"2.0.8">
-      | Experiment<"2.1.0">
-      | Experiment<"2.8.0">
-      | Experiment<"2.19.0"> ? { invoke: ExperimentFns<T> }
-    : never
-  {
-    if (o.type === "object" || o.type === "interface") {
-      return clientCtx.objectSetFactory(o, clientCtx) as any;
-    } else if (o.type === "action") {
-      return new ActionInvoker(
-        clientCtx,
-        o,
-      ) as (T extends ActionDefinition<any>
-        // first `as` to the action definition for our "real" typecheck
-        ? ActionSignatureFromDef<T>
-        : never) as any; // then as any for dealing with the conditional return value
-    } else if (o.type === "query") {
-      return new QueryInvoker(
-        clientCtx,
-        o,
-      ) as (T extends QueryDefinition<any> ? QuerySignatureFromDef<T>
-        : never) as any;
-    } else if (o.type === "experiment") {
-      switch (o.name) {
-        case __EXPERIMENTAL__NOT_SUPPORTED_YET__executeStreamingFunction.name:
-          return {
-            async *executeStreamingFunction(
-              query: QueryDefinition<any>,
-              params?: Record<string, any>,
-            ) {
-              const { applyStreamingQuery } = await import(
-                "./queries/applyStreamingQuery.js"
-              );
-              yield* applyStreamingQuery(clientCtx, query, params);
-            },
-          } as any;
-        case __EXPERIMENTAL__NOT_SUPPORTED_YET__getBulkLinks.name:
-          return {
-            async *getBulkLinks(
-              objs: Array<OsdkBase<any>>,
-              linkTypes: string[],
-            ) {
-              const { createBulkLinksAsyncIterFactory } = await import(
-                "./__unstable/createBulkLinksAsyncIterFactory.js"
-              );
-              yield* createBulkLinksAsyncIterFactory(clientCtx)(
-                objs,
-                linkTypes,
-              );
-            },
-          } as any;
-        case __EXPERIMENTAL__NOT_SUPPORTED_YET__fetchOneByRid.name:
-          return {
-            fetchOneByRid: async <
-              Q extends ObjectOrInterfaceDefinition,
-              const L extends PropertyKeys<Q>,
-              const R extends boolean,
-              const S extends false | "throw" = NullabilityAdherence.Default,
-            >(
-              objectType: Q,
-              rid: string,
-              options: SelectArg<Q, L, R, S>,
-            ) => {
-              return await fetchSingle(
-                clientCtx,
-                objectType,
-                options,
-                createWithRid(
-                  [rid],
-                ),
-              ) as Coach<Q>;
-            },
-          } as any;
-        case __EXPERIMENTAL__NOT_SUPPORTED_YET__createMediaReference.name:
-          return {
-            createMediaReference: async <
-              Q extends ObjectTypeDefinition,
-              const L extends PropertyKeys.Filtered<Q, "mediaReference">,
-            >(args: {
-              data: Blob;
-              fileName: string;
-              objectType: Q;
-              propertyType: L;
-            }) => {
-              const { data, fileName, objectType, propertyType } = args;
-              const { upload } = await import(
-                "@shared/utils/coach-types/MediaReferenceProperty"
-              );
-              return await upload(
-                clientCtx,
-                await clientCtx.ontologyRid,
-                objectType.apiName,
-                propertyType as string,
-                data,
-                {
-                  mediaItemPath: fileName,
-                  preview: true,
-                },
-              );
-            },
-          } as any;
-
-        case __EXPERIMENTAL__NOT_SUPPORTED_YET__fetchPageByRid.name:
-          return {
-            fetchPageByRid: async <
-              Q extends ObjectOrInterfaceDefinition,
-              const L extends PropertyKeys<Q>,
-              const R extends boolean,
-              const S extends false | "throw" = NullabilityAdherence.Default,
-              const T extends boolean = false,
-              const PROPERTY_SECURITIES extends boolean = false,
-            >(
-              objectOrInterfaceType: Q,
-              rids: string[],
-              options: FetchPageArgs<
-                Q,
-                L,
-                R,
-                any,
-                S,
-                T,
-                never,
-                {},
-                PROPERTY_SECURITIES
-              > = {},
-            ) => {
-              return await fetchPage(
-                clientCtx,
-                objectOrInterfaceType,
-                options,
-                createWithRid(rids),
-              );
-            },
-            fetchPageByRidNoType: async <
-              const R extends boolean,
-              const S extends NullabilityAdherence,
-              const T extends boolean,
-              const PROPERTY_SECURITIES extends boolean = false,
-            >(
-              rids: readonly string[],
-              options?: FetchPageArgs<
-                ObjectOrInterfaceDefinition,
-                any,
-                R,
-                any,
-                S,
-                T,
-                never,
-                {},
-                PROPERTY_SECURITIES
-              >,
-            ) => {
-              return await fetchStaticRidPage(
-                clientCtx,
-                rids,
-                options ?? {},
-              );
-            },
-          } as any;
-
-        case __EXPERIMENTAL__NOT_SUPPORTED_YET__subscribeToNoTypeObjectSet
-          .name:
-          return {
-            subscribeToNoTypeObjectSet: <R extends boolean = false>(
-              rid: string,
-              listener: ObjectSetSubscription.Listener<
-                ObjectOrInterfaceDefinition,
-                never,
-                R
-              >,
-              opts?: { includeRid?: R },
-            ) => {
-              const unsubscribe = ObjectSetListenerWebsocket
-                .getInstance(clientCtx)
-                .subscribeWithoutType(
-                  { type: "reference", reference: rid },
-                  listener as ObjectSetSubscription.Listener<
-                    ObjectOrInterfaceDefinition,
-                    never
-                  >,
-                  opts?.includeRid ?? false,
-                );
-              return { unsubscribe };
-            },
-          } as any;
-
-        case __EXPERIMENTAL__NOT_SUPPORTED_YET__transformAndWait.name:
-          return {
-            transformAndWait: async (args: {
-              mediaReference: MediaReference;
-              transformation: MediaTransformation;
-              options?: TransformOptions;
-            }) => {
-              const { transformAndWaitInternal } = await import(
-                "./util/transformAndWaitInternal.js"
-              );
-              const { mediaSetRid, mediaItemRid, token } =
-                args.mediaReference.reference.mediaSetViewItem;
-              return transformAndWaitInternal(
-                clientCtx,
-                mediaSetRid,
-                mediaItemRid,
-                makeMediaTransformation(args.transformation),
-                token,
-                args.options,
-              );
-            },
-          } as any;
-      }
-
-      throw new Error("not implemented");
-    } else {
-      throw new Error("not implemented");
+    T extends ObjectTypeDefinition | ActionDefinition | QueryDefinition
+  >(
+    o: T
+  ): T extends ObjectTypeDefinition
+    ? ObjectSet
+    : T extends ActionDefinition
+      ? CoachActionInvoker
+      : T extends QueryDefinition
+        ? CoachQueryInvoker
+        : never {
+    if ((o as any).type === 'object' || (o as any).type === 'interface') {
+      return clientCtx.pipelineFactory(o as any, clientCtx) as any
+    } else if ((o as any).type === 'action') {
+      return new CoachActionInvoker(clientCtx, o as any) as any
+    } else if ((o as any).type === 'query') {
+      return new CoachQueryInvoker(clientCtx, o as any) as any
     }
+    throw new Error('Unsupported definition type')
   }
 
-  const fetchMetadata = fetchMetadataInternal.bind(
-    undefined,
-    clientCtx,
-  );
+  const fetchMetadata = fetchCoachMetadataInternal.bind(undefined, clientCtx)
 
-  const symbolClientContext: newSymbolClientContext = "__osdkClientContext";
-
-  const client: Client = Object.defineProperties<Client>(
-    clientFn as Client,
+  const client: CoachClientFull = Object.defineProperties(
+    clientFn as unknown as CoachClientFull,
     {
-      [oldSymbolClientContext]: {
-        value: clientCtx,
-      },
-      [symbolClientContext]: {
-        value: clientCtx,
-      },
-      [additionalContext]: {
-        value: clientCtx,
-      },
-      fetchMetadata: {
-        value: fetchMetadata,
-      },
-    } satisfies Record<keyof Client, PropertyDescriptor>,
-  );
+      [coachClientSymbol]: { value: clientCtx },
+      _ctx: { value: clientCtx },
+      fetchMetadata: { value: fetchMetadata }
+    }
+  )
 
-  return client;
+  return client
 }
 
-/**
- * Creates a {@link Client} for interacting with a Pantheon GameState. This is the primary entry point for
- * the COACH and is typically called once per application during setup. The returned client is then used
- * to load object sets, apply actions, and execute queries against the configured gameState.
- * @param baseUrl - The base URL of the Pantheon stack (e.g. `"https://example.pantheon-coach.com"`).
- * @param ontologyRid - The gameState RID to scope the client to. May be provided directly or as a `Promise`
- *   that resolves to the RID. Typically the generated `$ontologyRid` export from your generated SDK is passed here.
- * @param tokenProvider - A function returning a `Promise` that resolves to a bearer token used to authenticate
- *   requests. Typically the OAuth client returned by `createPublicOauthClient` or `createConfidentialOauthClient`
- *   from `@shared/utils/coach-types`, which handles caching and refresh; you can also provide a custom function if you
- *   manage tokens yourself.
- * @param options - Optional client configuration: a custom `logger`, an experimental `UNSTABLE_DO_NOT_USE_BRANCH`
- *   for branch-aware requests, and additional `headers` to include on every request.
- * @param fetchFn - An optional `fetch` implementation to use for all requests. Defaults to the global `fetch`.
- * @example
- * ```ts
- * import { createClient, type Client } from "@shared/utils/coach-client";
- * import { createPublicOauthClient } from "@shared/utils/coach-types";
- * import { $ontologyRid } from "./generatedNoCheck/index.js";
- *
- * const auth = createPublicOauthClient(
- *   "<your-client-id>",
- *   "https://example.pantheon-coach.com",
- *   `${window.location.origin}/auth/callback`,
- * );
- *
- * export const client: Client = createClient(
- *   "https://example.pantheon-coach.com",
- *   $ontologyRid,
- *   auth,
- * );
- * ```
- * @returns a {@link Client} configured to talk to the given Pantheon stack and gameState
- */
-export const createClient: (
+export function createCoachClientFullExport(
   baseUrl: string,
-  ontologyRid: string | Promise<string>,
+  gameStateId: string | Promise<string>,
   tokenProvider: () => Promise<string>,
   options?: {
-    logger?: Logger;
-    /** @beta This is an experimental feature subject to change */
-    UNSTABLE_DO_NOT_USE_BRANCH?: string;
-    headers?: Record<string, string>;
-  } | undefined,
-  fetchFn?: typeof fetch | undefined,
-) => Client = createClientInternal.bind(
-  undefined,
-  createObjectSet,
-  undefined,
-  undefined,
-);
+    logger?: Logger
+    headers?: Record<string, string>
+  },
+  fetchFn?: typeof fetch
+): CoachClientFull {
+  return createCoachClientFullInternal(
+    createPipeline as unknown as PipelineFactory,
+    undefined,
+    undefined,
+    baseUrl,
+    gameStateId,
+    tokenProvider,
+    options,
+    fetchFn
+  )
+}
 
-export const createClientWithTransaction: (
+export function createCoachClientFullWithTransaction(
   transactionId: string,
   flushEdits: () => Promise<void>,
-  ...args: Parameters<typeof createClient>
-) => Client = (transactionRid, flushEdits, ...args) =>
-  createClientInternal(
-    createObjectSet,
-    transactionRid,
+  ...args: Parameters<typeof createCoachClientFullExport>
+): CoachClientFull {
+  return createCoachClientFullInternal(
+    createPipeline as unknown as PipelineFactory,
+    transactionId,
     flushEdits,
-    ...args,
-  ) as Client;
+    ...args
+  )
+}
 
-function createWithRid(
-  rids: string[],
-) {
-  const withRid: PipelineObjectSet = {
-    type: "static",
-    "objects": rids,
-  };
-
-  return withRid;
+function createWithGameId(gameIds: string[]): ObjectSet {
+  return {
+    type: 'base',
+    objectType: 'game-instance',
+    where: { gameId: { $in: gameIds } }
+  }
 }

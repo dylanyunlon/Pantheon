@@ -32,7 +32,7 @@ import type {
 } from "../coach-types";
 import { Actions } from "../coach-types";
 import invariant from "tiny-invariant";
-import type { MinimalClient } from "../MinimalClientContext";
+import type { MinimalCoachClient } from "../coach-client/MinimalCoachClientContext";
 import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";
 import { augmentRequestContext } from "../util/augmentRequestContext";
 import type { NOOP } from "../util/NOOP";
@@ -118,7 +118,7 @@ export async function applyAction<
   >[] ? ApplyBatchActionOptions
     : ApplyActionOptions,
 >(
-  client: MinimalClient,
+  client: MinimalCoachClient,
   action: AD,
   parameters?: P,
   options: Op = {} as Op,
@@ -207,7 +207,7 @@ async function remapActionParams<AD extends ActionDefinition<any>>(
   params:
     | OsdkActionParameters<CompileTimeActionMetadata<AD>["parameters"]>
     | undefined,
-  client: MinimalClient,
+  client: MinimalCoachClient,
   actionMetadata: ActionMetadata,
 ): Promise<Record<string, DataValue>> {
   if (params == null) {
@@ -226,7 +226,7 @@ async function remapBatchActionParams<
   AD extends ActionDefinition<any>,
 >(
   params: OsdkActionParameters<CompileTimeActionMetadata<AD>["parameters"]>[],
-  client: MinimalClient,
+  client: MinimalCoachClient,
   actionMetadata: ActionMetadata,
 ) {
   const remappedParams = await Promise.all(params.map(
@@ -260,7 +260,7 @@ export function remapActionResponse(
     const editedObjectTypesSet = new Set<string>();
     for (const edit of editResponses.edits) {
       if (edit.type === "addLink" || edit.type === "deleteLink") {
-        const osdkEdit = {
+        const coachEdit = {
           linkTypeApiNameAtoB: edit.linkTypeApiNameAtoB,
           linkTypeApiNameBtoA: edit.linkTypeApiNameBtoA,
           aSideObject: edit.aSideObject,
@@ -268,25 +268,25 @@ export function remapActionResponse(
         };
         edit.type === "addLink"
           ? remappedActionResponse.addedLinks.push(
-            osdkEdit,
+            coachEdit,
           )
-          : remappedActionResponse.deletedLinks?.push(osdkEdit);
+          : remappedActionResponse.deletedLinks?.push(coachEdit);
         editedObjectTypesSet.add(edit.aSideObject.objectType);
         editedObjectTypesSet.add(edit.bSideObject.objectType);
       } else if (
         edit.type === "addObject" || edit.type === "deleteObject"
         || edit.type === "modifyObject"
       ) {
-        const osdkEdit = {
+        const coachEdit = {
           objectType: edit.objectType,
           primaryKey: edit.primaryKey,
         };
         if (edit.type === "addObject") {
-          remappedActionResponse.addedObjects.push(osdkEdit);
+          remappedActionResponse.addedObjects.push(coachEdit);
         } else if (edit.type === "deleteObject") {
-          remappedActionResponse.deletedObjects?.push(osdkEdit);
+          remappedActionResponse.deletedObjects?.push(coachEdit);
         } else if (edit.type === "modifyObject") {
-          remappedActionResponse.modifiedObjects.push(osdkEdit);
+          remappedActionResponse.modifiedObjects.push(coachEdit);
         }
         editedObjectTypesSet.add(edit.objectType);
       } else {

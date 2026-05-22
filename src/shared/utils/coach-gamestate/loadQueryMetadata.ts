@@ -1,30 +1,20 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
-import type { QueryMetadata } from "@shared/utils/coach-types";
-import * as QueryTypes from "@shared/utils/coach-types/QueryType";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { QueryDefinition } from '../coach-types'
+import type { MinimalCoachClient } from '../coach-client/MinimalCoachClientContext'
 
 export async function loadQueryMetadata(
-  client: MinimalClient,
-  queryTypeApiNameAndVersion: string,
-): Promise<QueryMetadata> {
-  const [apiName, version] = queryTypeApiNameAndVersion.split(":");
-  const r = await QueryTypes.get(
-    client,
-    await client.ontologyRid,
-    apiName,
-    { version },
-  );
-
-  const { wireQueryTypeV2ToSdkQueryMetadata } = await import(
-    "@shared/utils/coach-types"
-  );
-  return wireQueryTypeV2ToSdkQueryMetadata(r);
+  client: MinimalCoachClient,
+  key: string
+): Promise<QueryDefinition> {
+  const [apiName, version] = key.split(':')
+  const token = await client.tokenProvider()
+  const gameStateId = typeof client.gameStateId === 'string'
+    ? client.gameStateId
+    : await client.gameStateId
+  let url = `${client.baseUrl}/api/v2/coach/gameStates/${encodeURIComponent(gameStateId)}/queryTypes/${encodeURIComponent(apiName)}`
+  if (version) url += `?version=${encodeURIComponent(version)}`
+  const resp = await client.fetchFn(url, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  if (!resp.ok) throw new Error(`Failed to load query metadata for ${apiName}: ${resp.status}`)
+  return resp.json()
 }

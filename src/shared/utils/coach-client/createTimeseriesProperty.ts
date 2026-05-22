@@ -13,17 +13,17 @@ import type {
   TimeSeriesQuery,
 } from "@shared/utils/coach-types";
 import * as TimeSeriesPropertiesV2 from "@shared/utils/coach-types/TimeSeriesPropertyV2";
-import type { MinimalClient } from "./MinimalClientContext.js";
-import { asyncIterPointsHelper, getTimeRange } from "./util/timeseriesUtils.js";
+import type { MinimalCoachClient } from "./MinimalCoachClientContext";
+import { asyncIterPointsHelper, getTimeRange } from "../coach-util/timeseriesUtils";
 
 export class TimeSeriesPropertyImpl<T extends number | string>
   implements TimeSeriesProperty<T>
 {
   #triplet: [string, any, string];
-  #client: MinimalClient;
+  #client: MinimalCoachClient;
 
   constructor(
-    client: MinimalClient,
+    client: MinimalCoachClient,
     objectApiName: string,
     primaryKey: any,
     propertyName: string,
@@ -35,7 +35,7 @@ export class TimeSeriesPropertyImpl<T extends number | string>
   public async getFirstPoint(): Promise<TimeSeriesPoint<T>> {
     return TimeSeriesPropertiesV2.getFirstPoint(
       this.#client,
-      await this.#client.ontologyRid,
+      await this.#client.gameStateId,
       ...this.#triplet,
     ) as Promise<TimeSeriesPoint<T>>;
   }
@@ -43,7 +43,7 @@ export class TimeSeriesPropertyImpl<T extends number | string>
   public async getLastPoint(): Promise<TimeSeriesPoint<T>> {
     return TimeSeriesPropertiesV2.getLastPoint(
       this.#client,
-      await this.#client.ontologyRid,
+      await this.#client.gameStateId,
       ...this.#triplet,
     ) as Promise<TimeSeriesPoint<T>>;
   }
@@ -72,7 +72,7 @@ export class TimeSeriesPropertyImpl<T extends number | string>
     const streamPointsIterator = await TimeSeriesPropertiesV2
       .streamPoints(
         this.#client,
-        await this.#client.ontologyRid,
+        await this.#client.gameStateId,
         ...this.#triplet,
         query ? { range: getTimeRange(query) } : {},
       );

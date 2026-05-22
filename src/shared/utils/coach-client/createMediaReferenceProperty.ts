@@ -10,15 +10,15 @@
 import type { Media, MediaMetadata, MediaReference } from "@shared/utils/coach-types";
 import type { MediaReference as CoreMediaReference } from "@shared/utils/coach-types";
 import * as MediaReferenceProperties from "@shared/utils/coach-types/MediaReferenceProperty";
-import type { MinimalClient } from "./MinimalClientContext.js";
+import type { MinimalCoachClient } from "./MinimalCoachClientContext";
 
 export class MediaReferencePropertyImpl implements Media {
   #mediaReference: MediaReference;
   #triplet: [string, any, string];
-  #client: MinimalClient;
+  #client: MinimalCoachClient;
 
   constructor(args: {
-    client: MinimalClient;
+    client: MinimalCoachClient;
     objectApiName: string;
     primaryKey: any;
     propertyName: string;
@@ -39,7 +39,7 @@ export class MediaReferencePropertyImpl implements Media {
   public async fetchContents(): Promise<Response> {
     return MediaReferenceProperties.getMediaContent(
       this.#client,
-      await this.#client.ontologyRid,
+      await this.#client.gameStateId,
       ...this.#triplet,
       {
         preview: true, // TODO: Can turn this back off when backend is no longer in beta.
@@ -50,7 +50,7 @@ export class MediaReferencePropertyImpl implements Media {
   public async fetchMetadata(): Promise<MediaMetadata> {
     const r = await MediaReferenceProperties.getMediaMetadata(
       this.#client,
-      await this.#client.ontologyRid,
+      await this.#client.gameStateId,
       ...this.#triplet,
       {
         preview: true, // TODO: Can turn this back off when backend is no longer in beta.

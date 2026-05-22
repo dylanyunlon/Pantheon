@@ -1,29 +1,18 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
-import type { ObjectMetadata } from "@shared/utils/coach-types";
-import * as ObjectTypesV2 from "@shared/utils/coach-types/ObjectTypeV2";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { ObjectMetadata } from '../coach-types'
+import type { MinimalCoachClient } from '../coach-client/MinimalCoachClientContext'
 
 export async function loadFullObjectMetadata(
-  client: MinimalClient,
-  objectType: string,
-): Promise<ObjectMetadata & { rid: string }> {
-  const full = await ObjectTypesV2.getFullMetadata(
-    client,
-    await client.ontologyRid,
-    objectType,
-    { preview: true, branch: client.branch },
-  );
-  const { wireObjectTypeFullMetadataToSdkObjectMetadata } = await import(
-    "@shared/utils/coach-types"
-  );
-  const ret = wireObjectTypeFullMetadataToSdkObjectMetadata(full, true);
-  return { ...ret };
+  client: MinimalCoachClient,
+  apiName: string
+): Promise<ObjectMetadata> {
+  const token = await client.tokenProvider()
+  const gameStateId = typeof client.gameStateId === 'string'
+    ? client.gameStateId
+    : await client.gameStateId
+  const resp = await client.fetchFn(
+    `${client.baseUrl}/api/v2/coach/gameStates/${encodeURIComponent(gameStateId)}/objectTypes/${encodeURIComponent(apiName)}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  if (!resp.ok) throw new Error(`Failed to load object metadata for ${apiName}: ${resp.status}`)
+  return resp.json()
 }

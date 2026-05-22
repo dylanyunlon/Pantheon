@@ -10,22 +10,22 @@
 import type { Media, MediaMetadata, MediaReference } from "@shared/utils/coach-types";
 import { MediaSets } from "@shared/utils/coach-types";
 import invariant from "../coach-util/invariant";
-import type { Client } from "./Client.js";
-import { additionalContext } from "./Client.js";
-import type { MinimalClient } from "./MinimalClientContext.js";
+import type { Client } from "./CoachClient";
+import { coachClientContext } from "./CoachClient";
+import type { MinimalCoachClient } from "./MinimalCoachClientContext";
 
 export function createMediaFromReference(
   client: Client,
   mediaReference: MediaReference,
 ): Media {
   return createMediaFromReferenceInternal(
-    client[additionalContext],
+    client[coachClientContext],
     mediaReference,
   );
 }
 
 export function createMediaFromReferenceInternal(
-  client: MinimalClient,
+  client: MinimalCoachClient,
   mediaReference: MediaReference,
 ): Media {
   const { mediaSetRid, mediaItemRid } =

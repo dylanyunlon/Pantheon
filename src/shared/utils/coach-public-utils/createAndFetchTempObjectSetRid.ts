@@ -13,8 +13,8 @@ import type {
   ObjectSet,
 } from "@shared/utils/coach-types";
 import * as OntologyObjectSets from "@shared/utils/coach-types/OntologyObjectSet";
-import { additionalContext, type Client } from "../Client.js";
-import { getWireObjectSet } from "../coach-pipeline/createObjectSet.js";
+import { additionalContext, type Client } from "../Client";
+import { getWireObjectSet } from "../coach-pipeline/createObjectSet";
 
 /**
  * Fetches a temporary object set RID from the Pantheon stack for the given object set.
@@ -32,7 +32,7 @@ export async function createAndFetchTempObjectSetRid<
 ): Promise<string> {
   const response = await OntologyObjectSets.createTemporary(
     client,
-    await client[additionalContext].ontologyRid,
+    await client[additionalContext].gameStateId,
     {
       objectSet: getWireObjectSet(objectSet),
     },

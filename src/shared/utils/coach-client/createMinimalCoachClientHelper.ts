@@ -1,33 +1,25 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
+import type { Logger } from '../coach-types'
+import type { MinimalCoachClient, MinimalCoachClientMetadata } from './MinimalCoachClientContext'
+import { createMinimalCoachClientFull } from './createMinimalCoachClientFull'
+import type { PipelineFactory } from '../coach-pipeline/PipelineFactory'
 
-import { createMinimalClient } from "./createMinimalClient.js";
-import type { MinimalClientParams } from "./MinimalClientContext.js";
-
-/** @internal */
-
-export function createMinimalClientHelper(
+export function createMinimalCoachClientHelper(
+  metadata: MinimalCoachClientMetadata,
   baseUrl: string,
-  ontologyRid: string | Promise<string>,
   tokenProvider: () => Promise<string>,
-  ...args: typeof createMinimalClient extends (
-    metadata: MinimalClientParams["metadata"],
-    baseUrl: string,
-    tokenProvider: () => Promise<string>,
-    ...args: infer A
-  ) => any ? A
-    : never
-): ReturnType<typeof createMinimalClient> {
-  return createMinimalClient(
-    { ontologyRid },
+  options?: {
+    logger?: Logger
+    headers?: Record<string, string>
+  },
+  fetchFn?: typeof globalThis.fetch,
+  pipelineFactory?: PipelineFactory
+): MinimalCoachClient {
+  return createMinimalCoachClientFull(
+    metadata,
     baseUrl,
     tokenProvider,
-    ...args,
-  );
+    options || {},
+    fetchFn,
+    pipelineFactory
+  )
 }

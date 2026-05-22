@@ -1,58 +1,40 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
-export function getMetaTagContent(name: string): string {
-  const element = document.querySelector(`meta[name="${name}"]`);
-  const val = element ? element.getAttribute("content") : null;
-  if (val == null) {
-    throw new Error(`Missing meta tag: ${name}`);
-  }
-  return val;
-}
-
-function getViteEnvVar(name: string): string {
-  const val = import.meta.env[name];
-  if (val == null) {
-    throw new Error(`Missing environment variable: ${name}`);
-  }
-  return val;
-}
-
-export interface OsdkConfig {
-  clientId: string;
-  redirectUrl: string;
-  pantheonUrl: string;
-  ontologyRid: string;
-}
-
 function isProduction(): boolean {
-  return process.env.NODE_ENV === "production";
+  try {
+    return typeof window !== 'undefined'
+      && window.location.hostname !== 'localhost'
+      && !window.location.hostname.startsWith('127.')
+  } catch {
+    return false
+  }
 }
 
-function getConfigValue(metaTagName: string, viteEnvVarName: string): string {
-  return isProduction()
-    ? getMetaTagContent(metaTagName)
-    : getViteEnvVar(viteEnvVarName);
+function getMetaTagContent(name: string): string {
+  if (typeof document === 'undefined') return ''
+  const meta = document.querySelector(`meta[name="${name}"]`)
+  return meta?.getAttribute('content') || ''
 }
 
-function getOntologyRid(ontologyRid: string): string {
-  return isProduction() ? getMetaTagContent("coach-ontologyRid") : ontologyRid;
+export interface CoachConfig {
+  baseUrl: string
+  gameStateId: string
+  clientId: string
 }
 
-export function getOsdkConfig(ontologyRid: string): OsdkConfig {
+function getGameStateId(gameStateId: string): string {
+  return isProduction() ? getMetaTagContent('coach-gameStateId') : gameStateId
+}
+
+export function getCoachConfig(gameStateId: string): CoachConfig {
+  if (isProduction()) {
+    return {
+      baseUrl: getMetaTagContent('coach-foundryUrl'),
+      clientId: getMetaTagContent('coach-clientId'),
+      gameStateId: getGameStateId(gameStateId)
+    }
+  }
   return {
-    clientId: getConfigValue("coach-clientId", "VITE_FOUNDRY_CLIENT_ID"),
-    redirectUrl: getConfigValue(
-      "coach-redirectUrl",
-      "VITE_FOUNDRY_REDIRECT_URL",
-    ),
-    pantheonUrl: getConfigValue("coach-pantheonUrl", "VITE_FOUNDRY_API_URL"),
-    ontologyRid: getOntologyRid(ontologyRid),
-  };
+    baseUrl: import.meta?.env?.VITE_COACH_URL ?? 'http://localhost:8080',
+    clientId: import.meta?.env?.VITE_COACH_CLIENT_ID ?? '',
+    gameStateId: getGameStateId(gameStateId)
+  }
 }

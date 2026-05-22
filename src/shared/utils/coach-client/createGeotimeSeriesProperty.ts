@@ -13,18 +13,18 @@ import type {
   TimeSeriesQuery,
 } from "@shared/utils/coach-types";
 import * as TimeSeriesValueBankProperties from "@shared/utils/coach-types/TimeSeriesValueBankProperty";
-import type { MinimalClient } from "./MinimalClientContext.js";
-import { asyncIterPointsHelper, getTimeRange } from "./util/timeseriesUtils.js";
+import type { MinimalCoachClient } from "./MinimalCoachClientContext";
+import { asyncIterPointsHelper, getTimeRange } from "../coach-util/timeseriesUtils";
 
 export class GeotimeSeriesPropertyImpl<T extends GeoJSON.Point>
   implements GeotimeSeriesProperty<T>
 {
   #triplet: [string, any, string];
-  #client: MinimalClient;
+  #client: MinimalCoachClient;
   lastFetchedValue: TimeSeriesPoint<T> | undefined;
 
   constructor(
-    client: MinimalClient,
+    client: MinimalCoachClient,
     objectApiName: string,
     primaryKey: any,
     propertyName: string,
@@ -41,7 +41,7 @@ export class GeotimeSeriesPropertyImpl<T extends GeoJSON.Point>
     const latestPointPromise = TimeSeriesValueBankProperties
       .getLatestValue(
         this.#client,
-        await this.#client.ontologyRid,
+        await this.#client.gameStateId,
         ...this.#triplet,
       );
     latestPointPromise.then(
@@ -76,7 +76,7 @@ export class GeotimeSeriesPropertyImpl<T extends GeoJSON.Point>
     const streamPointsIterator = await TimeSeriesValueBankProperties
       .streamValues(
         this.#client,
-        await this.#client.ontologyRid,
+        await this.#client.gameStateId,
         ...this.#triplet,
         query ? { range: getTimeRange(query) } : {},
       );
