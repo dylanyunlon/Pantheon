@@ -11,3 +11,13 @@ export type {
   TrainingSample,
   CaptureSessionMeta
 } from './experiment-capture'
+export {
+  PrivacyScrubber,
+  createPrivacyScrubber,
+  scrubPuuidInPlace,
+  validateNoLeakedPii
+} from './privacy-scrubber'
+export type {
+  ScrubStrategy,
+  PrivacyScrubberConfig
+} from './privacy-scrubber'

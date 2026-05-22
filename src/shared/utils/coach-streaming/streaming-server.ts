@@ -1,6 +1,7 @@
 import type { CoachAdvice } from '../coach-engine'
 import type { GamePhase } from '../coach-scheduler'
 import type { CaptureEvent, FeatureVector, TrainingSample } from '../coach-capture/experiment-capture'
+import type { PrivacyScrubber } from '../coach-capture/privacy-scrubber'
 import type { ReplayAnalysisReport } from '../coach-replay'
 import type { InferenceResult } from '../coach-inference'
 import type { ExperimentSnapshot } from '../coach-abtest'
@@ -97,9 +98,14 @@ export class CoachStreamServer {
   private _throttleTimer: ReturnType<typeof setTimeout> | null = null
   private _onStartListeners = new Set<(port: number) => void>()
   private _onClientListeners = new Set<(clientId: string, action: 'connect' | 'disconnect') => void>()
+  private _privacyScrubber: PrivacyScrubber | null = null
 
   constructor(config?: Partial<StreamServerConfig>) {
     this._config = { ...DEFAULT_CONFIG, ...config }
+  }
+
+  setPrivacyScrubber(scrubber: PrivacyScrubber | null): void {
+    this._privacyScrubber = scrubber
   }
 
   async start(sessionId?: string): Promise<boolean> {
@@ -253,11 +259,14 @@ export class CoachStreamServer {
   }
 
   broadcastCaptureEvent(event: CaptureEvent): void {
+    const scrubbedEvent = this._privacyScrubber
+      ? this._privacyScrubber.scrubCaptureEvent(event)
+      : event
     this._enqueue({
       type: 'capture-event',
       timestamp: Date.now(),
       sessionId: this._sessionId,
-      payload: event
+      payload: scrubbedEvent
     })
   }
 
@@ -271,11 +280,14 @@ export class CoachStreamServer {
   }
 
   broadcastTrainingSample(sample: TrainingSample): void {
+    const scrubbedSample = this._privacyScrubber
+      ? this._privacyScrubber.scrubTrainingSample(sample)
+      : sample
     this._enqueue({
       type: 'training-sample',
       timestamp: Date.now(),
       sessionId: this._sessionId,
-      payload: sample
+      payload: scrubbedSample
     })
   }
 

@@ -11,6 +11,8 @@ import { CoachDataTracker } from '@shared/utils/coach-cache'
 import type { CoachDataType, CoachQueryStatus } from '@shared/utils/coach-cache'
 import type { GamePhase } from '@shared/utils/coach-scheduler'
 import { mapQueryPhaseToGamePhase } from '@shared/utils/coach-scheduler'
+import { createPrivacyPipeline, PrivacyPipeline } from '@shared/utils/coach-privacy'
+import { createPrivacyScrubber } from '@shared/utils/coach-capture/privacy-scrubber'
 import { comparer } from 'mobx'
 import { makeAutoObservable, observable, runInAction } from 'mobx'
 
@@ -48,6 +50,12 @@ export class CoachAdvisorSettings {
   captureSampleCapacity: number = 100
   captureShowStatsInPanel: boolean = false
   captureExportFormat: 'json' | 'csv' = 'json'
+  privacyEnabled: boolean = true
+  privacyScrubPuuids: boolean = true
+  privacyScrubSessionIds: boolean = false
+  privacyScrubGameIds: boolean = false
+  privacyEnableAuditLog: boolean = true
+  privacyEnableComplianceChecks: boolean = true
 
   setEnabled(v: boolean) {
     this.enabled = v
@@ -118,6 +126,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
   private readonly _setting: SetterSettingService
   private _engine: CoachEngine
   private _dataTracker: CoachDataTracker
+  private _privacyPipeline: PrivacyPipeline | null = null
 
   public readonly settings = new CoachAdvisorSettings()
   public readonly state = new CoachAdvisorState()
@@ -160,7 +169,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         captureEventCapacity: { default: this.settings.captureEventCapacity },
         captureSampleCapacity: { default: this.settings.captureSampleCapacity },
         captureShowStatsInPanel: { default: this.settings.captureShowStatsInPanel },
-        captureExportFormat: { default: this.settings.captureExportFormat }
+        captureExportFormat: { default: this.settings.captureExportFormat },
+        privacyEnabled: { default: this.settings.privacyEnabled },
+        privacyScrubPuuids: { default: this.settings.privacyScrubPuuids },
+        privacyScrubSessionIds: { default: this.settings.privacyScrubSessionIds },
+        privacyScrubGameIds: { default: this.settings.privacyScrubGameIds },
+        privacyEnableAuditLog: { default: this.settings.privacyEnableAuditLog },
+        privacyEnableComplianceChecks: { default: this.settings.privacyEnableComplianceChecks }
       },
       this.settings
     )
@@ -172,12 +187,17 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
     this._handleDataTracking()
     this._handleReplayAnalysis()
     this._handleIpcCall()
+    this._initPrivacyPipeline()
   }
 
   async onDispose() {
     this._engine.dispose()
     this._dataTracker.clear()
     this.state.clear()
+    if (this._privacyPipeline) {
+      this._privacyPipeline.dispose()
+      this._privacyPipeline = null
+    }
   }
 
   private async _handleState() {
@@ -207,7 +227,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       'captureEventCapacity',
       'captureSampleCapacity',
       'captureShowStatsInPanel',
-      'captureExportFormat'
+      'captureExportFormat',
+      'privacyEnabled',
+      'privacyScrubPuuids',
+      'privacyScrubSessionIds',
+      'privacyScrubGameIds',
+      'privacyEnableAuditLog',
+      'privacyEnableComplianceChecks'
     ])
     this._mobx.propSync(CoachAdvisorMain.id, 'state', this.state, [
       'advices',
@@ -708,5 +734,62 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
     this._ipc.onCall(CoachAdvisorMain.id, 'getStreamClients', () => {
       return this._engine.streamServer.getClients()
     })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getPrivacyStats', () => {
+      if (!this._privacyPipeline) return null
+      return this._privacyPipeline.getStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'runComplianceScan', () => {
+      if (!this._privacyPipeline) return null
+      const exportPayload = this._engine.capture.getExportPayload()
+      const knownPuuids = this._engine.getKnownPuuids ? this._engine.getKnownPuuids() : []
+      return this._privacyPipeline.runComplianceScan(exportPayload, knownPuuids)
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getAuditLog', (_, limit?: number) => {
+      if (!this._privacyPipeline) return []
+      return this._privacyPipeline.auditLog.getEntries({ limit: limit || 100 })
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getAuditSummary', () => {
+      if (!this._privacyPipeline) return null
+      return this._privacyPipeline.auditLog.getSummary()
+    })
+  }
+
+  private _initPrivacyPipeline() {
+    if (!this.settings.privacyEnabled) {
+      this._log.info('Privacy pipeline disabled by settings')
+      return
+    }
+
+    this._privacyPipeline = createPrivacyPipeline({
+      enabled: this.settings.privacyEnabled,
+      scrubPuuids: this.settings.privacyScrubPuuids,
+      scrubSessionIds: this.settings.privacyScrubSessionIds,
+      scrubGameIds: this.settings.privacyScrubGameIds,
+      enableAuditLog: this.settings.privacyEnableAuditLog,
+      enableComplianceChecks: this.settings.privacyEnableComplianceChecks,
+    })
+
+    const scrubber = createPrivacyScrubber({
+      strategy: 'hash',
+      hashSalt: 'pantheon-coach-privacy-v1',
+      knownPuuids: [],
+    })
+
+    this._engine.capture.setPrivacyScrubber(scrubber)
+
+    if (this._engine.streamServer) {
+      this._engine.streamServer.setPrivacyScrubber(scrubber)
+    }
+
+    this._log.info(
+      `Privacy pipeline initialized: ` +
+      `puuids=${this.settings.privacyScrubPuuids} ` +
+      `sessions=${this.settings.privacyScrubSessionIds} ` +
+      `audit=${this.settings.privacyEnableAuditLog}`
+    )
   }
 }

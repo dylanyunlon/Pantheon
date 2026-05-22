@@ -2387,3 +2387,33 @@ CoachAdvisorSettings:
 
   captureStats:
     merges: 累计合并次数
+
+  privacyEnabled:
+    label: 启用隐私合规
+    description: 开启后将自动擦洗导出和流媒体中的PII数据
+
+  privacyScrubPuuids:
+    label: 擦洗PUUID
+    description: 对所有PUUID字段进行哈希处理
+
+  privacyScrubSessionIds:
+    label: 擦洗会话ID
+    description: 对会话标识符进行哈希处理
+
+  privacyScrubGameIds:
+    label: 擦洗游戏ID
+    description: 对游戏ID进行清零处理
+
+  privacyEnableAuditLog:
+    label: 审计日志
+    description: 记录所有PII擦洗操作用于合规审计
+
+  privacyEnableComplianceChecks:
+    label: 合规检查
+    description: 定期扫描导出数据确保无PII泄漏
+
+  privacyStats:
+    totalScrubs: 总擦洗次数
+    auditLogSize: 审计日志条目
+    complianceScore: 合规评分
+    lastScan: 上次扫描时间

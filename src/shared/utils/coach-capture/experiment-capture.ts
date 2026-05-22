@@ -3,6 +3,7 @@ import type { AggregatedTeamProfile, TeamComparisonResult } from '../coach-cache
 import type { GamePhase, ScheduledAdvice } from '../coach-scheduler'
 import type { CoachChanges, DataAvailability } from '../coach-cache/query'
 import { createCoachChanges } from '../coach-cache/query'
+import type { PrivacyScrubber } from './privacy-scrubber'
 
 export type CaptureEventKind =
   | 'advice-generated'
@@ -232,6 +233,7 @@ export class ExperimentCapture {
   private _flushTimer: ReturnType<typeof setInterval> | null = null
   private _pendingFlush: CaptureEvent[] = []
   private _flushCallback: ((events: CaptureEvent[]) => void) | null = null
+  private _privacyScrubber: PrivacyScrubber | null = null
 
   constructor(options?: { eventCapacity?: number; sampleCapacity?: number }) {
     this._events = new RingBuffer<CaptureEvent>(options?.eventCapacity || 500)
@@ -253,6 +255,14 @@ export class ExperimentCapture {
 
   get sessionId(): string {
     return this._sessionId
+  }
+
+  get privacyScrubber(): PrivacyScrubber | null {
+    return this._privacyScrubber
+  }
+
+  setPrivacyScrubber(scrubber: PrivacyScrubber | null): void {
+    this._privacyScrubber = scrubber
   }
 
   get isActive(): boolean {
@@ -569,12 +579,16 @@ export class ExperimentCapture {
       const s = this._accumulator.getStats(key)
       if (s) stats[key] = s
     }
-    return {
+    const raw = {
       meta: { ...this._sessionMeta },
       events: this._events.toArray(),
       samples: this._samples.toArray(),
       accumulatorStats: stats
     }
+    if (this._privacyScrubber) {
+      return this._privacyScrubber.scrubExportPayload(raw)
+    }
+    return raw
   }
 
   clear(): void {

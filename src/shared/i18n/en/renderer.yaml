@@ -2383,3 +2383,33 @@ CoachAdvisorSettings:
 
   captureStats:
     merges: Total merges
+
+  privacyEnabled:
+    label: Enable Privacy Compliance
+    description: Automatically scrub PII from exports and streaming data
+
+  privacyScrubPuuids:
+    label: Scrub PUUIDs
+    description: Hash all PUUID fields for anonymization
+
+  privacyScrubSessionIds:
+    label: Scrub Session IDs
+    description: Hash session identifiers
+
+  privacyScrubGameIds:
+    label: Scrub Game IDs
+    description: Zero-out game IDs
+
+  privacyEnableAuditLog:
+    label: Audit Log
+    description: Record all PII scrub operations for compliance auditing
+
+  privacyEnableComplianceChecks:
+    label: Compliance Checks
+    description: Periodically scan exported data to verify no PII leaks
+
+  privacyStats:
+    totalScrubs: Total Scrubs
+    auditLogSize: Audit Log Entries
+    complianceScore: Compliance Score
+    lastScan: Last Scan

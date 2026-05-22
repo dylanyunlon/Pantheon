@@ -427,7 +427,13 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
       'captureEventCapacity',
       'captureSampleCapacity',
       'captureShowStatsInPanel',
-      'captureExportFormat'
+      'captureExportFormat',
+      'privacyEnabled',
+      'privacyScrubPuuids',
+      'privacyScrubSessionIds',
+      'privacyScrubGameIds',
+      'privacyEnableAuditLog',
+      'privacyEnableComplianceChecks'
     ])
     this._pm.sync(COACH_SHARD_NAMESPACE, 'state', store.state, [
       'advices',
