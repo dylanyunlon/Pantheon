@@ -1,0 +1,414 @@
+/*
+ * Copyright 2026 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
+ * 
+ * 
+ *
+ *     Coach-advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type {
+  InterfaceDefinition,
+  ObjectOrInterfaceDefinition,
+  ObjectSet,
+  ObjectTypeDefinition,
+  Coach,
+  PageResult,
+  PrimaryKeyType,
+  WhereClause,
+} from "@shared/types/league-client/coach-api";
+import deepEqual from "fast-deep-equal";
+import { type Subject } from "rxjs";
+import { additionalContext } from "../../../Client.js";
+import type { SpecificLinkPayload } from "../../LinkPayload.js";
+import type { Status } from "../../ObservableClient/common.js";
+import type { ObserveLinks } from "../../ObservableClient/ObserveLink.js";
+import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery.js";
+import { BaseListQuery } from "../base-list/BaseListQuery.js";
+import type { BatchContext } from "../BatchContext.js";
+import type { CacheKey } from "../CacheKey.js";
+import type { Canonical } from "../Canonical.js";
+import type { Changes } from "../Changes.js";
+import type { Entry } from "../Layer.js";
+import type { OptimisticId } from "../OptimisticId.js";
+import type { Rdp } from "../RdpCanonicalizer.js";
+import type { SimpleWhereClause } from "../SimpleWhereClause.js";
+import { OrderBySortingStrategy } from "../sorting/SortingStrategy.js";
+import type { Store } from "../Store.js";
+import type { SubjectPayload } from "../SubjectPayload.js";
+import { tombstone } from "../tombstone.js";
+import {
+  INCLUDE_ALL_BASE_PROPERTIES_IDX as LINK_INCLUDE_ALL_BASE_PROPERTIES_IDX,
+  SELECT_IDX as LINK_SELECT_IDX,
+  type SpecificLinkCacheKey,
+} from "./SpecificLinkCacheKey.js";
+
+/**
+ * Query implementation for retrieving linked objects from a specific object.
+ * - Stores links as ObjectCacheKey[] references
+ * - Creates indirect dependencies on linked objects
+ * - Supports filtering and sorting of linked collections
+ * - Handles proper invalidation of related objects
+ */
+export class SpecificLinkQuery extends BaseListQuery<
+  SpecificLinkCacheKey,
+  SpecificLinkPayload,
+  ObserveLinks.Options<ObjectOrInterfaceDefinition, string>
+> {
+  #sourceApiName: string;
+  #sourceTypeKind: "object" | "interface";
+  #sourceUnderlyingObjectType: string;
+  #sourcePk: PrimaryKeyType<ObjectTypeDefinition>;
+  #linkName: string;
+  #whereClause: Canonical<SimpleWhereClause>;
+  #orderBy: Canonical<Record<string, "asc" | "desc" | undefined>>;
+  #select: Canonical<readonly string[]> | undefined;
+
+  protected override createPayload(
+    params: CollectionConnectableParams,
+  ): SpecificLinkPayload {
+    return {
+      ...super.createPayload(params),
+      linkedObjectsBySourcePrimaryKey: new Map([[
+        this.#sourcePk,
+        params.resolvedData ?? [],
+      ]]),
+    };
+  }
+
+  /**
+   * Register changes to the cache specific to SpecificLinkQuery
+   */
+  protected registerCacheChanges(batch: BatchContext): void {
+    batch.changes.modified.add(this.cacheKey);
+  }
+
+  constructor(
+    store: Store,
+    subject: Subject<SubjectPayload<SpecificLinkCacheKey>>,
+    cacheKey: SpecificLinkCacheKey,
+    opts: ObserveLinks.Options<ObjectOrInterfaceDefinition, string>,
+  ) {
+    super(
+      store,
+      subject,
+      opts,
+      cacheKey,
+      process.env.NODE_ENV !== "production"
+        ? (
+          store.client[additionalContext].logger?.child({}, {
+            msgPrefix: `SpecificLinkQuery<${
+              cacheKey.otherKeys.map(x => JSON.stringify(x)).join(", ")
+            }>`,
+          })
+        )
+        : undefined,
+    );
+
+    // Extract the necessary parameters from the cache key
+    [
+      this.#sourceApiName,
+      this.#sourceTypeKind,
+      this.#sourceUnderlyingObjectType,
+      this.#sourcePk,
+      this.#linkName,
+      this.#whereClause,
+      this.#orderBy,
+    ] = cacheKey.otherKeys;
+    this.#select = cacheKey.otherKeys[LINK_SELECT_IDX];
+  }
+
+  protected get rawSelect(): Canonical<readonly string[]> | undefined {
+    return this.#select;
+  }
+
+  // TODO: wire up RDP support for SpecificLinkCacheKey (needs its own slot).
+  public override get rdpConfig(): Canonical<Rdp> | undefined {
+    return undefined;
+  }
+
+  public override get includeAllBaseObjectProperties(): boolean {
+    return (
+      this.cacheKey.otherKeys[LINK_INCLUDE_ALL_BASE_PROPERTIES_IDX] === true
+    );
+  }
+
+  /**
+   * Implements fetchPageData from the BaseCollectionQuery template method pattern
+   */
+  protected async fetchPageData(
+    signal: AbortSignal | undefined,
+  ): Promise<PageResult<Coach.Instance<any>>> {
+    const client = this.store.client;
+    const gameStateProvider = client[additionalContext].gameStateProvider;
+    const isInterface = this.#sourceTypeKind === "interface";
+
+    // Resolve the link target's apiName + kind once if needed for sorting or
+    // for gating the $includeAllBaseObjectProperties param. The gameState
+    // provider caches its lookups, so calling it here is cheap.
+    const hasOrderBy = this.#orderBy
+      && Object.keys(this.#orderBy).length > 0;
+    let target: { apiName: string; kind: "object" | "interface" } | undefined;
+    if (hasOrderBy || this.includeAllBaseObjectProperties) {
+      if (isInterface) {
+        const interfaceMetadata = await gameStateProvider.getInterfaceDefinition(
+          this.#sourceApiName,
+        );
+        const linkDef = interfaceMetadata.links?.[this.#linkName];
+        if (!linkDef) {
+          throw new Error(
+            `Missing link definition for link '${this.#linkName}' on interface '${this.#sourceApiName}'`,
+          );
+        }
+        target = {
+          apiName: linkDef.targetTypeApiName,
+          kind: linkDef.targetType,
+        };
+      } else {
+        const objectMetadata = await gameStateProvider.getObjectDefinition(
+          this.#sourceApiName,
+        );
+        const linkDef = objectMetadata.links?.[this.#linkName];
+        if (!linkDef?.targetType) {
+          throw new Error(
+            `Missing link definition or targetType for link '${this.#linkName}' on object type '${this.#sourceApiName}'`,
+          );
+        }
+        // Object link defs always target an object type.
+        target = { apiName: linkDef.targetType, kind: "object" };
+      }
+    }
+
+    if (target && hasOrderBy) {
+      this.sortingStrategy = new OrderBySortingStrategy(
+        target.apiName,
+        this.#orderBy,
+      );
+    }
+
+    let linkQuery: ObjectSet<ObjectOrInterfaceDefinition>;
+
+    if (isInterface) {
+      const objectMetadata = await gameStateProvider.getObjectDefinition(
+        this.#sourceUnderlyingObjectType,
+      );
+
+      const interfaceSet = client({
+        type: "interface",
+        apiName: this.#sourceApiName,
+      } as InterfaceDefinition) as ObjectSet<ObjectOrInterfaceDefinition>;
+
+      const objectFilteredByPk = client({
+        type: "object",
+        apiName: this.#sourceUnderlyingObjectType,
+      } as ObjectTypeDefinition).where({
+        [objectMetadata.primaryKeyApiName]: this.#sourcePk,
+      } as WhereClause<any>);
+
+      const filteredSource = interfaceSet.intersect(objectFilteredByPk);
+
+      linkQuery = filteredSource.pivotTo(this.#linkName);
+    } else {
+      const objectMetadata = await gameStateProvider.getObjectDefinition(
+        this.#sourceApiName,
+      );
+
+      const sourceSet = client({
+        type: "object",
+        apiName: this.#sourceApiName,
+      } as ObjectTypeDefinition);
+
+      const sourceQuery = sourceSet.where({
+        [objectMetadata.primaryKeyApiName]: this.#sourcePk,
+      } as WhereClause<any>);
+
+      linkQuery = sourceQuery.pivotTo(this.#linkName);
+    }
+
+    if (signal?.aborted) {
+      throw new Error("Aborted");
+    }
+
+    const queryParams: {
+      $pageSize: number;
+      $nextPageToken: string | undefined;
+      $includeRid: true;
+      $orderBy?: Record<string, "asc" | "desc" | undefined>;
+      $where?: Record<string, unknown>;
+      $select?: readonly string[];
+      $includeAllBaseObjectProperties?: true;
+    } = {
+      $pageSize: this.getEffectiveFetchPageSize(),
+      $nextPageToken: this.nextPageToken,
+      $includeRid: true,
+    };
+
+    if (this.#select && this.#select.length > 0) {
+      queryParams.$select = this.#select;
+    }
+
+    if (this.#orderBy && Object.keys(this.#orderBy).length > 0) {
+      queryParams.$orderBy = this.#orderBy;
+    }
+
+    if (this.#whereClause && Object.keys(this.#whereClause).length > 0) {
+      queryParams.$where = this.#whereClause;
+    }
+
+    // Only forward $includeAllBaseObjectProperties when the link target is an
+    // interface — for object targets the flag is a no-op on the server.
+    if (target?.kind === "interface") {
+      queryParams.$includeAllBaseObjectProperties = true;
+    }
+
+    const response = await linkQuery.fetchPage(queryParams);
+
+    // Store the next page token for pagination
+    this.nextPageToken = response.nextPageToken;
+
+    return response;
+  }
+
+  /**
+   * Removes a link query from the store
+   */
+  deleteFromStore(
+    status: Status,
+    batch: BatchContext,
+  ): Entry<SpecificLinkCacheKey> | undefined {
+    const entry = batch.read(this.cacheKey);
+
+    if (entry && deepEqual(tombstone, entry.value)) {
+      if (process.env.NODE_ENV !== "production") {
+        this.logger?.child({ methodName: "deleteFromStore" }).debug(
+          `Links were already deleted, just setting status`,
+        );
+      }
+      return batch.write(this.cacheKey, entry.value, status);
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      this.logger?.child({ methodName: "deleteFromStore" }).debug(
+        JSON.stringify({ status }),
+      );
+    }
+
+    // If there is no entry then there is nothing to do
+    if (!entry || !entry.value) {
+      return;
+    }
+
+    const ret = batch.delete(this.cacheKey, status);
+    batch.changes.deleted.add(this.cacheKey);
+
+    return ret;
+  }
+
+  /**
+   * Implements Query.maybeUpdateAndRevalidate to handle cache invalidation
+   */
+  maybeUpdateAndRevalidate = async (
+    changes: Changes,
+    _optimisticId: OptimisticId | undefined,
+  ): Promise<void> => {
+    if (changes.modified.has(this.cacheKey)) {
+      return this.revalidate(true);
+    }
+
+    return Promise.resolve();
+  };
+
+  invalidateObjectType = (
+    objectType: string,
+    changes: Changes | undefined,
+  ): Promise<void> => {
+    // We need to invalidate links in multiple cases:
+    // 1. When the source object type matches the apiName (direct invalidation)
+    // 2. When the source is an interface and the invalidated type implements it
+    // 3. When the target type matches the invalidated type
+    // 4. When the target is an interface and the invalidated type implements it
+
+    if (
+      this.#sourceTypeKind === "object" && this.#sourceApiName === objectType
+    ) {
+      changes?.modified.add(this.cacheKey);
+      return this.revalidate(true);
+    }
+
+    return (async () => {
+      try {
+        const gameStateProvider = this.store.client[additionalContext]
+          .gameStateProvider;
+
+        if (this.#sourceTypeKind === "interface") {
+          const objectMetadata = await gameStateProvider.getObjectDefinition(
+            objectType,
+          );
+          if (this.#sourceApiName in objectMetadata.interfaceMap) {
+            changes?.modified.add(this.cacheKey);
+            return void await this.revalidate(true);
+          }
+        }
+
+        let targetTypeApiName: string | undefined;
+
+        if (this.#sourceTypeKind === "interface") {
+          const interfaceMetadata = await gameStateProvider
+            .getInterfaceDefinition(this.#sourceApiName);
+          targetTypeApiName = interfaceMetadata.links?.[this.#linkName]
+            ?.targetTypeApiName;
+        } else {
+          const objectMetadata = await gameStateProvider
+            .getObjectDefinition(this.#sourceApiName);
+          // Object link def's `targetType` is the target API name; it can be
+          // either an object type or an interface name.
+          targetTypeApiName = objectMetadata.links?.[this.#linkName]
+            ?.targetType;
+        }
+
+        if (!targetTypeApiName) return;
+
+        if (targetTypeApiName === objectType) {
+          changes?.modified.add(this.cacheKey);
+          return void await this.revalidate(true);
+        }
+
+        // If the target is an interface, revalidate when objectType implements
+        // it. For object-typed targets, interfaceMap[objectTypeName] is always
+        // false, so this is a safe no-op.
+        const objectMetadata = await gameStateProvider.getObjectDefinition(
+          objectType,
+        );
+        if (targetTypeApiName in objectMetadata.interfaceMap) {
+          changes?.modified.add(this.cacheKey);
+          return void await this.revalidate(true);
+        }
+      } catch (e) {
+        if (process.env.NODE_ENV !== "production") {
+          this.logger?.error(
+            "Failed to resolve metadata during invalidation",
+            e,
+          );
+        }
+        changes?.modified.add(this.cacheKey);
+        return void await this.revalidate(true);
+      }
+    })();
+  };
+}
+
+/**
+ * Type guard to check if a cache key is a SpecificLinkCacheKey
+ */
+export function isSpecificLinkCacheKey(
+  key: CacheKey,
+): key is SpecificLinkCacheKey {
+  return key.type === "specificLink";
+}

@@ -42,6 +42,12 @@ export class CoachAdvisorSettings {
   showTrueDamageWarning: boolean = true
   showWinCondition: boolean = true
   showKdaTrend: boolean = true
+  captureEnabled: boolean = false
+  captureAutoFlushInterval: number = 15000
+  captureEventCapacity: number = 500
+  captureSampleCapacity: number = 100
+  captureShowStatsInPanel: boolean = false
+  captureExportFormat: 'json' | 'csv' = 'json'
 
   setEnabled(v: boolean) {
     this.enabled = v
@@ -148,7 +154,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         showGoldEfficiency: { default: this.settings.showGoldEfficiency },
         showTrueDamageWarning: { default: this.settings.showTrueDamageWarning },
         showWinCondition: { default: this.settings.showWinCondition },
-        showKdaTrend: { default: this.settings.showKdaTrend }
+        showKdaTrend: { default: this.settings.showKdaTrend },
+        captureEnabled: { default: this.settings.captureEnabled },
+        captureAutoFlushInterval: { default: this.settings.captureAutoFlushInterval },
+        captureEventCapacity: { default: this.settings.captureEventCapacity },
+        captureSampleCapacity: { default: this.settings.captureSampleCapacity },
+        captureShowStatsInPanel: { default: this.settings.captureShowStatsInPanel },
+        captureExportFormat: { default: this.settings.captureExportFormat }
       },
       this.settings
     )
@@ -188,7 +200,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       'showGoldEfficiency',
       'showTrueDamageWarning',
       'showWinCondition',
-      'showKdaTrend'
+      'showKdaTrend',
+      'captureEnabled',
+      'captureAutoFlushInterval',
+      'captureEventCapacity',
+      'captureSampleCapacity',
+      'captureShowStatsInPanel',
+      'captureExportFormat'
     ])
     this._mobx.propSync(CoachAdvisorMain.id, 'state', this.state, [
       'advices',

@@ -1,0 +1,110 @@
+/*
+ * Copyright 2025 dylanyunlon <dylanyunlong@gmail.com>. Coach-advisor infrastructure.
+ *
+ * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
+ * 
+ * 
+ *
+ *     Coach-advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type {
+  CompileTimeMetadata,
+  ObjectOrInterfaceDefinition,
+} from "@shared/types/league-client/coach-api";
+import type { SpecificLinkPayload } from "../../LinkPayload.js";
+
+import type { Observer } from "../../ObservableClient/common.js";
+import type { ObserveLinks } from "../../ObservableClient/ObserveLink.js";
+import { AbstractHelper } from "../AbstractHelper.js";
+import type { CacheKeys } from "../CacheKeys.js";
+import type { KnownCacheKey } from "../KnownCacheKey.js";
+import type { OrderByCanonicalizer } from "../OrderByCanonicalizer.js";
+import type { QuerySubscription } from "../QuerySubscription.js";
+import type { SelectCanonicalizer } from "../SelectCanonicalizer.js";
+import type { Store } from "../Store.js";
+import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer.js";
+import type { SpecificLinkCacheKey } from "./SpecificLinkCacheKey.js";
+import { SpecificLinkQuery } from "./SpecificLinkQuery.js";
+
+export interface LinksHelper {
+  observe<
+    T extends ObjectOrInterfaceDefinition,
+    L extends keyof CompileTimeMetadata<T>["links"] & string,
+  >(
+    options: ObserveLinks.Options<T, L>,
+    subFn: Observer<SpecificLinkPayload>,
+  ): QuerySubscription<SpecificLinkQuery>;
+
+  getQuery<
+    T extends ObjectOrInterfaceDefinition,
+    L extends keyof CompileTimeMetadata<T>["links"] & string,
+  >(options: ObserveLinks.Options<T, L>): SpecificLinkQuery;
+}
+
+export class LinksHelper extends AbstractHelper<
+  SpecificLinkQuery,
+  ObserveLinks.Options<ObjectOrInterfaceDefinition, string>
+> {
+  whereCanonicalizer: WhereClauseCanonicalizer;
+  orderByCanonicalizer: OrderByCanonicalizer;
+  selectCanonicalizer: SelectCanonicalizer;
+
+  constructor(
+    store: Store,
+    cacheKeys: CacheKeys<KnownCacheKey>,
+    whereCanonicalizer: WhereClauseCanonicalizer,
+    orderByCanonicalizer: OrderByCanonicalizer,
+    selectCanonicalizer: SelectCanonicalizer,
+  ) {
+    super(store, cacheKeys);
+
+    this.whereCanonicalizer = whereCanonicalizer;
+    this.orderByCanonicalizer = orderByCanonicalizer;
+    this.selectCanonicalizer = selectCanonicalizer;
+  }
+
+  getQuery<
+    T extends ObjectOrInterfaceDefinition,
+    L extends keyof CompileTimeMetadata<T>["links"] & string,
+  >(options: ObserveLinks.Options<T, L>): SpecificLinkQuery {
+    const { apiName, type: sourceTypeKind } = options.srcType;
+
+    const canonWhere = this.whereCanonicalizer.canonicalize(
+      options.where ?? {},
+    );
+    const canonOrderBy = this.orderByCanonicalizer.canonicalize(
+      options.orderBy ?? {},
+    );
+    const canonSelect = options.select && options.select.length > 0
+      ? this.selectCanonicalizer.canonicalize(options.select)
+      : undefined;
+    const linkCacheKey = this.cacheKeys.get<SpecificLinkCacheKey>(
+      "specificLink",
+      apiName,
+      sourceTypeKind,
+      options.sourceUnderlyingObjectType,
+      options.pk,
+      options.linkName,
+      canonWhere,
+      canonOrderBy,
+      canonSelect,
+      options.$includeAllBaseObjectProperties ? true : undefined,
+    );
+
+    return this.store.queries.get(linkCacheKey, () => {
+      return new SpecificLinkQuery(
+        this.store,
+        this.store.subjects.get(linkCacheKey),
+        linkCacheKey,
+        options,
+      );
+    });
+  }
+}

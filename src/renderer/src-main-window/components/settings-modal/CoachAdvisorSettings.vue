@@ -221,24 +221,32 @@
       <template #header>
         <span class="card-header-title">{{ t('CoachAdvisorSettings.titleAdvanced') }}</span>
       </template>
+      <ControlItem class="control-item-margin" :label="t('CoachAdvisorSettings.captureEnabled.label')" :label-description="t('CoachAdvisorSettings.captureEnabled.description')" :label-width="400">
+        <NSwitch size="small" :value="cas.settings.captureEnabled" @update:value="(val) => ca.setCaptureEnabled(val)" />
+      </ControlItem>
+      <ControlItem v-if="cas.settings.captureEnabled" class="control-item-margin" :label="t('CoachAdvisorSettings.captureShowStatsInPanel.label')" :label-description="t('CoachAdvisorSettings.captureShowStatsInPanel.description')" :label-width="400">
+        <NSwitch size="small" :value="cas.settings.captureShowStatsInPanel" @update:value="(val) => ca.setCaptureShowStatsInPanel(val)" />
+      </ControlItem>
+      <ControlItem v-if="cas.settings.captureEnabled" class="control-item-margin" :label="t('CoachAdvisorSettings.captureAutoFlushInterval.label')" :label-description="t('CoachAdvisorSettings.captureAutoFlushInterval.description')" :label-width="400">
+        <NInputNumber style="width: 100px" size="small" :min="5000" :max="120000" :step="1000" :value="cas.settings.captureAutoFlushInterval" @update:value="(val) => ca.setCaptureAutoFlushInterval(val || 15000)" />
+      </ControlItem>
+      <ControlItem v-if="cas.settings.captureEnabled" class="control-item-margin" :label="t('CoachAdvisorSettings.captureEventCapacity.label')" :label-description="t('CoachAdvisorSettings.captureEventCapacity.description')" :label-width="400">
+        <NInputNumber style="width: 100px" size="small" :min="50" :max="5000" :step="50" :value="cas.settings.captureEventCapacity" @update:value="(val) => ca.setCaptureEventCapacity(val || 500)" />
+      </ControlItem>
+      <ControlItem v-if="cas.settings.captureEnabled" class="control-item-margin" :label="t('CoachAdvisorSettings.captureSampleCapacity.label')" :label-description="t('CoachAdvisorSettings.captureSampleCapacity.description')" :label-width="400">
+        <NInputNumber style="width: 100px" size="small" :min="10" :max="1000" :step="10" :value="cas.settings.captureSampleCapacity" @update:value="(val) => ca.setCaptureSampleCapacity(val || 100)" />
+      </ControlItem>
+      <ControlItem v-if="cas.settings.captureEnabled" class="control-item-margin" :label="t('CoachAdvisorSettings.captureExportFormat.label')" :label-description="t('CoachAdvisorSettings.captureExportFormat.description')" :label-width="400">
+        <NSelect style="width: 160px" size="small" :value="cas.settings.captureExportFormat" :options="exportFormatOptions" @update:value="(val) => ca.setCaptureExportFormat(val)" />
+      </ControlItem>
       <div class="advanced-info">
-        <div class="info-row">
-          <span class="info-label">{{ t('CoachAdvisorSettings.schedulerPhase') }}</span>
-          <span class="info-value">{{ cas.state.currentPhase || '-' }}</span>
-        </div>
-        <div class="info-row" v-if="captureStats">
-          <span class="info-label">{{ t('CoachAdvisorSettings.experimentEvents') }}</span>
-          <span class="info-value">{{ captureStats.eventCount }}</span>
-        </div>
-        <div class="info-row" v-if="captureStats">
-          <span class="info-label">{{ t('CoachAdvisorSettings.experimentSamples') }}</span>
-          <span class="info-value">{{ captureStats.sampleCount }}</span>
-        </div>
-        <div class="info-row" v-if="captureStats">
-          <span class="info-label">{{ t('CoachAdvisorSettings.sessionActive') }}</span>
-          <span class="info-value">{{ captureStats.isActive ? '\u2705' : '\u274C' }}</span>
-        </div>
+        <div class="info-row"><span class="info-label">{{ t('CoachAdvisorSettings.schedulerPhase') }}</span><span class="info-value">{{ cas.state.currentPhase || '-' }}</span></div>
+        <div class="info-row" v-if="captureStats"><span class="info-label">{{ t('CoachAdvisorSettings.experimentEvents') }}</span><span class="info-value">{{ captureStats.eventCount }}</span></div>
+        <div class="info-row" v-if="captureStats"><span class="info-label">{{ t('CoachAdvisorSettings.experimentSamples') }}</span><span class="info-value">{{ captureStats.sampleCount }}</span></div>
+        <div class="info-row" v-if="captureStats"><span class="info-label">{{ t('CoachAdvisorSettings.sessionActive') }}</span><span class="info-value">{{ captureStats.isActive ? '\u2705' : '\u274C' }}</span></div>
+        <div class="info-row" v-if="captureStats"><span class="info-label">{{ t('CoachAdvisorSettings.captureStats.merges') }}</span><span class="info-value">{{ captureStats.mergeCount }}</span></div>
       </div>
+      <NButton v-if="cas.settings.captureEnabled && captureStats" size="small" style="margin-top: 8px" :loading="isExporting" @click="handleExportData">{{ t('CoachAdvisorSettings.captureExportButton') }}</NButton>
     </NCard>
   </NScrollbar>
 </template>
@@ -248,26 +256,25 @@ import ControlItem from '@renderer-shared/components/ControlItem.vue'
 import { useInstance } from '@renderer-shared/shards'
 import { CoachAdvisorRenderer, useCoachAdvisorStore } from '@renderer-shared/shards/coach-advisor'
 import { useTranslation } from 'i18next-vue'
-import { NCard, NInputNumber, NScrollbar, NSwitch } from 'naive-ui'
-import { ref, onMounted } from 'vue'
+import { NButton, NCard, NInputNumber, NScrollbar, NSelect, NSwitch } from 'naive-ui'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const { t } = useTranslation()
 const cas = useCoachAdvisorStore()
 const ca = useInstance(CoachAdvisorRenderer)
 
-const captureStats = ref<{
-  sessionId: string
-  isActive: boolean
-  eventCount: number
-  sampleCount: number
-  mergeCount: number
-} | null>(null)
-
-onMounted(async () => {
-  try {
-    captureStats.value = await ca.getCaptureStats()
-  } catch (_) {}
-})
+const captureStats = ref<{ sessionId: string; isActive: boolean; eventCount: number; sampleCount: number; mergeCount: number } | null>(null)
+const isExporting = ref(false)
+const exportFormatOptions = [{ label: 'JSON', value: 'json' }, { label: 'CSV', value: 'csv' }]
+let pollTimer: ReturnType<typeof setInterval> | null = null
+async function refreshCaptureStats() { try { captureStats.value = await ca.getCaptureStats() } catch (_) {} }
+onMounted(() => { refreshCaptureStats(); pollTimer = setInterval(refreshCaptureStats, 5000) })
+onUnmounted(() => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null } })
+async function handleExportData() {
+  isExporting.value = true
+  try { const d = await ca.getExperimentExport(); const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `coach-capture-${Date.now()}.json`; a.click(); URL.revokeObjectURL(u) } catch (_) {}
+  isExporting.value = false
+}
 </script>
 
 <style lang="less" scoped>

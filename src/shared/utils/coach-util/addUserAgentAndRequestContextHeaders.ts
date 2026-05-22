@@ -1,0 +1,47 @@
+/*
+ * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
+ * 
+ * 
+ *
+ *     Coach-advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { ObjectOrInterfaceDefinition } from "@shared/types/league-client/coach-api";
+import { USER_AGENT_HEADER } from "@coach/shared.client.impl";
+import { createFetchHeaderMutator } from "@shared/http-api-axios-helper.fetch";
+import type { MinimalClient } from "../MinimalClientContext.js";
+
+export const addUserAgentAndRequestContextHeaders = (
+  client: MinimalClient,
+  withMetadata: Pick<ObjectOrInterfaceDefinition, "osdkMetadata">,
+): MinimalClient => ({
+  ...client,
+  fetch: createFetchHeaderMutator(
+    client.fetch,
+    (headers) => {
+      headers.set(
+        "X-COACH-Request-Context",
+        JSON.stringify(client.requestContext),
+      );
+
+      if (withMetadata.osdkMetadata) {
+        headers.set(
+          USER_AGENT_HEADER,
+          [
+            headers.get(USER_AGENT_HEADER),
+            withMetadata.osdkMetadata.extraUserAgent,
+          ].filter(x => x && x?.length > 0).join(" "),
+        );
+      }
+      return headers;
+    },
+  ),
+});

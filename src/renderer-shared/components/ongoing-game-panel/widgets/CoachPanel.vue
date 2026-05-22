@@ -139,6 +139,7 @@
             <span class="stat-item">\u2705 {{ schedulerStats.totalDeliveredAllTime }}</span>
           </div>
         </div>
+        <div v-if="captureStatsLine" class="coach-capture-indicator">{{ captureStatsLine }}</div>
       </template>
     </NCard>
   </Transition>
@@ -168,9 +169,8 @@ const feedbackSent = reactive(new Set<string>())
 const loadProgress = ref<{ loaded: number; total: number; percentage: number } | null>(null)
 const failedPuuids = ref<string[]>([])
 const schedulerStats = ref<Record<string, number> | null>(null)
-
+const captureStatsLine = ref<string | null>(null)
 let pollTimer: ReturnType<typeof setInterval> | null = null
-
 onMounted(() => {
   pollTimer = setInterval(async () => {
     try {
@@ -178,6 +178,7 @@ onMounted(() => {
       failedPuuids.value = await ca.getFailedPuuids()
       const stats = await ca.getSchedulerStats()
       if (stats) schedulerStats.value = stats
+      if (cas.settings.captureEnabled && cas.settings.captureShowStatsInPanel) { const c = await ca.getCaptureStats(); captureStatsLine.value = `E:${c.eventCount} S:${c.sampleCount} M:${c.mergeCount}` } else { captureStatsLine.value = null }
     } catch (_) {}
   }, 3000)
 })
@@ -383,6 +384,7 @@ async function handleItemFeedback(advice: AdviceItem, feedback: 'helpful' | 'not
 .coach-footer-stats { display: flex; gap: 8px; }
 .stat-item { font-size: 10px; opacity: 0.4; }
 .coach-feedback-actions { display: flex; gap: 2px; }
+.coach-capture-indicator { font-size: 10px; opacity: 0.4; margin-top: 2px; }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

@@ -1,0 +1,104 @@
+/*
+ * Copyright 2025 dylanyunlon <dylanyunlong@gmail.com>. Coach-advisor infrastructure.
+ *
+ * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
+ * 
+ * 
+ *
+ *     Coach-advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { ObjectMetadata, PropertyValueFormattingRule } from "@shared/types/league-client/coach-api";
+import type { SimpleOsdkProperties } from "../SimpleOsdkProperties.js";
+import { formatBoolean } from "./formatBoolean.js";
+import { formatDateTime } from "./formatDateTime.js";
+import { formatNumber } from "./formatNumber.js";
+import { getBrowserLocale } from "./propertyFormattingUtils.js";
+
+export interface FormatPropertyOptions {
+  locale?: string;
+  timezoneId?: string;
+}
+
+type PropertyValue =
+  | string
+  | Array<string>
+  | number
+  | Array<number>
+  | boolean
+  | Array<boolean>
+  | undefined;
+
+type DefinedPropertyValue = NonNullable<PropertyValue>;
+
+/**
+ * Applies formatting rules to a property value and returns the formatted string value.
+ *
+ * @param propertyValue - The value of the property to format
+ * @returns The formatted string value, or undefined if the property cannot be formatted
+ *
+ * @experimental This is a stub implementation that returns undefined.
+ * The actual formatting logic will be implemented later.
+ */
+export function applyPropertyFormatter(
+  propertyValue: PropertyValue,
+  propertyDefinition: ObjectMetadata.Property | undefined,
+  objectData: SimpleOsdkProperties,
+  options: FormatPropertyOptions = {},
+): string | undefined {
+  if (propertyDefinition?.valueFormatting == null || propertyValue == null) {
+    return undefined;
+  }
+  return formatPropertyValue(
+    propertyValue,
+    propertyDefinition.valueFormatting,
+    objectData,
+    options,
+  );
+}
+
+function formatPropertyValue(
+  value: DefinedPropertyValue,
+  rule: PropertyValueFormattingRule,
+  objectData: SimpleOsdkProperties,
+  options: FormatPropertyOptions,
+): string | undefined {
+  switch (rule.type) {
+    case "boolean":
+      if (typeof value !== "boolean") {
+        return undefined;
+      }
+      return formatBoolean(value, rule);
+    case "number":
+      if (typeof value !== "number") {
+        return undefined;
+      }
+      return formatNumber(
+        value,
+        rule.numberType,
+        objectData,
+        options.locale ?? getBrowserLocale(),
+      );
+    case "date":
+    case "timestamp":
+      if (typeof value !== "string") {
+        return undefined;
+      }
+      return formatDateTime(
+        new Date(value),
+        rule.format,
+        rule.type === "timestamp" ? rule.displayTimezone : undefined,
+        objectData,
+        options.locale ?? getBrowserLocale(),
+        options.timezoneId,
+      );
+    default:
+      return undefined;
+  }
+}

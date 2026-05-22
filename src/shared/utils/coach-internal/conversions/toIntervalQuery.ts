@@ -1,0 +1,67 @@
+/*
+ * Copyright 2026 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
+ * 
+ * 
+ *
+ *     Coach-advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { IntervalRule } from "@shared/types/league-client/coach-api";
+import type { SearchJsonQueryV2 } from "@coach/pantheon.ontologies";
+import invariant from "../../coach-util/invariant";
+
+type IntervalQueryRule = Extract<
+  SearchJsonQueryV2,
+  { type: "interval" }
+>["rule"];
+
+export function toIntervalQueryRule(
+  rule: IntervalRule,
+): IntervalQueryRule {
+  if (rule.$match != null) {
+    if (rule.$prefixOnLastTerm) {
+      return {
+        type: "prefixOnLastToken",
+        query: rule.$match,
+      };
+    }
+    return {
+      type: "match",
+      query: rule.$match,
+      ordered: rule.$ordered,
+      maxGaps: rule.$maxGaps,
+    };
+  }
+  if (rule.$and != null) {
+    return {
+      type: "allOf",
+      rules: rule.$and.map(toIntervalQueryRule),
+      ordered: rule.$ordered,
+      maxGaps: rule.$maxGaps,
+    };
+  }
+  if (rule.$or != null) {
+    return {
+      type: "anyOf",
+      rules: rule.$or.map(toIntervalQueryRule),
+    };
+  }
+  if (rule.$fuzzy != null) {
+    return {
+      type: "fuzzy",
+      term: rule.$fuzzy,
+      fuzziness: rule.$fuzziness,
+    };
+  }
+
+  const _: never = rule;
+  invariant(false, "Unknown interval rule type");
+}

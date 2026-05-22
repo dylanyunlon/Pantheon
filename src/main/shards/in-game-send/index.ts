@@ -690,8 +690,20 @@ export class InGameSendMain implements IAkariShardInitDispose {
       gameTimeline: this._og.state.gameTimeline,
       inferredPremadeTeams: this._og.state.inferredPremadeTeams,
       teamParticipantGroups: this._og.state.teamParticipantGroups,
-      additionalGame: this._og.state.additionalGame
+      additionalGame: this._og.state.additionalGame,
+      captureEnabled: this._getCaptureEnabledFlag(),
+      captureSessionId: this._getCaptureSessionId()
     }
+  }
+
+  private _getCaptureEnabledFlag(): boolean {
+    try { const ca = this._shared.manager.getInstance('coach-advisor-main'); if (ca?.settings) return ca.settings.captureEnabled === true } catch (_) {}
+    return false
+  }
+
+  private _getCaptureSessionId(): string | null {
+    try { const ca = this._shared.manager.getInstance('coach-advisor-main'); if (ca && typeof ca._engine?.capture?.sessionId === 'string') return ca._engine.capture.sessionId } catch (_) {}
+    return null
   }
 
   /**

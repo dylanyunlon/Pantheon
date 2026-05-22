@@ -30,7 +30,13 @@ export const useCoachAdvisorStore = defineStore('coach-advisor', () => {
     showGoldEfficiency: true,
     showTrueDamageWarning: true,
     showWinCondition: true,
-    showKdaTrend: true
+    showKdaTrend: true,
+    captureEnabled: false,
+    captureAutoFlushInterval: 15000,
+    captureEventCapacity: 500,
+    captureSampleCapacity: 100,
+    captureShowStatsInPanel: false,
+    captureExportFormat: 'json' as 'json' | 'csv'
   })
 
   const state = ref({
@@ -143,6 +149,13 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
   setShowKdaTrend(value: boolean) {
     return this._setting.set(COACH_SHARD_NAMESPACE, 'showKdaTrend', value)
   }
+
+  setCaptureEnabled(value: boolean) { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureEnabled', value) }
+  setCaptureAutoFlushInterval(value: number) { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureAutoFlushInterval', value) }
+  setCaptureEventCapacity(value: number) { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureEventCapacity', value) }
+  setCaptureSampleCapacity(value: number) { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureSampleCapacity', value) }
+  setCaptureShowStatsInPanel(value: boolean) { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureShowStatsInPanel', value) }
+  setCaptureExportFormat(value: 'json' | 'csv') { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureExportFormat', value) }
 
   getSchedulerStats() {
     return this._ipc.call(COACH_SHARD_NAMESPACE, 'getSchedulerStats') as Promise<Record<string, number>>
@@ -307,7 +320,13 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
       'showGoldEfficiency',
       'showTrueDamageWarning',
       'showWinCondition',
-      'showKdaTrend'
+      'showKdaTrend',
+      'captureEnabled',
+      'captureAutoFlushInterval',
+      'captureEventCapacity',
+      'captureSampleCapacity',
+      'captureShowStatsInPanel',
+      'captureExportFormat'
     ])
     this._pm.sync(COACH_SHARD_NAMESPACE, 'state', store.state, [
       'advices',
