@@ -351,6 +351,35 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
     }>
   }
 
+  getReplayReports() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getReplayReports') as Promise<any[]>
+  }
+
+  getLatestReplayReport() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getLatestReplayReport') as Promise<{
+      gameId: number
+      outcome: { outcome: string; gameDurationSeconds: number }
+      overallAccuracy: number
+      backfilledSamples: number
+      adviceAccuracy: Array<{ adviceType: string; accuracyScore: number; wasAccurate: boolean }>
+    } | null>
+  }
+
+  getAccuracyHistory() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getAccuracyHistory') as Promise<{
+      totalReports: number; avgAccuracy: number
+      accuracyByType: Record<string, { avg: number; count: number }>
+      winCorrelation: number
+    }>
+  }
+
+  getPredictionErrors() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getPredictionErrors') as Promise<{
+      avgPredictionError: number
+      errors: Array<{ gameId: number; predicted: number; actual: number; error: number }>
+    }>
+  }
+
   async onInit() {
     const store = useCoachAdvisorStore()
     this._pm.sync(COACH_SHARD_NAMESPACE, 'settings', store.settings, [

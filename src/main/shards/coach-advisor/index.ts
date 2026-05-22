@@ -170,6 +170,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
     await this._handleState()
     this._handleAutoGeneration()
     this._handleDataTracking()
+    this._handleReplayAnalysis()
     this._handleIpcCall()
   }
 
@@ -445,6 +446,64 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
     }
   }
 
+  private _handleReplayAnalysis() {
+    this._mobx.reaction(
+      () => this._lc.data.gameflow.phase,
+      async (phase) => {
+        if (phase !== 'EndOfGame' && phase !== 'PreEndOfGame') return
+        if (!this.settings.enabled) return
+
+        const selfPuuid = this._lc.data.summoner.me?.puuid
+        if (!selfPuuid) return
+
+        try {
+          const eogResponse = await this._lc.http.get(
+            '/lol-end-of-game/v1/gameclient-eog-stats-block'
+          )
+          const eogStats = eogResponse.data
+
+          if (!eogStats || !eogStats.statsBlock) {
+            this._log.warn('Replay analysis: no EOG stats available')
+            return
+          }
+
+          const captureSession = this._engine.capture.sessionMeta
+          const lastAdvices = this.state.advices
+          const lastComparison = this._engine.lastComparison
+
+          const report = this._engine.analyzeReplay({
+            eogStats,
+            selfPuuid,
+            sessionId: captureSession.sessionId,
+            advicesGiven: lastAdvices,
+            pendingSamples: this._engine.getTrainingSamples(),
+            featureVector: null,
+            teamComparison: lastComparison
+              ? { overallDelta: lastComparison.overallDelta }
+              : null
+          })
+
+          this._log.info(
+            `Replay analysis complete: game=${report.gameId} ` +
+            `outcome=${report.outcome.outcome} ` +
+            `accuracy=${(report.overallAccuracy * 100).toFixed(1)}% ` +
+            `backfilled=${report.backfilledSamples} samples`
+          )
+
+          this._ipc.sendEvent(
+            CoachAdvisorMain.id,
+            'replay-analyzed',
+            report.gameId,
+            report.outcome.outcome,
+            report.overallAccuracy
+          )
+        } catch (error) {
+          this._log.warn('Replay analysis failed', error)
+        }
+      }
+    )
+  }
+
   private _handleIpcCall() {
     this._ipc.onCall(CoachAdvisorMain.id, 'generate', () => {
       this._generateAdvices()
@@ -608,6 +667,22 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
 
     this._ipc.onCall(CoachAdvisorMain.id, 'getObservableStoreStats', () => {
       return this._engine.getObservableStoreStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getReplayReports', () => {
+      return this._engine.getReplayReports()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getLatestReplayReport', () => {
+      return this._engine.replayAnalysis.getLatestReport()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getAccuracyHistory', () => {
+      return this._engine.getAccuracyHistory()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getPredictionErrors', () => {
+      return this._engine.getPredictionErrors()
     })
   }
 }

@@ -47,6 +47,11 @@ import {
   createObservableStore
 } from './coach-observable-adapter'
 import type { ObservableStatus, SubjectListener } from './coach-observable-adapter'
+import {
+  ReplayAnalysisPipeline,
+  createReplayAnalysisPipeline
+} from './coach-replay'
+import type { ReplayAnalysisReport } from './coach-replay'
 
 export const enum CoachAdvicePriority {
   CRITICAL = 0,
@@ -1190,6 +1195,7 @@ export class CoachEngine {
   private _inference: CoachInferenceEngine
   private _experimentManager: CoachExperimentManager
   private _observableStore: CoachObservableStore
+  private _replayAnalysis: ReplayAnalysisPipeline
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new CoachPipeline()
@@ -1229,6 +1235,7 @@ export class CoachEngine {
     this._experimentManager = createExperimentManager()
     this._observableStore = createObservableStore({ staleAfterMs: 30000 })
     this._observableStore.startStaleCheck(15000)
+    this._replayAnalysis = createReplayAnalysisPipeline()
   }
 
   get scheduler(): CoachScheduler {
@@ -1301,6 +1308,38 @@ export class CoachEngine {
 
   getObservableStoreStats(): ReturnType<CoachObservableStore['stats']> {
     return this._observableStore.stats
+  }
+
+  get replayAnalysis(): ReplayAnalysisPipeline {
+    return this._replayAnalysis
+  }
+
+  analyzeReplay(params: Parameters<ReplayAnalysisPipeline['analyzeReplay']>[0]): ReplayAnalysisReport {
+    const report = this._replayAnalysis.analyzeReplay({
+      ...params,
+      pendingSamples: this._capture.getSamples()
+    })
+
+    const activeExpId = this._experimentManager.activeExperimentId
+    if (activeExpId) {
+      const sessionKey = `${params.selfPuuid}:${params.eogStats.gameMode}`
+      this._experimentManager.recordOutcome(sessionKey, report.outcome.outcome)
+    }
+
+    this._observableStore.write(`replay:${params.eogStats.gameId}`, report, 'loaded')
+    return report
+  }
+
+  getReplayReports(): ReplayAnalysisReport[] {
+    return this._replayAnalysis.getReports()
+  }
+
+  getAccuracyHistory(): ReturnType<ReplayAnalysisPipeline['getAccuracyHistory']> {
+    return this._replayAnalysis.getAccuracyHistory()
+  }
+
+  getPredictionErrors(): ReturnType<ReplayAnalysisPipeline['getPredictionErrorHistory']> {
+    return this._replayAnalysis.getPredictionErrorHistory()
   }
 
   generateAdvices(params: {
@@ -1563,6 +1602,7 @@ export class CoachEngine {
     this._inference.dispose()
     this._experimentManager.dispose()
     this._observableStore.dispose()
+    this._replayAnalysis.dispose()
     this.clearCache()
   }
 
