@@ -37,6 +37,16 @@ import {
   createInferenceEngine
 } from './coach-inference'
 import type { InferenceResult, InferenceConfig, InferenceBackend, OnnxSessionFactory } from './coach-inference'
+import {
+  CoachExperimentManager,
+  createExperimentManager
+} from './coach-abtest'
+import type { ExperimentDefinition, ExperimentSnapshot, SessionAssignment, ComparisonResult } from './coach-abtest'
+import {
+  CoachObservableStore,
+  createObservableStore
+} from './coach-observable-adapter'
+import type { ObservableStatus, SubjectListener } from './coach-observable-adapter'
 
 export const enum CoachAdvicePriority {
   CRITICAL = 0,
@@ -1178,6 +1188,8 @@ export class CoachEngine {
   private _lastComparison: TeamComparisonResult | null = null
   private _capture: ExperimentCapture
   private _inference: CoachInferenceEngine
+  private _experimentManager: CoachExperimentManager
+  private _observableStore: CoachObservableStore
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new CoachPipeline()
@@ -1214,6 +1226,9 @@ export class CoachEngine {
     this._capture = createExperimentCapture({ eventCapacity: 500, sampleCapacity: 100 })
     this._capture.startAutoFlush(15_000)
     this._inference = createInferenceEngine()
+    this._experimentManager = createExperimentManager()
+    this._observableStore = createObservableStore({ staleAfterMs: 30000 })
+    this._observableStore.startStaleCheck(15000)
   }
 
   get scheduler(): CoachScheduler {
@@ -1246,6 +1261,46 @@ export class CoachEngine {
 
   getInferenceStats(): ReturnType<CoachInferenceEngine['stats']> {
     return this._inference.stats
+  }
+
+  get experimentManager(): CoachExperimentManager {
+    return this._experimentManager
+  }
+
+  get observableStore(): CoachObservableStore {
+    return this._observableStore
+  }
+
+  createExperiment(params: {
+    name: string
+    description?: string
+    trafficSplit?: number
+  }): ExperimentDefinition {
+    return this._experimentManager.createExperiment(params)
+  }
+
+  startExperiment(experimentId: string): boolean {
+    return this._experimentManager.startExperiment(experimentId)
+  }
+
+  completeExperiment(experimentId: string): ExperimentSnapshot | null {
+    return this._experimentManager.completeExperiment(experimentId)
+  }
+
+  getExperimentSnapshot(experimentId: string): ExperimentSnapshot | null {
+    return this._experimentManager.getSnapshot(experimentId)
+  }
+
+  assignExperimentSession(puuid: string, sessionId: string): SessionAssignment | null {
+    return this._experimentManager.assignSession(puuid, sessionId)
+  }
+
+  subscribeToAdvices(key: string, listener: SubjectListener<CoachAdvice[]>): () => void {
+    return this._observableStore.subscribe<CoachAdvice[]>(key, listener)
+  }
+
+  getObservableStoreStats(): ReturnType<CoachObservableStore['stats']> {
+    return this._observableStore.stats
   }
 
   generateAdvices(params: {
@@ -1354,6 +1409,15 @@ export class CoachEngine {
 
     const pipelineDuration = Date.now() - pipelineStart
     this._capture.captureAdviceGenerated(deduped, gamePhase, pipelineDuration)
+
+    const activeExpId = this._experimentManager.activeExperimentId
+    if (activeExpId) {
+      const sessionKey = `${params.selfPuuid}:${params.gameMode}`
+      this._experimentManager.recordAdviceGeneration(sessionKey, deduped, pipelineDuration, gamePhase)
+    }
+
+    this._observableStore.write(`advices:${cacheKey}`, deduped, 'loaded')
+    this._observableStore.write(`phase:${params.selfPuuid}`, gamePhase, 'loaded')
 
     if (teamComparison) {
       this._capture.captureTeamComparison(teamComparison, gamePhase)
@@ -1489,12 +1553,16 @@ export class CoachEngine {
     this._aggregationReducer.clear()
     this._lastComparison = null
     this._capture.clear()
+    this._inference.clearCache()
+    this._observableStore.clear()
   }
 
     dispose() {
     this._refCounts.stopAutoGc()
     this._capture.dispose()
     this._inference.dispose()
+    this._experimentManager.dispose()
+    this._observableStore.dispose()
     this.clearCache()
   }
 

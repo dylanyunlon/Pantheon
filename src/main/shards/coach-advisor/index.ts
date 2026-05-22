@@ -244,6 +244,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
               queueType: gameInfo?.queueType || '',
               selfPuuid
             })
+            const sessionKey = `${selfPuuid}:${gameInfo?.gameMode || ''}`
+            const assignment = this._engine.assignExperimentSession(selfPuuid, sessionKey)
+            if (assignment) {
+              this._log.info(
+                `A/B experiment assigned: ${assignment.variantId} for ${assignment.experimentId}`
+              )
+            }
             this._log.info(`Experiment session started for phase: ${phase}`)
           }
         }
@@ -578,5 +585,29 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         this._engine.switchInferenceBackend(backend as any)
       }
     )
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'createExperiment', (_, params: any) => {
+      return this._engine.createExperiment(params)
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'startExperiment', (_, experimentId: string) => {
+      return this._engine.startExperiment(experimentId)
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'completeExperiment', (_, experimentId: string) => {
+      return this._engine.completeExperiment(experimentId)
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getExperimentSnapshot', (_, experimentId: string) => {
+      return this._engine.getExperimentSnapshot(experimentId)
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'listExperiments', () => {
+      return this._engine.experimentManager.listExperiments()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getObservableStoreStats', () => {
+      return this._engine.getObservableStoreStats()
+    })
   }
 }

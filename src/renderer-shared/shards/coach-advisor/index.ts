@@ -318,6 +318,39 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
     return this._ipc.call(COACH_SHARD_NAMESPACE, 'switchInferenceBackend', backend)
   }
 
+  createExperiment(params: { name: string; description?: string; trafficSplit?: number }) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'createExperiment', params) as Promise<{
+      experimentId: string; name: string; status: string; variants: any[]
+    }>
+  }
+
+  startExperiment(experimentId: string) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'startExperiment', experimentId) as Promise<boolean>
+  }
+
+  completeExperiment(experimentId: string) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'completeExperiment', experimentId) as Promise<{
+      experimentId: string; variants: any; comparisonResult: any
+    } | null>
+  }
+
+  getExperimentSnapshot(experimentId: string) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getExperimentSnapshot', experimentId) as Promise<{
+      experimentId: string; variants: any; totalSessions: number; comparisonResult: any
+    } | null>
+  }
+
+  listExperiments() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'listExperiments') as Promise<any[]>
+  }
+
+  getObservableStoreStats() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getObservableStoreStats') as Promise<{
+      subjectCount: number; activeRefs: number; pendingGc: number
+      totalWrites: number; totalReads: number; totalNotifications: number
+    }>
+  }
+
   async onInit() {
     const store = useCoachAdvisorStore()
     this._pm.sync(COACH_SHARD_NAMESPACE, 'settings', store.settings, [
