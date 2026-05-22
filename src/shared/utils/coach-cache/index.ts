@@ -7,3 +7,16 @@ export {
   shouldReplace
 } from './canonicalizer'
 export type { CoachCacheKeyParams } from './canonicalizer'
+export {
+  CoachDataTracker,
+  createCoachChanges
+} from './query'
+export type {
+  CoachDataType,
+  CoachQueryStatus,
+  CoachQueryKey,
+  CoachSubjectPayload,
+  CoachChanges,
+  CoachBatchContext,
+  DataAvailability
+} from './query'

@@ -6,6 +6,8 @@ import {
   CoachEngine,
   createCoachEngine
 } from '@shared/utils/coach-engine'
+import { CoachDataTracker } from '@shared/utils/coach-cache'
+import type { CoachDataType, CoachQueryStatus } from '@shared/utils/coach-cache'
 import { comparer } from 'mobx'
 import { makeAutoObservable, observable, runInAction } from 'mobx'
 
@@ -86,6 +88,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
   private readonly _log: AkariLogger
   private readonly _setting: SetterSettingService
   private _engine: CoachEngine
+  private _dataTracker: CoachDataTracker
 
   public readonly settings = new CoachAdvisorSettings()
   public readonly state = new CoachAdvisorState()
@@ -100,6 +103,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
   ) {
     this._log = _loggerFactory.create(CoachAdvisorMain.id)
     this._engine = createCoachEngine()
+    this._dataTracker = new CoachDataTracker()
     this._setting = _settingFactory.register(
       CoachAdvisorMain.id,
       {
@@ -123,11 +127,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
   async onInit() {
     await this._handleState()
     this._handleAutoGeneration()
+    this._handleDataTracking()
     this._handleIpcCall()
   }
 
   async onDispose() {
     this._engine.dispose()
+    this._dataTracker.clear()
     this.state.clear()
   }
 
@@ -180,6 +186,70 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       },
       { delay: 500 }
     )
+  }
+
+  private _handleDataTracking() {
+    this._mobx.reaction(
+      () => this._og.state.matchHistoryLoadingState,
+      (states) => {
+        for (const [puuid, status] of Object.entries(states)) {
+          const mapped = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
+          this._dataTracker.setStatus(puuid, 'match-history', mapped as any)
+        }
+      },
+      { fireImmediately: true }
+    )
+
+    this._mobx.reaction(
+      () => this._og.state.rankedStatsLoadingState,
+      (states) => {
+        for (const [puuid, status] of Object.entries(states)) {
+          const mapped = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
+          this._dataTracker.setStatus(puuid, 'ranked', mapped as any)
+        }
+      },
+      { fireImmediately: true }
+    )
+
+    this._mobx.reaction(
+      () => this._og.state.championMasteryLoadingState,
+      (states) => {
+        for (const [puuid, status] of Object.entries(states)) {
+          const mapped = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
+          this._dataTracker.setStatus(puuid, 'champion-mastery', mapped as any)
+        }
+      },
+      { fireImmediately: true }
+    )
+
+    this._mobx.reaction(
+      () => this._og.state.playerStats,
+      (playerStats) => {
+        if (!playerStats) return
+        for (const puuid of Object.keys(playerStats.players)) {
+          this._dataTracker.setStatus(puuid, 'analysis', 'loaded')
+        }
+      },
+      { fireImmediately: true }
+    )
+
+    this._mobx.reaction(
+      () => this._og.state.queryStage.phase,
+      (phase) => {
+        if (phase === 'unavailable') {
+          this._dataTracker.clear()
+        }
+      }
+    )
+
+    this._dataTracker.onChanges((changes) => {
+      if (!this.settings.enabled) return
+      const summary = this._dataTracker.getSummary()
+      this._log.info(
+        `Data tracking update: ${summary.fullyLoaded}/${summary.totalPlayers} fully loaded, ` +
+        `${summary.partiallyLoaded} partial, ${summary.loading} loading, ${summary.errors} errors`
+      )
+    })
   }
 
   private _generateAdvices() {
@@ -290,5 +360,22 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         })
       }
     )
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getDataAvailability', () => {
+      return {
+        summary: this._dataTracker.getSummary(),
+        availability: Object.fromEntries(this._dataTracker.getAllAvailability())
+      }
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getPlayerCompleteness', (_, puuid: string) => {
+      return {
+        puuid,
+        completeness: this._dataTracker.getCompleteness(puuid),
+        availability: this._dataTracker.getAvailability(puuid),
+        isReady: this._dataTracker.isReadyForAnalysis(puuid),
+        isFullyLoaded: this._dataTracker.isFullyLoaded(puuid)
+      }
+    })
   }
 }
