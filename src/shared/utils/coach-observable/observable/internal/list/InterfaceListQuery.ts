@@ -34,7 +34,7 @@ function groupBy<T>(
   }
   return result;
 }
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import { type Client } from "../../../coach-engine";
 import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import { ObjectDefRef } from "../../../object/convertWireToCoachRecords/InternalSymbols";

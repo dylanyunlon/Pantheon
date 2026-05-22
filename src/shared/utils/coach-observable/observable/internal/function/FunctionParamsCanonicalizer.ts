@@ -15,7 +15,7 @@
  */
 
 import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
-import { Trie } from "../../../../../coach-types";
+import { Trie } from "@wry/trie";
 import {
   getWirePipelineSet,
   isPipelineSet,

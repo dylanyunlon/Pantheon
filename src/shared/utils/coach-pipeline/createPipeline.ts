@@ -42,7 +42,7 @@ import type {
   PipelineSet as WirePipelineSet,
   PropertyApiName,
 } from "../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import { createWithPropertiesPipelineSet } from "../derivedProperties/createWithPropertiesPipelineSet";
 import { modernToLegacyWhereClause } from "../internal/conversions/modernToLegacyWhereClause";
 import type { MinimalClient } from "../MinimalClientContext";

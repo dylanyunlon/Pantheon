@@ -15,7 +15,7 @@
  */
 
 import type { ObjectSet } from "../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derivedPropertyRuntimeMetadata";
 import type { MinimalClient } from "../MinimalClientContext";
 

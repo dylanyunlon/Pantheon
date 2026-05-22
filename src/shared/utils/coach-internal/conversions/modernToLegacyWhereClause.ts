@@ -28,7 +28,7 @@ import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
 } from "../../../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import { fullyQualifyPropName } from "./fullyQualifyPropName";
 import { makeGeoFilterIntersects } from "./makeGeoFilterIntersects";
 import { makeGeoFilterWithin } from "./makeGeoFilterWithin";

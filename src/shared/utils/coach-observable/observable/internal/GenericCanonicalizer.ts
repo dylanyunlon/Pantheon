@@ -14,7 +14,7 @@
  * 
  */
 
-import { Trie } from "../../../../coach-types";
+import { Trie } from "@wry/trie";
 import deepEqual from "fast-deep-equal";
 import type { Canonical } from "./Canonical";
 import { CachingCanonicalizer } from "./Canonicalizer";

@@ -26,7 +26,7 @@ import type {
   WhereClause,
 } from "../../../../../coach-types";
 import type { Observable, Subscription } from "rxjs";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 // import { additionalContext } from "../../../coach-engine";
 import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import type {

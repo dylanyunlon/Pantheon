@@ -31,7 +31,7 @@ import type {
   SyncApplyActionResponseV2,
 } from "../coach-types";
 import { Actions } from "../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { MinimalClient } from "../MinimalClientContext";
 import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";
 import { augmentRequestContext } from "../util/augmentRequestContext";

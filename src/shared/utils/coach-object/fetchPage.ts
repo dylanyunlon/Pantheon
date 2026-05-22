@@ -41,7 +41,7 @@ import type {
   SearchOrderByV2,
 } from "../coach-types";
 import { GameStateObjectSets } from "../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import { extractNamespace } from "../internal/conversions/extractNamespace";
 import type { MinimalClient } from "../MinimalClientContext";
 import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";

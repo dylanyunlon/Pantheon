@@ -15,7 +15,7 @@
  */
 
 import type { Logger } from "../../../../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { BatchContext } from "./BatchContext";
 import { type Changes } from "./Changes";
 import { createInitEntry } from "./createInitEntry";

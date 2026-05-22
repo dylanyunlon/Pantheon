@@ -23,7 +23,7 @@ import type {
   ReferenceValue,
   SecuredPropertyValue,
 } from "../../../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import { GeotimeSeriesPropertyImpl } from "../../createGeotimeSeriesProperty";
 import { MediaReferencePropertyImpl } from "../../createMediaReferenceProperty";
 import { TimeSeriesPropertyImpl } from "../../createTimeseriesProperty";

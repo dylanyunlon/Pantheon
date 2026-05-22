@@ -30,7 +30,7 @@ import type {
 } from "../coach-types";
 import type { DataValue } from "../coach-types";
 import { Queries } from "../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import { createMediaFromReferenceInternal } from "../createMediaFromReference";
 import type { MinimalClient } from "../MinimalClientContext";
 import { createPipeline } from "../pipelineSet/createPipeline";

@@ -16,7 +16,7 @@
 
 import type { ObjectOrInterfaceDefinition } from "../coach-types";
 import type { ObjectSet } from "../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { MinimalClient } from "../MinimalClientContext";
 
 /* @internal

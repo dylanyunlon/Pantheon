@@ -19,7 +19,7 @@ import type {
   DerivedPropertyDefinition,
   PipelineSet as WirePipelineSet,
 } from "../../../../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { MinimalClient } from "../../MinimalClientContext";
 import type {
   FetchedObjectTypeDefinition,

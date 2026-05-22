@@ -1,12 +1,43 @@
 {
   "files": [],
-  "references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.web.json" }],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.web.json"
+    }
+  ],
   "compilerOptions": {
-    "types": ["@modyfi/vite-plugin-yaml/modules"],
+    "types": [
+      "@modyfi/vite-plugin-yaml/modules"
+    ],
     "target": "ESNext",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "paths": {
+      "@coach/pantheon.core": [
+        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      ],
+      "@coach/pantheon.functions/*": [
+        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      ],
+      "@coach/pantheon.mediasets": [
+        "src/shared/utils/coach-stubs/pantheon-mediasets"
+      ],
+      "@coach/pantheon.ontologies": [
+        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      ],
+      "@coach/pantheon.ontologies/*": [
+        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      ],
+      "@coach/shared.client.impl": [
+        "src/shared/utils/coach-stubs/shared-client-impl"
+      ]
+    }
   }
 }

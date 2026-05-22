@@ -24,7 +24,7 @@ import type {
   PrimaryKeyType,
   QueryDefinition,
 } from "../../../../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";
 import { type Client } from "../../coach-engine";
 import { DEBUG_REFCOUNTS } from "../DebugFlags";

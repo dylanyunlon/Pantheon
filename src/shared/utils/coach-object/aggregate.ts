@@ -27,7 +27,7 @@ import type {
   PipelineSet,
 } from "../coach-types";
 import { GameStateObjectSets } from "../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import { legacyToModernSingleAggregationResult } from "../internal/conversions/legacyToModernSingleAggregationResult";
 import { modernToLegacyAggregationClause } from "../internal/conversions/modernToLegacyAggregationClause";
 import { modernToLegacyGroupByClause } from "../internal/conversions/modernToLegacyGroupByClause";

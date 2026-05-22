@@ -32,7 +32,7 @@ import { inspect } from "node:util";
 import type { DeferredPromise } from "p-defer";
 import pDefer from "p-defer";
 import type { Observer } from "rxjs";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { Mock, MockedObject } from "vitest";
 import { afterEach, beforeEach, expect, vi, vitest } from "vitest";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";

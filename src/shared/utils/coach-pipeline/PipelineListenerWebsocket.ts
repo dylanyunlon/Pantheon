@@ -33,7 +33,7 @@ import type {
   SubscriptionClosed,
 } from "../coach-types";
 import WebSocket from "isomorphic-ws";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 import type { ClientCacheKey, MinimalClient } from "../MinimalClientContext";
 import { ExponentialBackoff } from "../util/exponentialBackoff";
 

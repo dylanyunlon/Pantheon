@@ -15,7 +15,7 @@
  */
 
 import type { PossibleWhereClauseFilters } from "../../../../coach-types";
-import invariant from "../../coach-util/invariant";
+import invariant from "tiny-invariant";
 
 /**
  * Evaluates a where clause filter against a value.
