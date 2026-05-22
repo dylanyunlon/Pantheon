@@ -15,9 +15,9 @@
  */
 
 import type { ObjectTypeDefinition } from "../../../../coach-types";
-import type { OrderBy } from "../ObservableClient.js";
-import type { Canonical } from "./Canonical.js";
-import { WeakRefTrie } from "./WeakRefTrie.js";
+import type { OrderBy } from "../ObservableClient";
+import type { Canonical } from "./Canonical";
+import { WeakRefTrie } from "./WeakRefTrie";
 
 export class OrderByCanonicalizer {
   #trie = new WeakRefTrie(

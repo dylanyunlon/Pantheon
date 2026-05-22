@@ -19,7 +19,7 @@ import type {
   ObjectOrInterfaceDefinition,
   PrimaryKeyTypes,
   QueryParam,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 
 /** Type representing whether a definition is an object or interface */
 export type DefType = "object" | "interface";

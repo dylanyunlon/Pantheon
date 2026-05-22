@@ -16,12 +16,12 @@
 
 import type { ObjectOrInterfaceDefinition, Coach } from "../../../coach-types";
 import type { inspect, InspectOptionsStylized } from "node:util";
-import type { HolderBase } from "./InternalSymbols.js";
+import type { HolderBase } from "./InternalSymbols";
 import {
   InterfaceDefRef,
   ObjectDefRef,
   UnderlyingCoachRecord,
-} from "./InternalSymbols.js";
+} from "./InternalSymbols";
 
 const nodejsUtilInspectCustom: unique symbol = Symbol.for(
   "nodejs.util.inspect.custom",

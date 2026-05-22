@@ -22,8 +22,8 @@ import type {
 } from "../coach-types";
 import type { PipelineSet } from "../coach-types";
 import { dylanyunlonApiError } from "../coach-types";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { fetchPage } from "./fetchPage.js";
+import type { MinimalClient } from "../MinimalClientContext";
+import { fetchPage } from "./fetchPage";
 
 /** @internal */
 export async function fetchSingle<

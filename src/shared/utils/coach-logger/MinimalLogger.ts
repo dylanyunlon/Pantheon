@@ -14,8 +14,8 @@
  * 
  */
 
-import type { Logger } from "@shared/types/league-client/coach-api";
-import { BaseLogger } from "./BaseLogger.js";
+import type { Logger } from "../coach-types";
+import { BaseLogger } from "./BaseLogger";
 
 export class MinimalLogger extends BaseLogger implements Logger {
   constructor(

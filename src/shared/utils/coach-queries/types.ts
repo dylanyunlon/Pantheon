@@ -26,7 +26,7 @@ import type {
   QueryParam,
   QueryResult,
 } from "../coach-types";
-import type { PartialByNotStrict } from "../util/partialBy.js";
+import type { PartialByNotStrict } from "../util/partialBy";
 
 export type QuerySignatureFromDef<T extends QueryDefinition<any>> = {
   executeFunction: CompileTimeMetadata<T> extends never ? QuerySignature<T>

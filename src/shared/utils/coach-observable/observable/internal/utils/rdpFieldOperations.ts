@@ -14,16 +14,16 @@
  * 
  */
 
-import { createCoachRecord } from "../../../object/convertWireToCoachRecords/createCoachRecord.js";
+import { createCoachRecord } from "../../../object/convertWireToCoachRecords/createCoachRecord";
 import {
   ClientRef,
   ObjectDefRef,
   UnderlyingCoachRecord,
-} from "../../../object/convertWireToCoachRecords/InternalSymbols.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { SimpleCoachProperties } from "../../../object/SimpleCoachProperties.js";
-import type { Canonical } from "../Canonical.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
+} from "../../../object/convertWireToCoachRecords/InternalSymbols";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { SimpleCoachProperties } from "../../../object/SimpleCoachProperties";
+import type { Canonical } from "../Canonical";
+import type { Rdp } from "../RdpCanonicalizer";
 
 export function extractRdpFieldNames(
   rdpConfig: Canonical<Rdp> | undefined,

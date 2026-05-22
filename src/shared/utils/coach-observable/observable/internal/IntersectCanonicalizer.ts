@@ -19,10 +19,10 @@ import type {
   SimplePropertyDef,
   WhereClause,
 } from "../../../../coach-types";
-import type { Canonical } from "./Canonical.js";
-import { CachingCanonicalizer } from "./Canonicalizer.js";
-import type { SimpleWhereClause } from "./SimpleWhereClause.js";
-import type { WhereClauseCanonicalizer } from "./WhereClauseCanonicalizer.js";
+import type { Canonical } from "./Canonical";
+import { CachingCanonicalizer } from "./Canonicalizer";
+import type { SimpleWhereClause } from "./SimpleWhereClause";
+import type { WhereClauseCanonicalizer } from "./WhereClauseCanonicalizer";
 
 type IntersectWithInput<
   T extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition,

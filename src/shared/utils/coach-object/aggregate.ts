@@ -26,15 +26,15 @@ import type {
   AggregateObjectsResponseV2,
   PipelineSet,
 } from "../coach-types";
-import * as GameStateObjectSets from "../coach-types";
+import { GameStateObjectSets } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import { legacyToModernSingleAggregationResult } from "../internal/conversions/legacyToModernSingleAggregationResult.js";
-import { modernToLegacyAggregationClause } from "../internal/conversions/modernToLegacyAggregationClause.js";
-import { modernToLegacyGroupByClause } from "../internal/conversions/modernToLegacyGroupByClause.js";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
-import type { ArrayElement } from "../util/ArrayElement.js";
-import { resolveBaseObjectSetType } from "../util/objectSetUtils.js";
+import { legacyToModernSingleAggregationResult } from "../internal/conversions/legacyToModernSingleAggregationResult";
+import { modernToLegacyAggregationClause } from "../internal/conversions/modernToLegacyAggregationClause";
+import { modernToLegacyGroupByClause } from "../internal/conversions/modernToLegacyGroupByClause";
+import type { MinimalClient } from "../MinimalClientContext";
+import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";
+import type { ArrayElement } from "../util/ArrayElement";
+import { resolveBaseObjectSetType } from "../util/objectSetUtils";
 
 /** @internal */
 export async function aggregate<

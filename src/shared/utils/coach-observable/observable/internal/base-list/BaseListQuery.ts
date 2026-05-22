@@ -25,25 +25,25 @@ import type { Connectable, Observable, Subscription } from "rxjs";
 import type {
   CommonObserveOptions,
   Status,
-} from "../../ObservableClient/common.js";
-import type { BatchContext } from "../BatchContext.js";
-import { type CacheKey, DEBUG_ONLY__cacheKeysToString } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import { isObjectInstance } from "../isObjectInstance.js";
-import type { Entry } from "../Layer.js";
-import { type ObjectCacheKey } from "../object/ObjectCacheKey.js";
-import { Query } from "../Query.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SortingStrategy } from "../sorting/SortingStrategy.js";
-import { NoOpSortingStrategy } from "../sorting/SortingStrategy.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
-import type { ObjectUpdate } from "../types/ObjectUpdate.js";
+} from "../../ObservableClient/common";
+import type { BatchContext } from "../BatchContext";
+import { type CacheKey, DEBUG_ONLY__cacheKeysToString } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import { isObjectInstance } from "../isObjectInstance";
+import type { Entry } from "../Layer";
+import { type ObjectCacheKey } from "../object/ObjectCacheKey";
+import { Query } from "../Query";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SortingStrategy } from "../sorting/SortingStrategy";
+import { NoOpSortingStrategy } from "../sorting/SortingStrategy";
+import type { SubjectPayload } from "../SubjectPayload";
+import type { ObjectUpdate } from "../types/ObjectUpdate";
 import type {
   CollectionConnectableParams,
   CollectionStorageData,
-} from "./BaseCollectionQuery.js";
-import { createCollectionConnectable } from "./createCollectionConnectable.js";
-import { removeDuplicates } from "./removeDuplicates.js";
+} from "./BaseCollectionQuery";
+import { createCollectionConnectable } from "./createCollectionConnectable";
+import { removeDuplicates } from "./removeDuplicates";
 
 export type ListUpdateMode =
   | { type: "serverOrdered"; append: boolean }

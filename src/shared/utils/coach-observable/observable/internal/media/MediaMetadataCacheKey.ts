@@ -19,8 +19,8 @@ import type {
   ObjectTypeDefinition,
   PrimaryKeyType,
 } from "../../../../../coach-types";
-import type { CacheKey } from "../CacheKey.js";
-import type { MediaMetadataQuery } from "./MediaMetadataQuery.js";
+import type { CacheKey } from "../CacheKey";
+import type { MediaMetadataQuery } from "./MediaMetadataQuery";
 
 export interface MediaMetadataCacheKey extends
   CacheKey<

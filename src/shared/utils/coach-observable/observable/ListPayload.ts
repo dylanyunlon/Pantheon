@@ -15,9 +15,9 @@
  */
 
 import type { WirePropertyTypes } from "../../../coach-types";
-import type { InterfaceHolder } from "../object/convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { ObserveObjectsCallbackArgs } from "./ObservableClient.js";
+import type { InterfaceHolder } from "../object/convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder";
+import type { ObserveObjectsCallbackArgs } from "./ObservableClient";
 
 export interface ListPayload<
   RDPs extends Record<

@@ -15,9 +15,9 @@
  */
 
 import type { InterfaceMetadata, ObjectMetadata, Coach } from "../../../coach-types";
-import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter.js";
-import type { BaseHolder } from "./BaseHolder.js";
-import type { InterfaceDefRef } from "./InternalSymbols.js";
+import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter";
+import type { BaseHolder } from "./BaseHolder";
+import type { InterfaceDefRef } from "./InternalSymbols";
 
 /** @internal */
 export interface InterfaceHolder<

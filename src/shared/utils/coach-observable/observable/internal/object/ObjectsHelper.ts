@@ -16,24 +16,24 @@
 
 import type { ObjectOrInterfaceDefinition, Coach } from "../../../../../coach-types";
 import deepEqual from "fast-deep-equal";
-import { UnderlyingCoachRecord } from "../../../object/convertWireToCoachRecords/InternalSymbols.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import { getDefType } from "../../../util/interfaceUtils.js";
-import type { ObjectPayload } from "../../ObjectPayload.js";
-import type { ObserveObjectOptions } from "../../ObservableClient.js";
-import type { Observer, Status } from "../../ObservableClient/common.js";
-import { AbstractHelper } from "../AbstractHelper.js";
-import type { BatchContext } from "../BatchContext.js";
-import type { Canonical } from "../Canonical.js";
-import type { QuerySubscription } from "../QuerySubscription.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import { tombstone } from "../tombstone.js";
+import { UnderlyingCoachRecord } from "../../../object/convertWireToCoachRecords/InternalSymbols";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import { getDefType } from "../../../util/interfaceUtils";
+import type { ObjectPayload } from "../../ObjectPayload";
+import type { ObserveObjectOptions } from "../../ObservableClient";
+import type { Observer, Status } from "../../ObservableClient/common";
+import { AbstractHelper } from "../AbstractHelper";
+import type { BatchContext } from "../BatchContext";
+import type { Canonical } from "../Canonical";
+import type { QuerySubscription } from "../QuerySubscription";
+import type { Rdp } from "../RdpCanonicalizer";
+import { tombstone } from "../tombstone";
 import {
   mergeObjectFields,
   mergeSelectFields,
-} from "../utils/rdpFieldOperations.js";
-import { type ObjectCacheKey } from "./ObjectCacheKey.js";
-import { ObjectQuery } from "./ObjectQuery.js";
+} from "../utils/rdpFieldOperations";
+import { type ObjectCacheKey } from "./ObjectCacheKey";
+import { ObjectQuery } from "./ObjectQuery";
 
 export class ObjectsHelper extends AbstractHelper<
   ObjectQuery,

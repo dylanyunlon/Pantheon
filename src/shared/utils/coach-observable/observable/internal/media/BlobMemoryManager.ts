@@ -14,7 +14,7 @@
  * 
  */
 
-import { RefCounts } from "../RefCounts.js";
+import { RefCounts } from "../RefCounts";
 
 interface CacheEntry {
   blob: Blob;

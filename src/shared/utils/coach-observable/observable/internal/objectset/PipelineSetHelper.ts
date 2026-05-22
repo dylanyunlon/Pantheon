@@ -14,27 +14,27 @@
  * 
  */
 
-import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
-import { hasWithProperties } from "../../../util/extractRdpDefinition.js";
-import type { ObjectSetPayload } from "../../ObjectSetPayload.js";
-import type { Observer } from "../../ObservableClient/common.js";
-import { AbstractHelper } from "../AbstractHelper.js";
-import type { CacheKeys } from "../CacheKeys.js";
-import type { Canonical } from "../Canonical.js";
-import type { KnownCacheKey } from "../KnownCacheKey.js";
-import type { ObjectSetArrayCanonicalizer } from "../ObjectSetArrayCanonicalizer.js";
-import type { OrderByCanonicalizer } from "../OrderByCanonicalizer.js";
-import type { QuerySubscription } from "../QuerySubscription.js";
-import type { RdpCanonicalizer } from "../RdpCanonicalizer.js";
-import type { SelectCanonicalizer } from "../SelectCanonicalizer.js";
-import type { Store } from "../Store.js";
-import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer.js";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline";
+import { hasWithProperties } from "../../../util/extractRdpDefinition";
+import type { ObjectSetPayload } from "../../PipelineSetPayload";
+import type { Observer } from "../../ObservableClient/common";
+import { AbstractHelper } from "../AbstractHelper";
+import type { CacheKeys } from "../CacheKeys";
+import type { Canonical } from "../Canonical";
+import type { KnownCacheKey } from "../KnownCacheKey";
+import type { ObjectSetArrayCanonicalizer } from "../PipelineSetArrayCanonicalizer";
+import type { OrderByCanonicalizer } from "../OrderByCanonicalizer";
+import type { QuerySubscription } from "../QuerySubscription";
+import type { RdpCanonicalizer } from "../RdpCanonicalizer";
+import type { SelectCanonicalizer } from "../SelectCanonicalizer";
+import type { Store } from "../Store";
+import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer";
 import type {
   ObjectSetCacheKey,
   ObjectSetOperations,
-} from "./ObjectSetCacheKey.js";
-import { ObjectSetQuery } from "./ObjectSetQuery.js";
-import type { ObjectSetQueryOptions } from "./ObjectSetQueryOptions.js";
+} from "./PipelineSetCacheKey";
+import { ObjectSetQuery } from "./PipelineSetQuery";
+import type { ObjectSetQueryOptions } from "./PipelineSetQueryOptions";
 
 export class ObjectSetHelper extends AbstractHelper<
   ObjectSetQuery,

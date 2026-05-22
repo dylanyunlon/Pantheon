@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Canonical } from "./Canonical.js";
+import type { Canonical } from "./Canonical";
 
 export class SelectCanonicalizer {
   private cache = new Map<string, Canonical<readonly string[]>>();

@@ -16,11 +16,11 @@
 
 import type { Logger } from "../../../../coach-types";
 import { BehaviorSubject } from "rxjs";
-import { createInitEntry } from "./createInitEntry.js";
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Entry } from "./Layer.js";
-import { type Layers } from "./Layers.js";
-import type { SubjectPayload } from "./SubjectPayload.js";
+import { createInitEntry } from "./createInitEntry";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Entry } from "./Layer";
+import { type Layers } from "./Layers";
+import type { SubjectPayload } from "./SubjectPayload";
 
 export class Subjects {
   #layers: Layers;

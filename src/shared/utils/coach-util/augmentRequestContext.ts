@@ -14,7 +14,7 @@
  * 
  */
 
-import type { MinimalClient, RequestContext } from "../MinimalClientContext.js";
+import type { MinimalClient, RequestContext } from "../MinimalClientContext";
 
 /**
 Returns a client with its `requestContext` merged with the result of applying

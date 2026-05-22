@@ -19,11 +19,11 @@ import type {
   AggregationsResults,
   ObjectOrInterfaceDefinition,
 } from "../../../../../coach-types";
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import type { AggregationQuery } from "./AggregationQuery.js";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import type { AggregationQuery } from "./AggregationQuery";
 
 export const TYPE_IDX = 0;
 export const API_NAME_IDX = 1;

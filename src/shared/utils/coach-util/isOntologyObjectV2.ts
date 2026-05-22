@@ -14,7 +14,7 @@
  * 
  */
 
-import type { GameStateObjectV2 } from "@coach/pantheon.ontologies";
+import type { GameStateObjectV2 } from "../coach-types";
 
 /** @internal */
 export function isGameStateObjectV2(o: any): o is GameStateObjectV2 {

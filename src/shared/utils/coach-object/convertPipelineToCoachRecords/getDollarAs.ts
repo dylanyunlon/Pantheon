@@ -18,12 +18,12 @@ import type { ObjectOrInterfaceDefinition, CoachBase } from "../../../coach-type
 import {
   type FetchedObjectTypeDefinition,
   InterfaceDefinitions,
-} from "../../gameState/GameStateProvider.js";
-import { createSimpleCache } from "../SimpleCache.js";
-import { createCoachInterface } from "./createCoachInterface.js";
-import type { InterfaceHolder } from "./InterfaceHolder.js";
-import { UnderlyingCoachRecord } from "./InternalSymbols.js";
-import type { ObjectHolder } from "./ObjectHolder.js";
+} from "../../gameState/GameStateProvider";
+import { createSimpleCache } from "../SimpleCache";
+import { createCoachInterface } from "./createCoachInterface";
+import type { InterfaceHolder } from "./InterfaceHolder";
+import { UnderlyingCoachRecord } from "./InternalSymbols";
+import type { ObjectHolder } from "./ObjectHolder";
 
 /** @internal */
 export type DollarAsFn = <

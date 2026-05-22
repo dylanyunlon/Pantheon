@@ -22,7 +22,7 @@ import type {
   PrimaryKeyType,
   WhereClause,
 } from "../../../../coach-types";
-import type { Unsubscribable } from "../Unsubscribable.js";
+import type { Unsubscribable } from "../Unsubscribable";
 import type {
   CommonObserveOptions,
   InvalidationMode,
@@ -30,7 +30,7 @@ import type {
   Observer,
   OrderBy,
   Status,
-} from "./common.js";
+} from "./common";
 
 export namespace ObserveLinks {
   export interface Options<

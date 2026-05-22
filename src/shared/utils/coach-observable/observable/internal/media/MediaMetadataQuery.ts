@@ -29,20 +29,20 @@ import {
   type Observable,
   type Subject,
 } from "rxjs";
-import { additionalContext } from "../../../Client.js";
-import type { Status } from "../../ObservableClient/common.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { Status } from "../../ObservableClient/common";
 import type {
   MediaMetadataObserveOptions,
   MediaMetadataPayload,
-} from "../../ObservableClient/MediaObservableTypes.js";
-import type { BatchContext } from "../BatchContext.js";
-import type { Changes } from "../Changes.js";
-import type { Entry } from "../Layer.js";
-import type { OptimisticId } from "../OptimisticId.js";
-import { Query } from "../Query.js";
-import type { Store } from "../Store.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
-import type { MediaMetadataCacheKey } from "./MediaMetadataCacheKey.js";
+} from "../../ObservableClient/MediaObservableTypes";
+import type { BatchContext } from "../BatchContext";
+import type { Changes } from "../Changes";
+import type { Entry } from "../Layer";
+import type { OptimisticId } from "../OptimisticId";
+import { Query } from "../Query";
+import type { Store } from "../Store";
+import type { SubjectPayload } from "../SubjectPayload";
+import type { MediaMetadataCacheKey } from "./MediaMetadataCacheKey";
 
 export type { MediaMetadataObserveOptions, MediaMetadataPayload };
 
@@ -123,7 +123,7 @@ export class MediaMetadataQuery extends Query<
     try {
       const gameStateRid = await this.store.client[additionalContext]
         .gameStateRid;
-      const response = await OntologiesV2.MediaReferenceProperties
+      const response = await MediaReferenceProperties
         .getMediaMetadata(
           this.store.client[additionalContext],
           gameStateRid,

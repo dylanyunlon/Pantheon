@@ -14,10 +14,10 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "@shared/types/league-client/coach-api";
-import type { ObjectSet } from "@coach/pantheon.ontologies";
+import type { ObjectOrInterfaceDefinition } from "../coach-types";
+import type { ObjectSet } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { MinimalClient } from "../MinimalClientContext";
 
 /* @internal
 * Returns the resultant interface or object type of the object set

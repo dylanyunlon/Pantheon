@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectSet as WireObjectSet } from "@coach/pantheon.ontologies";
+import type { ObjectSet as WireObjectSet } from "../coach-types";
 
 const WIRE_OBJECT_SET_TYPES = new Set([
   "base",

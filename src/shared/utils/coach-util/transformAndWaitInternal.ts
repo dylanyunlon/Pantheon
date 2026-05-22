@@ -14,14 +14,14 @@
  * 
  */
 
-import type { TransformOptions } from "@shared/types/league-client/coach-api/unstable";
+import type { TransformOptions } from "../coach-types";
 import {
   MediaTransformationFailedError,
   MediaTransformationTimeoutError,
-} from "@shared/types/league-client/coach-api/unstable";
-import { MediaSets } from "@coach/pantheon.mediasets";
-import type { Transformation } from "@coach/pantheon.mediasets";
-import type { MinimalClient } from "../MinimalClientContext.js";
+} from "../coach-types";
+import { MediaSets } from "../coach-types";
+import type { Transformation } from "../coach-types";
+import type { MinimalClient } from "../MinimalClientContext";
 
 /**
  * @internal

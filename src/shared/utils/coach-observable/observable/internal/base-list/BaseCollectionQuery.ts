@@ -14,10 +14,10 @@
  * 
  */
 
-import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { Status } from "../../ObservableClient/common.js";
-import { type ObjectCacheKey } from "../object/ObjectCacheKey.js";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { Status } from "../../ObservableClient/common";
+import { type ObjectCacheKey } from "../object/ObjectCacheKey";
 
 /**
  * Abstract base for ListQuery and SpecificLinkQuery.

@@ -14,7 +14,7 @@
  * 
  */
 
-import { DEBUG_REFCOUNTS } from "../DebugFlags.js";
+import { DEBUG_REFCOUNTS } from "../DebugFlags";
 
 export class RefCounts<T extends {}> {
   private refCounts = new Map<T, number>();

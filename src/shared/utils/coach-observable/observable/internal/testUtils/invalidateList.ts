@@ -15,11 +15,11 @@
  */
 
 import type { ObjectTypeDefinition, WhereClause } from "../../../../../coach-types";
-import type { OrderBy } from "../../ObservableClient.js";
-import type { Canonical } from "../Canonical.js";
-import type { ListCacheKey } from "../list/ListCacheKey.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import type { Store } from "../Store.js";
+import type { OrderBy } from "../../ObservableClient";
+import type { Canonical } from "../Canonical";
+import type { ListCacheKey } from "../list/ListCacheKey";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import type { Store } from "../Store";
 
 export async function invalidateList<T extends ObjectTypeDefinition>(
   store: Store,

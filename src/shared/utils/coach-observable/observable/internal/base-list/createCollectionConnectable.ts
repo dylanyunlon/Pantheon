@@ -27,11 +27,11 @@ import {
   scheduled,
   switchMap,
 } from "rxjs";
-import type { CacheKey } from "../CacheKey.js";
-import type { ObjectCacheKey } from "../object/ObjectCacheKey.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
-import type { Subjects } from "../Subjects.js";
-import type { CollectionConnectableParams } from "./BaseCollectionQuery.js";
+import type { CacheKey } from "../CacheKey";
+import type { ObjectCacheKey } from "../object/ObjectCacheKey";
+import type { SubjectPayload } from "../SubjectPayload";
+import type { Subjects } from "../Subjects";
+import type { CollectionConnectableParams } from "./BaseCollectionQuery";
 
 /**
  * Creates a connectable observable for a collection of objects

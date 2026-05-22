@@ -19,8 +19,8 @@ import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
 } from "../../../coach-types";
-import { makeGeoFilterBbox } from "./makeGeoFilterBbox.js";
-import { makeGeoFilterPolygon } from "./makeGeoFilterPolygon.js";
+import { makeGeoFilterBbox } from "./makeGeoFilterBbox";
+import { makeGeoFilterPolygon } from "./makeGeoFilterPolygon";
 
 export function makeGeoFilterIntersects(
   intersectsBody: GeoFilterOptions["$intersects"],

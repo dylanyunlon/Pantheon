@@ -15,7 +15,7 @@
  */
 
 import type { PropertyTypeReferenceOrStringConstant } from "../../../coach-types";
-import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties";
 
 /**
  * Resolves a property reference or string constant to its actual value

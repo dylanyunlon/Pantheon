@@ -26,29 +26,29 @@ import type {
 } from "../../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import { type Subject } from "rxjs";
-import { additionalContext } from "../../../Client.js";
-import type { SpecificLinkPayload } from "../../LinkPayload.js";
-import type { Status } from "../../ObservableClient/common.js";
-import type { ObserveLinks } from "../../ObservableClient/ObserveLink.js";
-import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery.js";
-import { BaseListQuery } from "../base-list/BaseListQuery.js";
-import type { BatchContext } from "../BatchContext.js";
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import type { Changes } from "../Changes.js";
-import type { Entry } from "../Layer.js";
-import type { OptimisticId } from "../OptimisticId.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import { OrderBySortingStrategy } from "../sorting/SortingStrategy.js";
-import type { Store } from "../Store.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
-import { tombstone } from "../tombstone.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { SpecificLinkPayload } from "../../LinkPayload";
+import type { Status } from "../../ObservableClient/common";
+import type { ObserveLinks } from "../../ObservableClient/ObserveLink";
+import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery";
+import { BaseListQuery } from "../base-list/BaseListQuery";
+import type { BatchContext } from "../BatchContext";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import type { Changes } from "../Changes";
+import type { Entry } from "../Layer";
+import type { OptimisticId } from "../OptimisticId";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import { OrderBySortingStrategy } from "../sorting/SortingStrategy";
+import type { Store } from "../Store";
+import type { SubjectPayload } from "../SubjectPayload";
+import { tombstone } from "../tombstone";
 import {
   INCLUDE_ALL_BASE_PROPERTIES_IDX as LINK_INCLUDE_ALL_BASE_PROPERTIES_IDX,
   SELECT_IDX as LINK_SELECT_IDX,
   type SpecificLinkCacheKey,
-} from "./SpecificLinkCacheKey.js";
+} from "./SpecificLinkCacheKey";
 
 /**
  * Query implementation for retrieving linked objects from a specific object.

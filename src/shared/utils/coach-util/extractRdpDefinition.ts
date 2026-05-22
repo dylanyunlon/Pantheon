@@ -14,10 +14,10 @@
  * 
  */
 
-import type { ObjectSet } from "@coach/pantheon.ontologies";
+import type { ObjectSet } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derivedPropertyRuntimeMetadata.js";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derivedPropertyRuntimeMetadata";
+import type { MinimalClient } from "../MinimalClientContext";
 
 export async function extractRdpDefinition(
   clientCtx: MinimalClient,

@@ -14,12 +14,12 @@
  * 
  */
 
-import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { BatchContext } from "../BatchContext.js";
-import type { Canonical } from "../Canonical.js";
-import type { ObjectCacheKey } from "../object/ObjectCacheKey.js";
-import { PK_IDX } from "../object/ObjectCacheKey.js";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { BatchContext } from "../BatchContext";
+import type { Canonical } from "../Canonical";
+import type { ObjectCacheKey } from "../object/ObjectCacheKey";
+import { PK_IDX } from "../object/ObjectCacheKey";
 
 /**
  * Strategy interface for collection sorting

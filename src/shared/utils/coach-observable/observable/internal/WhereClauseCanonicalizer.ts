@@ -22,8 +22,8 @@ import type {
 import { Trie } from "../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import invariant from "../../coach-util/invariant";
-import type { Canonical } from "./Canonical.js";
-import type { SimpleWhereClause } from "./SimpleWhereClause.js";
+import type { Canonical } from "./Canonical";
+import type { SimpleWhereClause } from "./SimpleWhereClause";
 
 export class WhereClauseCanonicalizer {
   /**

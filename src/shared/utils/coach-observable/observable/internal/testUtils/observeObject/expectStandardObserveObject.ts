@@ -16,15 +16,15 @@
 
 import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
 import { expect } from "vitest";
-import type { TypedObjectPayload } from "../../../ObjectPayload.js";
-import type { Store } from "../../Store.js";
-import type { MockedSingleSubCallback } from "../../testUtils.js";
+import type { TypedObjectPayload } from "../../../ObjectPayload";
+import type { Store } from "../../Store";
+import type { MockedSingleSubCallback } from "../../testUtils";
 import {
   createDefer,
   expectSingleObjectCallAndClear,
   mockSingleSubCallback,
   waitForCall,
-} from "../../testUtils.js";
+} from "../../testUtils";
 
 const defer = createDefer();
 

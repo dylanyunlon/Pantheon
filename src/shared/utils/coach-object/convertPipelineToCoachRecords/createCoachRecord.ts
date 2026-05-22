@@ -24,28 +24,28 @@ import type {
   SecuredPropertyValue,
 } from "../../../coach-types";
 import invariant from "../../coach-util/invariant";
-import { GeotimeSeriesPropertyImpl } from "../../createGeotimeSeriesProperty.js";
-import { MediaReferencePropertyImpl } from "../../createMediaReferenceProperty.js";
-import { TimeSeriesPropertyImpl } from "../../createTimeseriesProperty.js";
-import type { DerivedPropertyRuntimeMetadata } from "../../derivedProperties/derivedPropertyRuntimeMetadata.js";
-import type { MinimalClient } from "../../MinimalClientContext.js";
-import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider.js";
-import { hydrateAttachmentFromRidInternal } from "../../public-utils/hydrateAttachmentFromRid.js";
-import { createObjectSpecifierFromPrimaryKey } from "../../coach-util/objectSpecifierUtils.js";
+import { GeotimeSeriesPropertyImpl } from "../../createGeotimeSeriesProperty";
+import { MediaReferencePropertyImpl } from "../../createMediaReferenceProperty";
+import { TimeSeriesPropertyImpl } from "../../createTimeseriesProperty";
+import type { DerivedPropertyRuntimeMetadata } from "../../derivedProperties/derivedPropertyRuntimeMetadata";
+import type { MinimalClient } from "../../MinimalClientContext";
+import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
+import { hydrateAttachmentFromRidInternal } from "../../public-utils/hydrateAttachmentFromRid";
+import { createObjectSpecifierFromPrimaryKey } from "../../coach-util/objectSpecifierUtils";
 import {
   applyPropertyFormatter,
   type FormatPropertyOptions,
-} from "../formatting/applyPropertyFormatter.js";
-import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
-import { get$as } from "./getDollarAs.js";
-import { get$link } from "./getDollarLink.js";
+} from "../formatting/applyPropertyFormatter";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties";
+import { get$as } from "./getDollarAs";
+import { get$link } from "./getDollarLink";
 import {
   ClientRef,
   ObjectDefRef,
   PropertySecuritiesRef,
   UnderlyingCoachRecord,
-} from "./InternalSymbols.js";
-import type { ObjectHolder } from "./ObjectHolder.js";
+} from "./InternalSymbols";
+import type { ObjectHolder } from "./ObjectHolder";
 
 const specialPropertyTypes = new Set(
   [

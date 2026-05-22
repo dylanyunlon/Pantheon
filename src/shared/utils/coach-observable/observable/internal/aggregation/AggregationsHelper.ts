@@ -19,27 +19,27 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
 } from "../../../../../coach-types";
-import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline";
 import type {
   ObserveAggregationOptions,
   ObserveAggregationOptionsWithPipelineSet,
-} from "../../ObservableClient.js";
-import type { Observer } from "../../ObservableClient/common.js";
-import { AbstractHelper } from "../AbstractHelper.js";
-import type { CacheKeys } from "../CacheKeys.js";
-import type { Canonical } from "../Canonical.js";
-import type { IntersectCanonicalizer } from "../IntersectCanonicalizer.js";
-import type { KnownCacheKey } from "../KnownCacheKey.js";
-import type { QuerySubscription } from "../QuerySubscription.js";
-import type { RdpCanonicalizer } from "../RdpCanonicalizer.js";
-import type { Store } from "../Store.js";
-import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer.js";
-import type { AggregationCacheKey } from "./AggregationCacheKey.js";
+} from "../../ObservableClient";
+import type { Observer } from "../../ObservableClient/common";
+import { AbstractHelper } from "../AbstractHelper";
+import type { CacheKeys } from "../CacheKeys";
+import type { Canonical } from "../Canonical";
+import type { IntersectCanonicalizer } from "../IntersectCanonicalizer";
+import type { KnownCacheKey } from "../KnownCacheKey";
+import type { QuerySubscription } from "../QuerySubscription";
+import type { RdpCanonicalizer } from "../RdpCanonicalizer";
+import type { Store } from "../Store";
+import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer";
+import type { AggregationCacheKey } from "./AggregationCacheKey";
 import type {
   AggregationPayloadBase,
   AggregationQuery,
-} from "./AggregationQuery.js";
-import { ObjectAggregationQuery } from "./ObjectAggregationQuery.js";
+} from "./AggregationQuery";
+import { ObjectAggregationQuery } from "./ObjectAggregationQuery";
 
 type AggregationOptions =
   | ObserveAggregationOptions<

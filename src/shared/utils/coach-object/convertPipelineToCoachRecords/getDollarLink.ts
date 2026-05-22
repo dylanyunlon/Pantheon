@@ -21,16 +21,16 @@ import type {
   SingleLinkAccessor,
   WhereClause,
 } from "../../../coach-types";
-import { getWirePipelineSet } from "../../coach-pipeline/createPipeline.js";
-import { fetchSingle, fetchSingleWithErrors } from "../fetchSingle.js";
-import type { InterfaceHolder } from "./InterfaceHolder.js";
+import { getWirePipelineSet } from "../../coach-pipeline/createPipeline";
+import { fetchSingle, fetchSingleWithErrors } from "../fetchSingle";
+import type { InterfaceHolder } from "./InterfaceHolder";
 import {
   ClientRef,
   InterfaceDefRef,
   ObjectDefRef,
   UnderlyingCoachRecord,
-} from "./InternalSymbols.js";
-import type { ObjectHolder } from "./ObjectHolder.js";
+} from "./InternalSymbols";
+import type { ObjectHolder } from "./ObjectHolder";
 
 /** @internal */
 export function get$link(

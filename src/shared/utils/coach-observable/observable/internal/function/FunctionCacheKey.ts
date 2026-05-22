@@ -14,10 +14,10 @@
  * 
  */
 
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import type { CanonicalFunctionParams } from "./FunctionParamsCanonicalizer.js";
-import type { FunctionQuery } from "./FunctionQuery.js";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import type { CanonicalFunctionParams } from "./FunctionParamsCanonicalizer";
+import type { FunctionQuery } from "./FunctionQuery";
 
 // Index constants for accessing otherKeys array elements
 export const API_NAME_IDX = 0;

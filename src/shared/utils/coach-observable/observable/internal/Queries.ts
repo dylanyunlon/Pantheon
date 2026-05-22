@@ -14,8 +14,8 @@
  * 
  */
 
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Query } from "./Query.js";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Query } from "./Query";
 
 export class Queries {
   // we can use a regular Map here because the refCounting will

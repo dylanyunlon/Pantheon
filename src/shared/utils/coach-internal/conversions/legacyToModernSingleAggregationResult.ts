@@ -20,8 +20,8 @@ import type {
   ObjectOrInterfaceDefinition,
 } from "../../../coach-types";
 import type { AggregateObjectsResponseV2 } from "../../../coach-types";
-import type { ArrayElement } from "../../coach-util/ArrayElement.js";
-import { splitAggregationKey } from "./modernToLegacyAggregationClause.js";
+import type { ArrayElement } from "../../coach-util/ArrayElement";
+import { splitAggregationKey } from "./modernToLegacyAggregationClause";
 
 /** @internal */
 export function legacyToModernSingleAggregationResult<

@@ -15,18 +15,18 @@
  */
 
 import type { QueryDefinition } from "../../../../../coach-types";
-import type { FunctionPayload } from "../../FunctionPayload.js";
-import type { Observer } from "../../ObservableClient/common.js";
-import { AbstractHelper } from "../AbstractHelper.js";
-import type { CacheKeys } from "../CacheKeys.js";
-import type { Canonical } from "../Canonical.js";
-import type { KnownCacheKey } from "../KnownCacheKey.js";
-import type { QuerySubscription } from "../QuerySubscription.js";
-import type { Store } from "../Store.js";
-import { type FunctionCacheKey, PARAMS_IDX } from "./FunctionCacheKey.js";
-import type { CanonicalFunctionParams } from "./FunctionParamsCanonicalizer.js";
-import { FunctionParamsCanonicalizer } from "./FunctionParamsCanonicalizer.js";
-import { type FunctionObserveOptions, FunctionQuery } from "./FunctionQuery.js";
+import type { FunctionPayload } from "../../FunctionPayload";
+import type { Observer } from "../../ObservableClient/common";
+import { AbstractHelper } from "../AbstractHelper";
+import type { CacheKeys } from "../CacheKeys";
+import type { Canonical } from "../Canonical";
+import type { KnownCacheKey } from "../KnownCacheKey";
+import type { QuerySubscription } from "../QuerySubscription";
+import type { Store } from "../Store";
+import { type FunctionCacheKey, PARAMS_IDX } from "./FunctionCacheKey";
+import type { CanonicalFunctionParams } from "./FunctionParamsCanonicalizer";
+import { FunctionParamsCanonicalizer } from "./FunctionParamsCanonicalizer";
+import { type FunctionObserveOptions, FunctionQuery } from "./FunctionQuery";
 
 type PrimaryKeyValue = string | number;
 type FunctionParams = Record<string, unknown>;

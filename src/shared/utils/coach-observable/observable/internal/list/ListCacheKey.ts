@@ -14,13 +14,13 @@
  * 
  */
 
-import type { CollectionStorageData } from "../base-list/BaseCollectionQuery.js";
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import type { PivotInfo } from "../PivotCanonicalizer.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import type { ListQuery } from "./ListQuery.js";
+import type { CollectionStorageData } from "../base-list/BaseCollectionQuery";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import type { PivotInfo } from "../PivotCanonicalizer";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import type { ListQuery } from "./ListQuery";
 
 // Index constants for accessing otherKeys array elements
 export const TYPE_IDX = 0;

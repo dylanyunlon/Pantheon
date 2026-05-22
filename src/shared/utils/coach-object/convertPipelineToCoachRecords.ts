@@ -28,15 +28,15 @@ import type {
   PropertySecurities,
 } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derivedPropertyRuntimeMetadata.js";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derivedPropertyRuntimeMetadata";
+import type { MinimalClient } from "../MinimalClientContext";
 import {
   type FetchedObjectTypeDefinition,
-} from "../gameState/GameStateProvider.js";
-import { createCoachRecord } from "./convertWireToCoachRecords/createCoachRecord.js";
-import type { InterfaceHolder } from "./convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "./convertWireToCoachRecords/ObjectHolder.js";
-import type { SimpleCoachProperties } from "./SimpleCoachProperties.js";
+} from "../gameState/GameStateProvider";
+import { createCoachRecord } from "./convertWireToCoachRecords/createCoachRecord";
+import type { InterfaceHolder } from "./convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "./convertWireToCoachRecords/ObjectHolder";
+import type { SimpleCoachProperties } from "./SimpleCoachProperties";
 
 /**
  * If interfaceApiName is not undefined, converts the instances of the

@@ -14,10 +14,10 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "@shared/types/league-client/coach-api";
-import { USER_AGENT_HEADER } from "@coach/shared.client.impl";
-import { createFetchHeaderMutator } from "@shared/http-api-axios-helper.fetch";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { ObjectOrInterfaceDefinition } from "../coach-types";
+import { USER_AGENT_HEADER } from "../coach-types";
+import { createFetchHeaderMutator } from "../coach-types";
+import type { MinimalClient } from "../MinimalClientContext";
 
 export const addUserAgentAndRequestContextHeaders = (
   client: MinimalClient,

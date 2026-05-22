@@ -15,11 +15,11 @@
  */
 
 import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
-import type { CollectionStorageData } from "../base-list/BaseCollectionQuery.js";
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import type { SpecificLinkQuery } from "./SpecificLinkQuery.js";
+import type { CollectionStorageData } from "../base-list/BaseCollectionQuery";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import type { SpecificLinkQuery } from "./SpecificLinkQuery";
 
 // Index constants for accessing otherKeys array elements
 export const SOURCE_API_NAME_IDX = 0;

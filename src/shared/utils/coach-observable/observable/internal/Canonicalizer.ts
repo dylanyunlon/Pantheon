@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Canonical } from "./Canonical.js";
+import type { Canonical } from "./Canonical";
 
 /**
  * Interface for canonicalizing objects.

@@ -14,12 +14,12 @@
  * 
  */
 
-import { additionalContext } from "../../../Client.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { OptimisticBuilder } from "../../OptimisticBuilder.js";
-import { type Changes } from "../Changes.js";
-import { createOptimisticId, type OptimisticId } from "../OptimisticId.js";
-import type { Store } from "../Store.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { OptimisticBuilder } from "../../OptimisticBuilder";
+import { type Changes } from "../Changes";
+import { createOptimisticId, type OptimisticId } from "../OptimisticId";
+import type { Store } from "../Store";
 
 export class OptimisticJob {
   context: OptimisticBuilder;

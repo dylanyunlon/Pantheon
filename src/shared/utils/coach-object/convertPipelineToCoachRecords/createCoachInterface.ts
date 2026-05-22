@@ -15,16 +15,16 @@
  */
 
 import type { InterfaceMetadata, PropertySecurity } from "../../../coach-types";
-import { extractNamespace } from "../../coach-internal/conversions/extractNamespace.js";
-import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider.js";
-import { get$linkForInterface } from "./getDollarLink.js";
-import type { InterfaceHolder } from "./InterfaceHolder.js";
+import { extractNamespace } from "../../coach-internal/conversions/extractNamespace";
+import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
+import { get$linkForInterface } from "./getDollarLink";
+import type { InterfaceHolder } from "./InterfaceHolder";
 import {
   InterfaceDefRef,
   ObjectDefRef,
   UnderlyingCoachRecord,
-} from "./InternalSymbols.js";
-import type { ObjectHolder } from "./ObjectHolder.js";
+} from "./InternalSymbols";
+import type { ObjectHolder } from "./ObjectHolder";
 
 type PropertySecuritiesMap = {
   [propName: string]: PropertySecurity[] | PropertySecurity[][];

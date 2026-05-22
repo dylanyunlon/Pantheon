@@ -18,10 +18,10 @@ import type { Subscription } from "rxjs";
 import type {
   CommonObserveOptions,
   ObserveOptions,
-} from "../ObservableClient/common.js";
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Query } from "./Query.js";
-import { UnsubscribableWrapper } from "./UnsubscribableWrapper.js";
+} from "../ObservableClient/common";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Query } from "./Query";
+import { UnsubscribableWrapper } from "./UnsubscribableWrapper";
 
 let subscriptionIdCounter = 0;
 

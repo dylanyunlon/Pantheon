@@ -14,9 +14,9 @@
  * 
  */
 
-import type { Changes } from "./Changes.js";
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Entry } from "./Layer.js";
+import type { Changes } from "./Changes";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Entry } from "./Layer";
 
 export interface BatchContext {
   changes: Changes;

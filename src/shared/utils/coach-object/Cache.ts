@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ClientCacheKey, MinimalClient } from "../MinimalClientContext.js";
+import type { ClientCacheKey, MinimalClient } from "../MinimalClientContext";
 
 /**
  * A simple cache that can be used to store values for a given client.

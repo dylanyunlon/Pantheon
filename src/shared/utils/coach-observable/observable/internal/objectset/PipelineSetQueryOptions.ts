@@ -23,7 +23,7 @@ import type {
   WhereClause,
   WirePropertyTypes,
 } from "../../../../../coach-types";
-import type { CommonObserveOptions } from "../../ObservableClient/common.js";
+import type { CommonObserveOptions } from "../../ObservableClient/common";
 
 export interface ObserveObjectSetOptions<
   Q extends ObjectOrInterfaceDefinition,

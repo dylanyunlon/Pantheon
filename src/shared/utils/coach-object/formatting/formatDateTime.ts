@@ -20,8 +20,8 @@ import type {
   DatetimeTimezone,
 } from "../../../coach-types";
 import type { DatetimeLocalizedFormatType } from "../../../coach-types";
-import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
-import { resolvePropertyReference } from "./propertyFormattingUtils.js";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties";
+import { resolvePropertyReference } from "./propertyFormattingUtils";
 
 /**
  * Formats a date/timestamp value according to the specified formatting rule

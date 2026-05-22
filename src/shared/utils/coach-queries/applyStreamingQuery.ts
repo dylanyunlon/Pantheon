@@ -19,20 +19,20 @@ import type {
   QueryDefinition,
   QueryMetadata,
 } from "../coach-types";
-import * as Functions from "../coach-types";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
-import { augmentRequestContext } from "../util/augmentRequestContext.js";
+import { Functions } from "../coach-types";
+import type { MinimalClient } from "../MinimalClientContext";
+import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";
+import { augmentRequestContext } from "../util/augmentRequestContext";
 import {
   iterateReadableStream,
   parseNdjsonStream,
-} from "../util/streamutils.js";
+} from "../util/streamutils";
 import {
   getRequiredDefinitions,
   remapQueryParams,
   remapQueryResponse,
-} from "./applyQuery.js";
-import type { QueryParameterType, QueryReturnType } from "./types.js";
+} from "./applyQuery";
+import type { QueryParameterType, QueryReturnType } from "./types";
 
 export async function* applyStreamingQuery<
   QD extends QueryDefinition<any>,

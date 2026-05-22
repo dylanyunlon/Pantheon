@@ -15,11 +15,11 @@
  */
 
 import type { Coach } from "../../../coach-types";
-import type { MinimalClient } from "../../MinimalClientContext.js";
-import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider.js";
-import type { BaseHolder } from "./BaseHolder.js";
-import type { get$link } from "./getDollarLink.js";
-import type { ClientRef, ObjectDefRef } from "./InternalSymbols.js";
+import type { MinimalClient } from "../../MinimalClientContext";
+import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
+import type { BaseHolder } from "./BaseHolder";
+import type { get$link } from "./getDollarLink";
+import type { ClientRef, ObjectDefRef } from "./InternalSymbols";
 
 /**
  * @internal

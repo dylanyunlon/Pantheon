@@ -14,10 +14,10 @@
  * 
  */
 
-import type { TimeSeriesQuery } from "@shared/types/league-client/coach-api";
-import { TimeseriesDurationMapping } from "@shared/types/league-client/coach-api";
-import type { TimeRange } from "@coach/pantheon.ontologies";
-import { iterateReadableStream, parseStreamedResponse } from "./streamutils.js";
+import type { TimeSeriesQuery } from "../coach-types";
+import { TimeseriesDurationMapping } from "../coach-types";
+import type { TimeRange } from "../coach-types";
+import { iterateReadableStream, parseStreamedResponse } from "./streamutils";
 
 export function getTimeRange(body: TimeSeriesQuery): TimeRange {
   if ("$startTime" in body || "$endTime" in body) {

@@ -20,11 +20,11 @@ import type {
   PipelineSet as WirePipelineSet,
 } from "../../../../coach-types";
 import invariant from "../../coach-util/invariant";
-import type { MinimalClient } from "../../MinimalClientContext.js";
+import type { MinimalClient } from "../../MinimalClientContext";
 import type {
   FetchedObjectTypeDefinition,
   GameStateProvider,
-} from "../../gameState/GameStateProvider.js";
+} from "../../gameState/GameStateProvider";
 
 // Suppose we did an object set that is basically
 // A.where()

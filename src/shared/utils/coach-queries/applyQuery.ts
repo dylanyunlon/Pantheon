@@ -29,20 +29,20 @@ import type {
   QueryParameterDefinition,
 } from "../coach-types";
 import type { DataValue } from "../coach-types";
-import * as Queries from "../coach-types";
+import { Queries } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import { createMediaFromReferenceInternal } from "../createMediaFromReference.js";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { createPipeline } from "../pipelineSet/createPipeline.js";
-import { hydrateAttachmentFromRidInternal } from "../public-utils/hydrateAttachmentFromRid.js";
-import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
-import { augmentRequestContext } from "../util/augmentRequestContext.js";
+import { createMediaFromReferenceInternal } from "../createMediaFromReference";
+import type { MinimalClient } from "../MinimalClientContext";
+import { createPipeline } from "../pipelineSet/createPipeline";
+import { hydrateAttachmentFromRidInternal } from "../public-utils/hydrateAttachmentFromRid";
+import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";
+import { augmentRequestContext } from "../util/augmentRequestContext";
 import {
   createObjectSpecifierFromInterfaceSpecifier,
   createObjectSpecifierFromPrimaryKey,
-} from "../util/objectSpecifierUtils.js";
-import { toDataValueQueries } from "../util/toDataValueQueries.js";
-import type { QueryParameterType, QueryReturnType } from "./types.js";
+} from "../util/objectSpecifierUtils";
+import { toDataValueQueries } from "../util/toDataValueQueries";
+import type { QueryParameterType, QueryReturnType } from "./types";
 
 export async function applyQuery<
   QD extends QueryDefinition<any>,

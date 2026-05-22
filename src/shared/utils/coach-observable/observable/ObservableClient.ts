@@ -34,29 +34,29 @@ import type {
   WirePropertyTypes,
 } from "../../../coach-types";
 import { createFetchHeaderMutator } from "../../../coach-types";
-import type { ActionSignatureFromDef } from "../actions/applyAction.js";
-import { additionalContext, type Client } from "../Client.js";
-import { createClientFromContext } from "../createClient.js";
-import type { QueryReturnType } from "../queries/types.js";
-import { OBSERVABLE_USER_AGENT } from "../util/UserAgent.js";
-import type { Canonical } from "./internal/Canonical.js";
-import type { ObserveObjectSetOptions } from "./internal/objectset/ObjectSetQueryOptions.js";
-import { ObservableClientImpl } from "./internal/ObservableClientImpl.js";
-import { Store } from "./internal/Store.js";
+import type { ActionSignatureFromDef } from "../actions/applyAction";
+import { type Client } from "../coach-engine";
+import { createClientFromContext } from "../createClient";
+import type { QueryReturnType } from "../queries/types";
+import { OBSERVABLE_USER_AGENT } from "../util/UserAgent";
+import type { Canonical } from "./internal/Canonical";
+import type { ObserveObjectSetOptions } from "./internal/objectset/PipelineSetQueryOptions";
+import { ObservableClientImpl } from "./internal/ObservableClientImpl";
+import { Store } from "./internal/Store";
 import type {
   CommonObserveOptions,
   InvalidationMode,
   ObserveOptions,
   Observer,
   Status,
-} from "./ObservableClient/common.js";
+} from "./ObservableClient/common";
 import type {
   MediaMetadataObserveOptions,
   MediaMetadataPayload,
-} from "./ObservableClient/MediaObservableTypes.js";
-import type { MediaPropertyLocation } from "./ObservableClient/MediaTypes.js";
-import type { ObserveLinks } from "./ObservableClient/ObserveLink.js";
-import type { OptimisticBuilder } from "./OptimisticBuilder.js";
+} from "./ObservableClient/MediaObservableTypes";
+import type { MediaPropertyLocation } from "./ObservableClient/MediaTypes";
+import type { ObserveLinks } from "./ObservableClient/ObserveLink";
+import type { OptimisticBuilder } from "./OptimisticBuilder";
 
 export namespace ObservableClient {
   export interface ApplyActionOptions {

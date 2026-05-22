@@ -14,10 +14,10 @@
  * 
  */
 
-import type { Logger } from "@shared/types/league-client/coach-api";
+import type { Logger } from "../coach-types";
 import { Chalk } from "chalk";
 import { vi } from "vitest";
-import { BaseLogger } from "./BaseLogger.js";
+import { BaseLogger } from "./BaseLogger";
 
 const chalk = new Chalk(); // new Chalk({ level: 3 });
 

@@ -16,8 +16,8 @@
 
 import { Trie } from "../../../../coach-types";
 import deepEqual from "fast-deep-equal";
-import type { Canonical } from "./Canonical.js";
-import { CachingCanonicalizer } from "./Canonicalizer.js";
+import type { Canonical } from "./Canonical";
+import { CachingCanonicalizer } from "./Canonicalizer";
 
 // Limits how deep we recurse into nested objects when building the trie
 // fingerprint. Beyond this depth, objects land in the same trie bucket and

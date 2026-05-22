@@ -14,8 +14,8 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "@shared/types/league-client/coach-api";
-import type { ObjectSet as WireObjectSet } from "@coach/pantheon.ontologies";
+import type { ObjectOrInterfaceDefinition } from "../coach-types";
+import type { ObjectSet as WireObjectSet } from "../coach-types";
 
 export function resolveBaseObjectSetType(
   objectType: ObjectOrInterfaceDefinition,

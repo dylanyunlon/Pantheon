@@ -15,25 +15,25 @@
  */
 
 import type { ObjectOrInterfaceDefinition } from "../../../../../coach-types";
-import type { ListPayload } from "../../ListPayload.js";
-import type { ObserveListOptions } from "../../ObservableClient.js";
-import type { Observer } from "../../ObservableClient/common.js";
-import { AbstractHelper } from "../AbstractHelper.js";
-import type { CacheKeys } from "../CacheKeys.js";
-import type { IntersectCanonicalizer } from "../IntersectCanonicalizer.js";
-import type { KnownCacheKey } from "../KnownCacheKey.js";
-import type { OrderByCanonicalizer } from "../OrderByCanonicalizer.js";
-import type { PivotCanonicalizer } from "../PivotCanonicalizer.js";
-import type { QuerySubscription } from "../QuerySubscription.js";
-import type { RdpCanonicalizer } from "../RdpCanonicalizer.js";
-import type { RidListCanonicalizer } from "../RidListCanonicalizer.js";
-import type { SelectCanonicalizer } from "../SelectCanonicalizer.js";
-import type { Store } from "../Store.js";
-import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer.js";
-import { InterfaceListQuery } from "./InterfaceListQuery.js";
-import type { ListCacheKey } from "./ListCacheKey.js";
-import type { ListQuery } from "./ListQuery.js";
-import { ObjectListQuery } from "./ObjectListQuery.js";
+import type { ListPayload } from "../../ListPayload";
+import type { ObserveListOptions } from "../../ObservableClient";
+import type { Observer } from "../../ObservableClient/common";
+import { AbstractHelper } from "../AbstractHelper";
+import type { CacheKeys } from "../CacheKeys";
+import type { IntersectCanonicalizer } from "../IntersectCanonicalizer";
+import type { KnownCacheKey } from "../KnownCacheKey";
+import type { OrderByCanonicalizer } from "../OrderByCanonicalizer";
+import type { PivotCanonicalizer } from "../PivotCanonicalizer";
+import type { QuerySubscription } from "../QuerySubscription";
+import type { RdpCanonicalizer } from "../RdpCanonicalizer";
+import type { RidListCanonicalizer } from "../RidListCanonicalizer";
+import type { SelectCanonicalizer } from "../SelectCanonicalizer";
+import type { Store } from "../Store";
+import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer";
+import { InterfaceListQuery } from "./InterfaceListQuery";
+import type { ListCacheKey } from "./ListCacheKey";
+import type { ListQuery } from "./ListQuery";
+import { ObjectListQuery } from "./ObjectListQuery";
 
 export class ListsHelper extends AbstractHelper<
   ListQuery,

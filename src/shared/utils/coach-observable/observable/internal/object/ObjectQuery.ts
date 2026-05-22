@@ -22,23 +22,23 @@ import type {
 } from "../../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
-import { additionalContext } from "../../../Client.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { DefType } from "../../../util/interfaceUtils.js";
-import type { ObjectPayload } from "../../ObjectPayload.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { DefType } from "../../../util/interfaceUtils";
+import type { ObjectPayload } from "../../ObjectPayload";
 import type {
   CommonObserveOptions,
   Status,
-} from "../../ObservableClient/common.js";
-import type { BatchContext } from "../BatchContext.js";
-import { getBulkObjectLoader } from "../BulkObjectLoader.js";
-import type { Changes } from "../Changes.js";
-import type { Entry } from "../Layer.js";
-import { Query } from "../Query.js";
-import type { Store } from "../Store.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
-import { tombstone } from "../tombstone.js";
-import { type ObjectCacheKey, RDP_CONFIG_IDX } from "./ObjectCacheKey.js";
+} from "../../ObservableClient/common";
+import type { BatchContext } from "../BatchContext";
+import { getBulkObjectLoader } from "../BulkObjectLoader";
+import type { Changes } from "../Changes";
+import type { Entry } from "../Layer";
+import { Query } from "../Query";
+import type { Store } from "../Store";
+import type { SubjectPayload } from "../SubjectPayload";
+import { tombstone } from "../tombstone";
+import { type ObjectCacheKey, RDP_CONFIG_IDX } from "./ObjectCacheKey";
 
 export class ObjectQuery extends Query<
   ObjectCacheKey,

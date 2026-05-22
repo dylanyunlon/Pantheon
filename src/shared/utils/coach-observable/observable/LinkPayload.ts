@@ -14,9 +14,9 @@
  * 
  */
 
-import type { InterfaceHolder } from "../object/convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { ObserveLinkCallbackArgs } from "./ObservableClient.js";
+import type { InterfaceHolder } from "../object/convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder";
+import type { ObserveLinkCallbackArgs } from "./ObservableClient";
 
 /**
  * Internal type to keep the generic insanity down internal to the observable code

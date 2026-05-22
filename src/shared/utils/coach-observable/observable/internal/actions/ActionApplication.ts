@@ -15,10 +15,10 @@
  */
 
 import type { ActionDefinition, ActionEditResponse } from "../../../../../coach-types";
-import type { ActionSignatureFromDef } from "../../../actions/applyAction.js";
-import { API_NAME_IDX } from "../list/ListCacheKey.js";
-import type { Store } from "../Store.js";
-import { runOptimisticJob } from "./OptimisticJob.js";
+import type { ActionSignatureFromDef } from "../../../actions/applyAction";
+import { API_NAME_IDX } from "../list/ListCacheKey";
+import type { Store } from "../Store";
+import { runOptimisticJob } from "./OptimisticJob";
 
 const ACTION_DELAY = process.env.NODE_ENV === "production" ? 0 : 1000;
 

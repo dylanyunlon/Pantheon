@@ -17,14 +17,14 @@
 import type {
   CommonObserveOptions,
   Observer,
-} from "../ObservableClient/common.js";
-import type { BaseListPayloadShape } from "./base-list/BaseListQuery.js";
-import type { CacheKeys } from "./CacheKeys.js";
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import { ListQueryView, type ListQueryViewTarget } from "./ListQueryView.js";
-import type { Query } from "./Query.js";
-import { QuerySubscription } from "./QuerySubscription.js";
-import type { Store } from "./Store.js";
+} from "../ObservableClient/common";
+import type { BaseListPayloadShape } from "./base-list/BaseListQuery";
+import type { CacheKeys } from "./CacheKeys";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import { ListQueryView, type ListQueryViewTarget } from "./ListQueryView";
+import type { Query } from "./Query";
+import { QuerySubscription } from "./QuerySubscription";
+import type { Store } from "./Store";
 
 /**
  * Check if a query supports view-based pagination (has the required methods).

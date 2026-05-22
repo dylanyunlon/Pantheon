@@ -19,7 +19,7 @@ import type {
   ObjectSpecifier,
   ObjectTypeDefinition,
   PrimaryKeyType,
-} from "@shared/types/league-client/coach-api";
+} from "../coach-types";
 
 /**
  * Creates an Object Specifier. An ObjectSpecifier is a string that uniquely identifies an object in the system,

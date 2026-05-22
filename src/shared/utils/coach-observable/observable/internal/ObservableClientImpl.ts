@@ -31,18 +31,18 @@ import type {
   WirePropertyTypes,
 } from "../../../../coach-types";
 import { Subscription } from "rxjs";
-import type { ActionSignatureFromDef } from "../../coach-actions/applyAction.js";
-import { additionalContext } from "../../coach-engine.js";
+import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";
+// import { additionalContext } from "../../coach-engine";
 import {
   getWirePipelineSet,
   isPipelineSet,
-} from "../../coach-pipeline/createPipeline.js";
-import { extractObjectOrInterfaceType } from "../../coach-util/extractObjectOrInterfaceType.js";
-import type { FunctionPayload } from "../FunctionPayload.js";
-import type { SpecificLinkPayload } from "../LinkPayload.js";
-import type { ListPayload } from "../ListPayload.js";
-import type { ObjectPayload } from "../ObjectPayload.js";
-import type { ObjectSetPayload } from "../ObjectSetPayload.js";
+} from "../../coach-pipeline/createPipeline";
+import { extractObjectOrInterfaceType } from "../../coach-util/extractObjectOrInterfaceType";
+import type { FunctionPayload } from "../FunctionPayload";
+import type { SpecificLinkPayload } from "../LinkPayload";
+import type { ListPayload } from "../ListPayload";
+import type { ObjectPayload } from "../ObjectPayload";
+import type { ObjectSetPayload } from "../PipelineSetPayload";
 import type {
   CacheSnapshot,
   CanonicalizedOptions,
@@ -59,20 +59,20 @@ import type {
   ObserveObjectsCallbackArgs,
   ObserveObjectSetArgs,
   Unsubscribable,
-} from "../ObservableClient.js";
-import type { Observer } from "../ObservableClient/common.js";
+} from "../ObservableClient";
+import type { Observer } from "../ObservableClient/common";
 import type {
   MediaMetadataObserveOptions,
   MediaMetadataPayload,
-} from "../ObservableClient/MediaObservableTypes.js";
-import type { MediaPropertyLocation } from "../ObservableClient/MediaTypes.js";
-import type { ObserveLinks } from "../ObservableClient/ObserveLink.js";
-import type { AggregationPayloadBase } from "./aggregation/AggregationQuery.js";
-import type { Canonical } from "./Canonical.js";
-import type { ObserveObjectSetOptions } from "./objectset/ObjectSetQueryOptions.js";
-import type { Rdp } from "./RdpCanonicalizer.js";
-import type { Store } from "./Store.js";
-import { UnsubscribableWrapper } from "./UnsubscribableWrapper.js";
+} from "../ObservableClient/MediaObservableTypes";
+import type { MediaPropertyLocation } from "../ObservableClient/MediaTypes";
+import type { ObserveLinks } from "../ObservableClient/ObserveLink";
+import type { AggregationPayloadBase } from "./aggregation/AggregationQuery";
+import type { Canonical } from "./Canonical";
+import type { ObserveObjectSetOptions } from "./objectset/PipelineSetQueryOptions";
+import type { Rdp } from "./RdpCanonicalizer";
+import type { Store } from "./Store";
+import { UnsubscribableWrapper } from "./UnsubscribableWrapper";
 
 /**
  * Implementation of the public ObservableClient interface.

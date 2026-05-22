@@ -34,8 +34,8 @@ import type {
 } from "../coach-types";
 import WebSocket from "isomorphic-ws";
 import invariant from "../../coach-util/invariant";
-import type { ClientCacheKey, MinimalClient } from "../MinimalClientContext.js";
-import { ExponentialBackoff } from "../util/exponentialBackoff.js";
+import type { ClientCacheKey, MinimalClient } from "../MinimalClientContext";
+import { ExponentialBackoff } from "../util/exponentialBackoff";
 
 const MINIMUM_RECONNECT_DELAY_MS = 5 * 1000;
 const EXPONENTIAL_BACKOFF_INITIAL_DELAY_MS = 1000;

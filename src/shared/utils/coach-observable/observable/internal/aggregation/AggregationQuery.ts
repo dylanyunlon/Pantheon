@@ -25,21 +25,21 @@ import type {
 import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
-import { additionalContext } from "../../../Client.js";
+// import { additionalContext } from "../../../coach-engine";
 import type {
   CommonObserveOptions,
   Status,
-} from "../../ObservableClient/common.js";
-import type { BatchContext } from "../BatchContext.js";
-import type { Canonical } from "../Canonical.js";
-import type { Changes } from "../Changes.js";
-import { getObjectTypesThatInvalidate } from "../getObjectTypesThatInvalidate.js";
-import type { Entry } from "../Layer.js";
-import { Query } from "../Query.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import type { Store } from "../Store.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
+} from "../../ObservableClient/common";
+import type { BatchContext } from "../BatchContext";
+import type { Canonical } from "../Canonical";
+import type { Changes } from "../Changes";
+import { getObjectTypesThatInvalidate } from "../getObjectTypesThatInvalidate";
+import type { Entry } from "../Layer";
+import { Query } from "../Query";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import type { Store } from "../Store";
+import type { SubjectPayload } from "../SubjectPayload";
 import {
   AGGREGATE_IDX,
   type AggregationCacheKey,
@@ -47,7 +47,7 @@ import {
   RDP_IDX,
   WHERE_IDX,
   WIRE_OBJECT_SET_IDX,
-} from "./AggregationCacheKey.js";
+} from "./AggregationCacheKey";
 
 export interface AggregationPayload<
   Q extends ObjectOrInterfaceDefinition,

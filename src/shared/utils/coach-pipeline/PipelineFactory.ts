@@ -16,7 +16,7 @@
 
 import type { ObjectOrInterfaceDefinition, PipelineSet } from "../coach-types";
 import type { PipelineSet as WirePipelineSet } from "../coach-types";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { MinimalClient } from "../MinimalClientContext";
 
 /** @internal */
 export type PipelineFactory<

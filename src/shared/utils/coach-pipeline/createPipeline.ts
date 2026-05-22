@@ -43,19 +43,19 @@ import type {
   PropertyApiName,
 } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import { createWithPropertiesPipelineSet } from "../derivedProperties/createWithPropertiesPipelineSet.js";
-import { modernToLegacyWhereClause } from "../internal/conversions/modernToLegacyWhereClause.js";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { aggregate } from "../object/aggregate.js";
+import { createWithPropertiesPipelineSet } from "../derivedProperties/createWithPropertiesPipelineSet";
+import { modernToLegacyWhereClause } from "../internal/conversions/modernToLegacyWhereClause";
+import type { MinimalClient } from "../MinimalClientContext";
+import { aggregate } from "../object/aggregate";
 import {
   fetchPageInternal,
   fetchPageWithErrorsInternal,
-} from "../object/fetchPage.js";
-import { fetchSingle, fetchSingleWithErrors } from "../object/fetchSingle.js";
-import { augmentRequestContext } from "../util/augmentRequestContext.js";
-import { resolveBaseObjectSetType } from "../util/objectSetUtils.js";
-import { isWirePipelineSet } from "../util/WirePipelineSet.js";
-import { fetchRelationsPage } from "./fetchRelationsPage.js";
+} from "../object/fetchPage";
+import { fetchSingle, fetchSingleWithErrors } from "../object/fetchSingle";
+import { augmentRequestContext } from "../util/augmentRequestContext";
+import { resolveBaseObjectSetType } from "../util/objectSetUtils";
+import { isWirePipelineSet } from "../util/WirePipelineSet";
+import { fetchRelationsPage } from "./fetchRelationsPage";
 
 const a: WirePipelineSet = {
   "type": "interfaceLinkSearchAround",
@@ -282,7 +282,7 @@ export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
       listener,
       opts,
     ) => {
-      const pendingSubscribe = import("./PipelineListenerWebsocket.js")
+      const pendingSubscribe = import("./PipelineListenerWebsocket")
         .then(({ PipelineListenerWebsocket }) =>
           PipelineListenerWebsocket.getInstance(clientCtx)
             .subscribe(

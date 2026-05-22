@@ -27,34 +27,34 @@ import type {
 } from "../../../../../coach-types";
 import type { Observable, Subscription } from "rxjs";
 import invariant from "../../coach-util/invariant";
-import { additionalContext } from "../../../Client.js";
-import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import type {
   ObjectHolder,
-} from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
-import type { ListPayload } from "../../ListPayload.js";
-import type { Status } from "../../ObservableClient/common.js";
-import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery.js";
-import { BaseListQuery } from "../base-list/BaseListQuery.js";
-import type { BatchContext } from "../BatchContext.js";
-import { type CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import { type Changes, DEBUG_ONLY__changesToString } from "../Changes.js";
-import { getObjectTypesThatInvalidate } from "../getObjectTypesThatInvalidate.js";
-import type { Entry } from "../Layer.js";
+} from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline";
+import type { ListPayload } from "../../ListPayload";
+import type { Status } from "../../ObservableClient/common";
+import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery";
+import { BaseListQuery } from "../base-list/BaseListQuery";
+import type { BatchContext } from "../BatchContext";
+import { type CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import { type Changes, DEBUG_ONLY__changesToString } from "../Changes";
+import { getObjectTypesThatInvalidate } from "../getObjectTypesThatInvalidate";
+import type { Entry } from "../Layer";
 import {
   API_NAME_IDX as OBJECT_API_NAME_IDX,
   type ObjectCacheKey,
-} from "../object/ObjectCacheKey.js";
-import { objectSortaMatchesWhereClause as objectMatchesWhereClause } from "../objectMatchesWhereClause.js";
-import type { OptimisticId } from "../OptimisticId.js";
-import type { PivotInfo } from "../PivotCanonicalizer.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import { OrderBySortingStrategy } from "../sorting/SortingStrategy.js";
-import type { Store } from "../Store.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
+} from "../object/ObjectCacheKey";
+import { objectSortaMatchesWhereClause as objectMatchesWhereClause } from "../objectMatchesWhereClause";
+import type { OptimisticId } from "../OptimisticId";
+import type { PivotInfo } from "../PivotCanonicalizer";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import { OrderBySortingStrategy } from "../sorting/SortingStrategy";
+import type { Store } from "../Store";
+import type { SubjectPayload } from "../SubjectPayload";
 import {
   INCLUDE_ALL_BASE_PROPERTIES_IDX,
   INTERSECT_IDX,
@@ -64,7 +64,7 @@ import {
   RDP_IDX,
   SELECT_IDX,
   WHERE_IDX,
-} from "./ListCacheKey.js";
+} from "./ListCacheKey";
 export {
   API_NAME_IDX,
   INCLUDE_ALL_BASE_PROPERTIES_IDX,
@@ -73,8 +73,8 @@ export {
   RDP_IDX,
   RIDS_IDX,
   SELECT_IDX,
-} from "./ListCacheKey.js";
-import type { ListQueryOptions } from "./ListQueryOptions.js";
+} from "./ListCacheKey";
+import type { ListQueryOptions } from "./ListQueryOptions";
 
 type ExtractRelevantObjectsResult = Record<"added" | "modified", {
   all: (ObjectHolder | InterfaceHolder)[];

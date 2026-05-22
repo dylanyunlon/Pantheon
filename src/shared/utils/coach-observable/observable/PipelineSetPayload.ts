@@ -15,7 +15,7 @@
  */
 
 import type { PipelineSet } from "../../../coach-types";
-import type { BaseCollectionPayload } from "./internal/base-list/BaseCollectionQuery.js";
+import type { BaseCollectionPayload } from "./internal/base-list/BaseCollectionQuery";
 
 export interface ObjectSetPayload extends BaseCollectionPayload {
   pipelineSet: PipelineSet<any, any>;

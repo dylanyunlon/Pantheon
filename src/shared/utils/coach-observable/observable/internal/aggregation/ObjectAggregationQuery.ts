@@ -15,14 +15,14 @@
  */
 
 import type { DerivedProperty, ObjectTypeDefinition } from "../../../../../coach-types";
-import { additionalContext } from "../../../Client.js";
-import { createPipeline } from "../../../pipelineSet/createPipeline.js";
+// import { additionalContext } from "../../../coach-engine";
+import { createPipeline } from "../../../pipelineSet/createPipeline";
 import {
   type AggregationCacheKey,
   API_NAME_IDX,
   INTERSECT_IDX,
-} from "./AggregationCacheKey.js";
-import { AggregationQuery } from "./AggregationQuery.js";
+} from "./AggregationCacheKey";
+import { AggregationQuery } from "./AggregationQuery";
 
 export class ObjectAggregationQuery extends AggregationQuery {
   protected async _fetchAggregation(): Promise<

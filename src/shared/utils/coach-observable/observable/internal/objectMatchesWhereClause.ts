@@ -17,10 +17,10 @@
 import type { PossibleWhereClauseFilters } from "../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import invariant from "../../coach-util/invariant";
-import type { InterfaceHolder } from "../../coach-object/convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder.js";
-import { evaluateFilter } from "./evaluateFilter.js";
-import type { SimpleWhereClause } from "./SimpleWhereClause.js";
+import type { InterfaceHolder } from "../../coach-object/convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder";
+import { evaluateFilter } from "./evaluateFilter";
+import type { SimpleWhereClause } from "./SimpleWhereClause";
 
 function is$and(
   whereClause: SimpleWhereClause,

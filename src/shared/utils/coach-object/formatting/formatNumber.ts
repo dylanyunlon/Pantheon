@@ -26,8 +26,8 @@ import type {
   NumberScaleType,
   PropertyNumberFormattingRuleType,
 } from "../../../coach-types";
-import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
-import { resolvePropertyReference } from "./propertyFormattingUtils.js";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties";
+import { resolvePropertyReference } from "./propertyFormattingUtils";
 
 /**
  * Extended NumberFormatOptions that includes rounding mode support

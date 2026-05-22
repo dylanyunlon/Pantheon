@@ -14,8 +14,8 @@
  * 
  */
 
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import { WeakMapWithEntries } from "./WeakMapWithEntries.js";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import { WeakMapWithEntries } from "./WeakMapWithEntries";
 
 /*
   Image some layers

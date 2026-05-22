@@ -14,10 +14,10 @@
  * 
  */
 
-import type { Canonical } from "../Canonical.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import { extractRdpFieldNames } from "../utils/rdpFieldOperations.js";
-import type { ObjectCacheKey } from "./ObjectCacheKey.js";
+import type { Canonical } from "../Canonical";
+import type { Rdp } from "../RdpCanonicalizer";
+import { extractRdpFieldNames } from "../utils/rdpFieldOperations";
+import type { ObjectCacheKey } from "./ObjectCacheKey";
 
 interface CacheKeyMetadata {
   apiName: string;

@@ -15,7 +15,7 @@
  */
 
 import type { MediaMetadata } from "../../../../coach-types";
-import type { Status } from "./common.js";
+import type { Status } from "./common";
 
 export interface MediaMetadataPayload {
   metadata: MediaMetadata | undefined;

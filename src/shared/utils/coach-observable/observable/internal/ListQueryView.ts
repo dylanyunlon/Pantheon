@@ -15,8 +15,8 @@
  */
 
 import type { Subscription } from "rxjs";
-import type { Observer, Status } from "../ObservableClient/common.js";
-import type { BaseListPayloadShape } from "./base-list/BaseListQuery.js";
+import type { Observer, Status } from "../ObservableClient/common";
+import type { BaseListPayloadShape } from "./base-list/BaseListQuery";
 
 /**
  * Interface for the query methods that ListQueryView needs.

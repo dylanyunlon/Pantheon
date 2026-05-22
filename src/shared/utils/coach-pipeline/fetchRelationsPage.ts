@@ -25,8 +25,8 @@ import type {
   PipelineSet,
   GameStateObjectV2,
 } from "../coach-types";
-import * as GameStateObjectSets from "../coach-types";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import { GameStateObjectSets } from "../coach-types";
+import type { MinimalClient } from "../MinimalClientContext";
 
 /** @internal */
 export const fetchRelationsPage = async <

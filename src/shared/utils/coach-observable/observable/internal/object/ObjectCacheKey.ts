@@ -15,11 +15,11 @@
  */
 
 import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { ObjectQuery } from "./ObjectQuery.js";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { ObjectQuery } from "./ObjectQuery";
 
 // Index constants for accessing otherKeys array elements
 export const API_NAME_IDX = 0;

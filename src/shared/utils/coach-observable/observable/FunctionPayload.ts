@@ -15,8 +15,8 @@
  */
 
 import type { CompileTimeMetadata, QueryDefinition } from "../../../coach-types";
-import type { QueryReturnType } from "../queries/types.js";
-import type { Status } from "./ObservableClient/common.js";
+import type { QueryReturnType } from "../queries/types";
+import type { Status } from "./ObservableClient/common";
 
 export interface FunctionPayload<T = unknown> {
   status: Status;

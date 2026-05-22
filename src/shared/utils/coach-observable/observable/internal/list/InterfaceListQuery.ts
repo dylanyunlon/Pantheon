@@ -35,18 +35,18 @@ function groupBy<T>(
   return result;
 }
 import invariant from "../../coach-util/invariant";
-import { additionalContext, type Client } from "../../../Client.js";
-import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
-import { ObjectDefRef } from "../../../object/convertWireToCoachRecords/InternalSymbols.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { ListPayload } from "../../ListPayload.js";
-import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery.js";
-import type { Changes } from "../Changes.js";
-import type { PivotInfo } from "../PivotCanonicalizer.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import type { Store } from "../Store.js";
-import { ListQuery, PIVOT_IDX, RDP_IDX, RIDS_IDX } from "./ListQuery.js";
+import { type Client } from "../../../coach-engine";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
+import { ObjectDefRef } from "../../../object/convertWireToCoachRecords/InternalSymbols";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { ListPayload } from "../../ListPayload";
+import type { CollectionConnectableParams } from "../base-list/BaseCollectionQuery";
+import type { Changes } from "../Changes";
+import type { PivotInfo } from "../PivotCanonicalizer";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import type { Store } from "../Store";
+import { ListQuery, PIVOT_IDX, RDP_IDX, RIDS_IDX } from "./ListQuery";
 
 type ExtractRelevantObjectsResult = Record<"added" | "modified", {
   all: (ObjectHolder | InterfaceHolder)[];

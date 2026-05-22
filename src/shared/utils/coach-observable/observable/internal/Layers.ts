@@ -16,15 +16,15 @@
 
 import type { Logger } from "../../../../coach-types";
 import invariant from "../../coach-util/invariant";
-import type { BatchContext } from "./BatchContext.js";
-import { type Changes } from "./Changes.js";
-import { createInitEntry } from "./createInitEntry.js";
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Entry } from "./Layer.js";
-import { Layer } from "./Layer.js";
-import type { OptimisticId } from "./OptimisticId.js";
-import { Subjects } from "./Subjects.js";
-import { tombstone } from "./tombstone.js";
+import type { BatchContext } from "./BatchContext";
+import { type Changes } from "./Changes";
+import { createInitEntry } from "./createInitEntry";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Entry } from "./Layer";
+import { Layer } from "./Layer";
+import type { OptimisticId } from "./OptimisticId";
+import { Subjects } from "./Subjects";
+import { tombstone } from "./tombstone";
 
 export class Layers {
   #truthLayer: Layer = new Layer(undefined, undefined);

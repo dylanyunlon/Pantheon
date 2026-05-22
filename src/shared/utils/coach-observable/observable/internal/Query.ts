@@ -22,19 +22,19 @@ import type {
   Subscribable,
   Subscription,
 } from "rxjs";
-import { additionalContext } from "../../coach-engine.js";
+// import { additionalContext } from "../../coach-engine";
 import type {
   CommonObserveOptions,
   Status,
-} from "../ObservableClient/common.js";
-import type { BatchContext } from "./BatchContext.js";
-import type { CacheKeys } from "./CacheKeys.js";
-import type { Changes } from "./Changes.js";
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Entry } from "./Layer.js";
-import type { OptimisticId } from "./OptimisticId.js";
-import type { Store } from "./Store.js";
-import type { SubjectPayload } from "./SubjectPayload.js";
+} from "../ObservableClient/common";
+import type { BatchContext } from "./BatchContext";
+import type { CacheKeys } from "./CacheKeys";
+import type { Changes } from "./Changes";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Entry } from "./Layer";
+import type { OptimisticId } from "./OptimisticId";
+import type { Store } from "./Store";
+import type { SubjectPayload } from "./SubjectPayload";
 
 export abstract class Query<
   KEY extends KnownCacheKey,

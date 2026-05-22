@@ -25,59 +25,59 @@ import type {
   QueryDefinition,
 } from "../../../../coach-types";
 import invariant from "../../coach-util/invariant";
-import type { ActionSignatureFromDef } from "../../coach-actions/applyAction.js";
-import { additionalContext, type Client } from "../../coach-engine.js";
-import { DEBUG_REFCOUNTS } from "../DebugFlags.js";
-import type { CacheEntry, CacheSnapshot } from "../ObservableClient.js";
-import type { OptimisticBuilder } from "../OptimisticBuilder.js";
-import { ActionApplication } from "./actions/ActionApplication.js";
+import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";
+import { type Client } from "../../coach-engine";
+import { DEBUG_REFCOUNTS } from "../DebugFlags";
+import type { CacheEntry, CacheSnapshot } from "../ObservableClient";
+import type { OptimisticBuilder } from "../OptimisticBuilder";
+import { ActionApplication } from "./actions/ActionApplication";
 import {
   API_NAME_IDX as AGGREGATION_API_NAME_IDX,
   RDP_IDX as AGGREGATION_RDP_IDX,
-} from "./aggregation/AggregationCacheKey.js";
-import { AggregationsHelper } from "./aggregation/AggregationsHelper.js";
-import type { BatchContext } from "./BatchContext.js";
-import { DEBUG_ONLY__cacheKeyToString } from "./CacheKey.js";
-import { CacheKeys } from "./CacheKeys.js";
-import type { Canonical } from "./Canonical.js";
+} from "./aggregation/AggregationCacheKey";
+import { AggregationsHelper } from "./aggregation/AggregationsHelper";
+import type { BatchContext } from "./BatchContext";
+import { DEBUG_ONLY__cacheKeyToString } from "./CacheKey";
+import { CacheKeys } from "./CacheKeys";
+import type { Canonical } from "./Canonical";
 import {
   type Changes,
   createChangedObjects,
   DEBUG_ONLY__changesToString,
-} from "./Changes.js";
-import { FunctionsHelper } from "./function/FunctionsHelper.js";
-import { GenericCanonicalizer } from "./GenericCanonicalizer.js";
-import { IntersectCanonicalizer } from "./IntersectCanonicalizer.js";
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Entry } from "./Layer.js";
-import { Layers } from "./Layers.js";
-import { LinksHelper } from "./links/LinksHelper.js";
+} from "./Changes";
+import { FunctionsHelper } from "./function/FunctionsHelper";
+import { GenericCanonicalizer } from "./GenericCanonicalizer";
+import { IntersectCanonicalizer } from "./IntersectCanonicalizer";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Entry } from "./Layer";
+import { Layers } from "./Layers";
+import { LinksHelper } from "./links/LinksHelper";
 import {
   SOURCE_API_NAME_IDX as LINK_API_NAME_IDX,
-} from "./links/SpecificLinkCacheKey.js";
+} from "./links/SpecificLinkCacheKey";
 import {
   API_NAME_IDX as LIST_API_NAME_IDX,
   RDP_IDX as LIST_RDP_IDX,
-} from "./list/ListCacheKey.js";
-import { ListsHelper } from "./list/ListsHelper.js";
-import { MediaHelper } from "./media/MediaHelper.js";
+} from "./list/ListCacheKey";
+import { ListsHelper } from "./list/ListsHelper";
+import { MediaHelper } from "./media/MediaHelper";
 import {
   API_NAME_IDX as OBJECT_API_NAME_IDX,
   RDP_CONFIG_IDX as OBJECT_RDP_CONFIG_IDX,
-} from "./object/ObjectCacheKey.js";
-import { ObjectCacheKeyRegistry } from "./object/ObjectCacheKeyRegistry.js";
-import { ObjectsHelper } from "./object/ObjectsHelper.js";
-import { ObjectSetHelper } from "./objectset/ObjectSetHelper.js";
-import { ObjectSetArrayCanonicalizer } from "./ObjectSetArrayCanonicalizer.js";
-import { type OptimisticId } from "./OptimisticId.js";
-import { OrderByCanonicalizer } from "./OrderByCanonicalizer.js";
-import { PivotCanonicalizer } from "./PivotCanonicalizer.js";
-import { Queries } from "./Queries.js";
-import { type Rdp, RdpCanonicalizer } from "./RdpCanonicalizer.js";
-import { RidListCanonicalizer } from "./RidListCanonicalizer.js";
-import { SelectCanonicalizer } from "./SelectCanonicalizer.js";
-import type { Subjects } from "./Subjects.js";
-import { WhereClauseCanonicalizer } from "./WhereClauseCanonicalizer.js";
+} from "./object/ObjectCacheKey";
+import { ObjectCacheKeyRegistry } from "./object/ObjectCacheKeyRegistry";
+import { ObjectsHelper } from "./object/ObjectsHelper";
+import { ObjectSetHelper } from "./objectset/PipelineSetHelper";
+import { ObjectSetArrayCanonicalizer } from "./PipelineSetArrayCanonicalizer";
+import { type OptimisticId } from "./OptimisticId";
+import { OrderByCanonicalizer } from "./OrderByCanonicalizer";
+import { PivotCanonicalizer } from "./PivotCanonicalizer";
+import { Queries } from "./Queries";
+import { type Rdp, RdpCanonicalizer } from "./RdpCanonicalizer";
+import { RidListCanonicalizer } from "./RidListCanonicalizer";
+import { SelectCanonicalizer } from "./SelectCanonicalizer";
+import type { Subjects } from "./Subjects";
+import { WhereClauseCanonicalizer } from "./WhereClauseCanonicalizer";
 
 export namespace Store {
   export interface ApplyActionOptions {

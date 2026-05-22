@@ -20,9 +20,9 @@ import type {
   SimplePropertyDef,
 } from "../../../../coach-types";
 import type { DerivedPropertyDefinition } from "../../../../coach-types";
-import { createWithPropertiesPipelineSet } from "../../derivedProperties/createWithPropertiesPipelineSet.js";
-import type { Canonical } from "./Canonical.js";
-import { CachingCanonicalizer } from "./Canonicalizer.js";
+import { createWithPropertiesPipelineSet } from "../../derivedProperties/createWithPropertiesPipelineSet";
+import type { Canonical } from "./Canonical";
+import { CachingCanonicalizer } from "./Canonicalizer";
 
 export type Rdp = DerivedProperty.Clause<ObjectOrInterfaceDefinition>;
 

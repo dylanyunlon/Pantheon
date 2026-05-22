@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PrimaryKeyTypes } from "@shared/types/league-client/coach-api";
+import type { PrimaryKeyTypes } from "../coach-types";
 
 export function isObjectSpecifiersObject(
   o: any,

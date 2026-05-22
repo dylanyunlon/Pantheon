@@ -14,8 +14,8 @@
  * 
  */
 
-import type { KnownCacheKey } from "./KnownCacheKey.js";
-import type { Entry } from "./Layer.js";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Entry } from "./Layer";
 
 export function createInitEntry(cacheKey: KnownCacheKey): Entry<any> {
   return {

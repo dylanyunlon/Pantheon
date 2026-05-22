@@ -17,15 +17,15 @@
 import type { ObjectTypeDefinition, Coach } from "../../../../../coach-types";
 import type { Observer } from "type-fest";
 import type { MockedObject } from "vitest";
-import type { ObjectHolder } from "../../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { SpecificLinkPayload } from "../../../LinkPayload.js";
-import type { Store } from "../../Store.js";
+import type { ObjectHolder } from "../../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { SpecificLinkPayload } from "../../../LinkPayload";
+import type { Store } from "../../Store";
 import {
   createDefer,
   expectSingleLinkCallAndClear,
   mockLinkSubCallback,
   waitForCall,
-} from "../../testUtils.js";
+} from "../../testUtils";
 
 const defer = createDefer();
 

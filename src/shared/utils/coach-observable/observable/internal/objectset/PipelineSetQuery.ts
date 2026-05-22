@@ -17,35 +17,35 @@
 import type { PipelineSet, Coach, PageResult } from "../../../../../coach-types";
 import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
 import type { Observable, Subscription } from "rxjs";
-import { additionalContext } from "../../../Client.js";
-import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import { getWirePipelineSet } from "../../../pipelineSet/createPipeline.js";
-import type { ObjectSetPayload } from "../../ObjectSetPayload.js";
-import type { Status } from "../../ObservableClient/common.js";
-import { BaseListQuery } from "../base-list/BaseListQuery.js";
-import type { BatchContext } from "../BatchContext.js";
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import { type Changes, DEBUG_ONLY__changesToString } from "../Changes.js";
-import { getObjectTypesThatInvalidate } from "../getObjectTypesThatInvalidate.js";
-import type { Entry } from "../Layer.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import { getWirePipelineSet } from "../../../pipelineSet/createPipeline";
+import type { ObjectSetPayload } from "../../PipelineSetPayload";
+import type { Status } from "../../ObservableClient/common";
+import { BaseListQuery } from "../base-list/BaseListQuery";
+import type { BatchContext } from "../BatchContext";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import { type Changes, DEBUG_ONLY__changesToString } from "../Changes";
+import { getObjectTypesThatInvalidate } from "../getObjectTypesThatInvalidate";
+import type { Entry } from "../Layer";
 import {
   API_NAME_IDX as OBJECT_API_NAME_IDX,
   type ObjectCacheKey,
-} from "../object/ObjectCacheKey.js";
-import { objectSortaMatchesWhereClause as objectMatchesWhereClause } from "../objectMatchesWhereClause.js";
-import type { OptimisticId } from "../OptimisticId.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { SimpleWhereClause } from "../SimpleWhereClause.js";
-import { OrderBySortingStrategy } from "../sorting/SortingStrategy.js";
-import type { Store } from "../Store.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
+} from "../object/ObjectCacheKey";
+import { objectSortaMatchesWhereClause as objectMatchesWhereClause } from "../objectMatchesWhereClause";
+import type { OptimisticId } from "../OptimisticId";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { SimpleWhereClause } from "../SimpleWhereClause";
+import { OrderBySortingStrategy } from "../sorting/SortingStrategy";
+import type { Store } from "../Store";
+import type { SubjectPayload } from "../SubjectPayload";
 import type {
   ObjectSetCacheKey,
   ObjectSetOperations,
-} from "./ObjectSetCacheKey.js";
-import type { ObjectSetQueryOptions } from "./ObjectSetQueryOptions.js";
+} from "./PipelineSetCacheKey";
+import type { ObjectSetQueryOptions } from "./PipelineSetQueryOptions";
 
 export class ObjectSetQuery extends BaseListQuery<
   ObjectSetCacheKey,

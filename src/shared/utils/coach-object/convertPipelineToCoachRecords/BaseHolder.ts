@@ -20,13 +20,13 @@ import type {
   ObjectSpecifier,
   PropertySecurity,
 } from "../../../coach-types";
-import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter.js";
-import type { InterfaceHolder } from "./InterfaceHolder.js";
+import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter";
+import type { InterfaceHolder } from "./InterfaceHolder";
 import type {
   PropertySecuritiesRef,
   UnderlyingCoachRecord,
-} from "./InternalSymbols.js";
-import type { ObjectHolder } from "./ObjectHolder.js";
+} from "./InternalSymbols";
+import type { ObjectHolder } from "./ObjectHolder";
 
 /** @internal */
 

@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Query } from "./Query.js";
+import type { Query } from "./Query";
 
 export type CacheKey<
   X extends string = string,

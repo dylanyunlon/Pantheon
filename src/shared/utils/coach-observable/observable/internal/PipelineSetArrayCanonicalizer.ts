@@ -14,8 +14,8 @@
  * 
  */
 
-import type { Canonical } from "./Canonical.js";
-import { WeakRefTrie } from "./WeakRefTrie.js";
+import type { Canonical } from "./Canonical";
+import { WeakRefTrie } from "./WeakRefTrie";
 
 export class ObjectSetArrayCanonicalizer {
   #unionTrie = new WeakRefTrie<string[]>();

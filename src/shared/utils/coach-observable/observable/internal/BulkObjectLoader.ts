@@ -22,13 +22,13 @@ import type {
 import { dylanyunlonApiError } from "../../../../coach-types";
 import type { DeferredPromise } from "p-defer";
 import pDefer from "p-defer";
-import { additionalContext, type Client } from "../../coach-engine.js";
+import { type Client } from "../../coach-engine";
 import type {
   ObjectHolder,
-} from "../../coach-object/convertWireToCoachRecords/ObjectHolder.js";
-import type { DefType } from "../../coach-util/interfaceUtils.js";
-import { DefaultMap } from "./collections/DefaultMap.js";
-import { DefaultWeakMap } from "./collections/DefaultWeakMap.js";
+} from "../../coach-object/convertWireToCoachRecords/ObjectHolder";
+import type { DefType } from "../../coach-util/interfaceUtils";
+import { DefaultMap } from "./collections/DefaultMap";
+import { DefaultWeakMap } from "./collections/DefaultWeakMap";
 
 interface InternalValue {
   primaryKey: string;

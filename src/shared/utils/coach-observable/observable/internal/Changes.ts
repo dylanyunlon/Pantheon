@@ -14,17 +14,17 @@
  * 
  */
 
-import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder.js";
-import type { AggregationCacheKey } from "./aggregation/AggregationCacheKey.js";
-import type { CacheKey } from "./CacheKey.js";
-import { DEBUG_ONLY__cacheKeyToString } from "./CacheKey.js";
-import { MultiMap } from "./collections/MultiMap.js";
-import type { FunctionCacheKey } from "./function/FunctionCacheKey.js";
-import type { SpecificLinkCacheKey } from "./links/SpecificLinkCacheKey.js";
-import type { ListCacheKey } from "./list/ListCacheKey.js";
-import type { MediaMetadataCacheKey } from "./media/MediaMetadataCacheKey.js";
-import type { ObjectCacheKey } from "./object/ObjectCacheKey.js";
-import type { ObjectSetCacheKey } from "./objectset/ObjectSetCacheKey.js";
+import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder";
+import type { AggregationCacheKey } from "./aggregation/AggregationCacheKey";
+import type { CacheKey } from "./CacheKey";
+import { DEBUG_ONLY__cacheKeyToString } from "./CacheKey";
+import { MultiMap } from "./collections/MultiMap";
+import type { FunctionCacheKey } from "./function/FunctionCacheKey";
+import type { SpecificLinkCacheKey } from "./links/SpecificLinkCacheKey";
+import type { ListCacheKey } from "./list/ListCacheKey";
+import type { MediaMetadataCacheKey } from "./media/MediaMetadataCacheKey";
+import type { ObjectCacheKey } from "./object/ObjectCacheKey";
+import type { ObjectSetCacheKey } from "./objectset/PipelineSetCacheKey";
 
 export class Changes {
   modifiedObjects: MultiMap<string, ObjectHolder> = new MultiMap();

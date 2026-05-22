@@ -15,8 +15,8 @@
  */
 
 import type { ObjectTypeDefinition, Coach } from "../../../coach-types";
-import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { ObserveObjectCallbackArgs } from "./ObservableClient.js";
+import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder";
+import type { ObserveObjectCallbackArgs } from "./ObservableClient";
 
 export interface ObjectPayload
   extends Omit<ObserveObjectCallbackArgs<any>, "object">

@@ -29,10 +29,10 @@ import type {
   SearchJsonQueryV2,
 } from "../../../coach-types";
 import invariant from "../../coach-util/invariant";
-import { fullyQualifyPropName } from "./fullyQualifyPropName.js";
-import { makeGeoFilterIntersects } from "./makeGeoFilterIntersects.js";
-import { makeGeoFilterWithin } from "./makeGeoFilterWithin.js";
-import { toIntervalQueryRule } from "./toIntervalQuery.js";
+import { fullyQualifyPropName } from "./fullyQualifyPropName";
+import { makeGeoFilterIntersects } from "./makeGeoFilterIntersects";
+import { makeGeoFilterWithin } from "./makeGeoFilterWithin";
+import { toIntervalQueryRule } from "./toIntervalQuery";
 
 type DropDollarSign<T extends `$${string}`> = T extends `$${infer U}` ? U
   : never;

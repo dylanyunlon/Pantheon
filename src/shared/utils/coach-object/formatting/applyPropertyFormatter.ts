@@ -15,11 +15,11 @@
  */
 
 import type { ObjectMetadata, PropertyValueFormattingRule } from "../../../coach-types";
-import type { SimpleCoachProperties } from "../SimpleCoachProperties.js";
-import { formatBoolean } from "./formatBoolean.js";
-import { formatDateTime } from "./formatDateTime.js";
-import { formatNumber } from "./formatNumber.js";
-import { getBrowserLocale } from "./propertyFormattingUtils.js";
+import type { SimpleCoachProperties } from "../SimpleCoachProperties";
+import { formatBoolean } from "./formatBoolean";
+import { formatDateTime } from "./formatDateTime";
+import { formatNumber } from "./formatNumber";
+import { getBrowserLocale } from "./propertyFormattingUtils";
 
 export interface FormatPropertyOptions {
   locale?: string;

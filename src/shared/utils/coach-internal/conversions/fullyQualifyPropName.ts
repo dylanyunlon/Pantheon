@@ -15,7 +15,7 @@
  */
 
 import type { ObjectOrInterfaceDefinition } from "../../../coach-types";
-import { extractNamespace } from "./extractNamespace.js";
+import { extractNamespace } from "./extractNamespace";
 
 export function fullyQualifyPropName(
   fieldName: string,

@@ -19,9 +19,9 @@ import { Trie } from "../../../../../coach-types";
 import {
   getWirePipelineSet,
   isPipelineSet,
-} from "../../../pipelineSet/createPipeline.js";
-import { isObjectSpecifiersObject } from "../../../util/isObjectSpecifiersObject.js";
-import type { Canonical } from "../Canonical.js";
+} from "../../../pipelineSet/createPipeline";
+import { isObjectSpecifiersObject } from "../../../util/isObjectSpecifiersObject";
+import type { Canonical } from "../Canonical";
 
 export type CanonicalFunctionParams = Record<string, CanonicalValue>;
 

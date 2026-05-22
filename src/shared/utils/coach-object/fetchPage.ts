@@ -40,14 +40,14 @@ import type {
   SearchJsonQueryV2,
   SearchOrderByV2,
 } from "../coach-types";
-import * as GameStateObjectSets from "../coach-types";
+import { GameStateObjectSets } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import { extractNamespace } from "../internal/conversions/extractNamespace.js";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
-import { extractObjectOrInterfaceType } from "../util/extractObjectOrInterfaceType.js";
-import { extractRdpDefinition } from "../util/extractRdpDefinition.js";
-import { resolveBaseObjectSetType } from "../util/objectSetUtils.js";
+import { extractNamespace } from "../internal/conversions/extractNamespace";
+import type { MinimalClient } from "../MinimalClientContext";
+import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";
+import { extractObjectOrInterfaceType } from "../util/extractObjectOrInterfaceType";
+import { extractRdpDefinition } from "../util/extractRdpDefinition";
+import { resolveBaseObjectSetType } from "../util/objectSetUtils";
 
 /**
  * Converts a PropertyModifierValue to the corresponding wire format loadLevel type.

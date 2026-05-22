@@ -14,28 +14,28 @@
  * 
  */
 
-import type { QueryDataTypeDefinition } from "@shared/types/league-client/coach-api";
-import { MediaSets } from "@coach/pantheon.mediasets";
-import { type DataValue } from "@coach/pantheon.ontologies";
-import * as Attachments from "@coach/pantheon.ontologies/Attachment";
-import type { MinimalClient } from "../MinimalClientContext.js";
+import type { QueryDataTypeDefinition } from "../coach-types";
+import { MediaSets } from "../coach-types";
+import { type DataValue } from "../coach-types";
+import { Attachments } from "../coach-types";
+import type { MinimalClient } from "../MinimalClientContext";
 import {
   isAttachmentFile,
   isAttachmentUpload,
-} from "../object/AttachmentUpload.js";
+} from "../object/AttachmentUpload";
 import {
   isMedia,
   isMediaReference,
   isMediaUpload,
-} from "../object/mediaUpload.js";
-import { getWireObjectSet, isObjectSet } from "../objectSet/createObjectSet.js";
+} from "../object/mediaUpload";
+import { getWireObjectSet, isObjectSet } from "../objectSet/createPipeline";
 import {
   isInterfaceQueryParam,
   isInterfaceSpecifier,
-} from "./interfaceUtils.js";
-import { isObjectSpecifiersObject } from "./isObjectSpecifiersObject.js";
-import { extractPrimaryKeyFromObjectSpecifier } from "./objectSpecifierUtils.js";
-import { isWireObjectSet } from "./WireObjectSet.js";
+} from "./interfaceUtils";
+import { isObjectSpecifiersObject } from "./isObjectSpecifiersObject";
+import { extractPrimaryKeyFromObjectSpecifier } from "./objectSpecifierUtils";
+import { isWireObjectSet } from "./PipelineObjectSet";
 
 /**
  * Marshall user-facing data into the wire DataValue type

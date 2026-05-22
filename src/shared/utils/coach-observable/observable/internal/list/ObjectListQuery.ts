@@ -22,11 +22,11 @@ import type {
   Coach,
   WhereClause,
 } from "../../../../../coach-types";
-import { additionalContext } from "../../../Client.js";
-import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder.js";
-import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder.js";
-import type { Changes } from "../Changes.js";
-import type { Store } from "../Store.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
+import type { Changes } from "../Changes";
+import type { Store } from "../Store";
 import {
   API_NAME_IDX,
   INTERSECT_IDX,
@@ -34,7 +34,7 @@ import {
   PIVOT_IDX,
   RDP_IDX,
   RIDS_IDX,
-} from "./ListQuery.js";
+} from "./ListQuery";
 
 type ExtractRelevantObjectsResult = Record<"added" | "modified", {
   all: (ObjectHolder | InterfaceHolder)[];

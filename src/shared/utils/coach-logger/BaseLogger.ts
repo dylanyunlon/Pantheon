@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Logger } from "@shared/types/league-client/coach-api";
+import type { Logger } from "../coach-types";
 
 export function noop(): any {
 }

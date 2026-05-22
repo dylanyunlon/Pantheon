@@ -14,8 +14,8 @@
  * 
  */
 
-import type { BatchContext } from "../BatchContext.js";
-import type { ObjectCacheKey } from "../object/ObjectCacheKey.js";
+import type { BatchContext } from "../BatchContext";
+import type { ObjectCacheKey } from "../object/ObjectCacheKey";
 
 /**
  * Removes duplicate object cache keys from an array while maintaining order.

@@ -19,7 +19,7 @@ import type {
   SimplePropertyDef,
   WhereClause,
 } from "../../../../../coach-types";
-import type { CommonObserveOptions } from "../../ObservableClient/common.js";
+import type { CommonObserveOptions } from "../../ObservableClient/common";
 
 export interface ListQueryOptions<
   Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition,

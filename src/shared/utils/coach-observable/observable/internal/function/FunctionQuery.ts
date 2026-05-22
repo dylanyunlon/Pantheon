@@ -17,22 +17,22 @@
 import type { QueryDefinition } from "../../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
-import { additionalContext } from "../../../Client.js";
-import type { MinimalClient } from "../../../MinimalClientContext.js";
-import { applyQuery } from "../../../queries/applyQuery.js";
-import type { FunctionPayload } from "../../FunctionPayload.js";
-import type { CommonObserveOptions } from "../../ObservableClient/common.js";
-import type { BatchContext } from "../BatchContext.js";
-import type { Changes } from "../Changes.js";
-import type { Entry } from "../Layer.js";
-import type { OptimisticId } from "../OptimisticId.js";
-import { Query } from "../Query.js";
-import type { Store } from "../Store.js";
-import type { SubjectPayload } from "../SubjectPayload.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { MinimalClient } from "../../../MinimalClientContext";
+import { applyQuery } from "../../../queries/applyQuery";
+import type { FunctionPayload } from "../../FunctionPayload";
+import type { CommonObserveOptions } from "../../ObservableClient/common";
+import type { BatchContext } from "../BatchContext";
+import type { Changes } from "../Changes";
+import type { Entry } from "../Layer";
+import type { OptimisticId } from "../OptimisticId";
+import { Query } from "../Query";
+import type { Store } from "../Store";
+import type { SubjectPayload } from "../SubjectPayload";
 import type {
   FunctionCacheKey,
   FunctionCacheValue,
-} from "./FunctionCacheKey.js";
+} from "./FunctionCacheKey";
 
 type PrimaryKeyValue = string | number;
 type FunctionParams = Record<string, unknown>;

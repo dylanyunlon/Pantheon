@@ -15,9 +15,9 @@
  */
 
 import { Trie } from "../../../../coach-types";
-import { DEBUG_CACHE_KEYS, DEBUG_REFCOUNTS } from "../DebugFlags.js";
-import type { CacheKey } from "./CacheKey.js";
-import { RefCounts } from "./RefCounts.js";
+import { DEBUG_CACHE_KEYS, DEBUG_REFCOUNTS } from "../DebugFlags";
+import type { CacheKey } from "./CacheKey";
+import { RefCounts } from "./RefCounts";
 
 /**
  * Cache key management with canonicalization.

@@ -16,20 +16,20 @@
 
 import type { Attachment, Media, MediaMetadata } from "../../../../../coach-types";
 import * as OntologiesV2 from "../../../../../coach-types";
-import { additionalContext } from "../../../Client.js";
-import type { Observer } from "../../ObservableClient/common.js";
-import type { MediaPropertyLocation } from "../../ObservableClient/MediaTypes.js";
-import { AbstractHelper } from "../AbstractHelper.js";
-import type { UnsubscribableWrapper } from "../UnsubscribableWrapper.js";
-import type { BlobMemoryManager } from "./BlobMemoryManager.js";
-import { createBlobMemoryManager } from "./BlobMemoryManager.js";
-import { getMediaCacheKey } from "./getMediaCacheKey.js";
-import type { MediaMetadataCacheKey } from "./MediaMetadataCacheKey.js";
+// import { additionalContext } from "../../../coach-engine";
+import type { Observer } from "../../ObservableClient/common";
+import type { MediaPropertyLocation } from "../../ObservableClient/MediaTypes";
+import { AbstractHelper } from "../AbstractHelper";
+import type { UnsubscribableWrapper } from "../UnsubscribableWrapper";
+import type { BlobMemoryManager } from "./BlobMemoryManager";
+import { createBlobMemoryManager } from "./BlobMemoryManager";
+import { getMediaCacheKey } from "./getMediaCacheKey";
+import type { MediaMetadataCacheKey } from "./MediaMetadataCacheKey";
 import type {
   MediaMetadataObserveOptions,
   MediaMetadataPayload,
-} from "./MediaMetadataQuery.js";
-import { MediaMetadataQuery } from "./MediaMetadataQuery.js";
+} from "./MediaMetadataQuery";
+import { MediaMetadataQuery } from "./MediaMetadataQuery";
 
 export class MediaHelper extends AbstractHelper<
   MediaMetadataQuery,
@@ -86,7 +86,7 @@ export class MediaHelper extends AbstractHelper<
     options?: { preview?: boolean },
   ): Promise<MediaMetadata> {
     const gameStateRid = await this.store.client[additionalContext].gameStateRid;
-    const response = await OntologiesV2.MediaReferenceProperties
+    const response = await MediaReferenceProperties
       .getMediaMetadata(
         this.store.client[additionalContext],
         gameStateRid,
@@ -122,7 +122,7 @@ export class MediaHelper extends AbstractHelper<
     if (coords) {
       const gameStateRid = await this.store.client[additionalContext]
         .gameStateRid;
-      response = await OntologiesV2.MediaReferenceProperties.getMediaContent(
+      response = await MediaReferenceProperties.getMediaContent(
         this.store.client[additionalContext],
         gameStateRid,
         coords.objectType,

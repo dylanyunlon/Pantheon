@@ -295,3 +295,75 @@ export class Trie<V> {
 }
 
 export type ValidateActionResponseV2 = ActionValidationResponse
+
+export type ActionMetadata = ActionDefinition & { displayName?: string }
+
+export const Actions = {
+  applyAction: async (_client: unknown, _action: unknown, _params: unknown) => ({} as ActionEditResponse)
+}
+
+export const Attachments = {
+  upload: async (_client: unknown, _upload: AttachmentUpload) => ({} as Attachment)
+}
+
+export const Functions = {
+  applyFunction: async (_client: unknown, _fn: unknown, _params: unknown) => ({} as unknown)
+}
+
+export const GameStateObjectSets = {
+  create: (_client: unknown, _type: string) => ({} as ObjectSet)
+}
+
+export const Queries = {
+  execute: async (_client: unknown, _query: unknown, _params: unknown) => ({} as unknown)
+}
+
+export const MediaSets = {
+  upload: async (_client: unknown, _ref: MediaReference, _data: Blob | ArrayBuffer) => {},
+  getUrl: (_client: unknown, _ref: MediaReference) => ''
+}
+
+export type CoachBase = OsdkBase
+
+export type MinimalPipelineSet = MinimalObjectSet
+
+export type PipelineSet = ObjectSet
+
+export type WirePipelineSet = ObjectSet
+
+export type PrimaryKeyTypes = string | number
+
+export interface QueryDataTypeDefinition {
+  type: string
+  subType?: string
+  objectTypeApiName?: string
+}
+
+export interface TimeRange {
+  startTime: string
+  endTime: string
+}
+
+export interface TimeSeriesQuery {
+  range?: TimeRange
+  type: string
+}
+
+export interface TimeseriesDurationMapping {
+  unit: string
+  value: number
+}
+
+export interface TransformOptions {
+  transformations: Transformation[]
+  outputFormat?: string
+}
+
+export const USER_AGENT_HEADER = 'X-Coach-User-Agent'
+
+export interface GameStateObjectV2 {
+  __apiName: string
+  __primaryKey: string
+  __rid?: string
+  [key: string]: unknown
+}

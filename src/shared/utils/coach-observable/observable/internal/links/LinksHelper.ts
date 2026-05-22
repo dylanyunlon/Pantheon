@@ -18,20 +18,20 @@ import type {
   CompileTimeMetadata,
   ObjectOrInterfaceDefinition,
 } from "../../../../../coach-types";
-import type { SpecificLinkPayload } from "../../LinkPayload.js";
+import type { SpecificLinkPayload } from "../../LinkPayload";
 
-import type { Observer } from "../../ObservableClient/common.js";
-import type { ObserveLinks } from "../../ObservableClient/ObserveLink.js";
-import { AbstractHelper } from "../AbstractHelper.js";
-import type { CacheKeys } from "../CacheKeys.js";
-import type { KnownCacheKey } from "../KnownCacheKey.js";
-import type { OrderByCanonicalizer } from "../OrderByCanonicalizer.js";
-import type { QuerySubscription } from "../QuerySubscription.js";
-import type { SelectCanonicalizer } from "../SelectCanonicalizer.js";
-import type { Store } from "../Store.js";
-import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer.js";
-import type { SpecificLinkCacheKey } from "./SpecificLinkCacheKey.js";
-import { SpecificLinkQuery } from "./SpecificLinkQuery.js";
+import type { Observer } from "../../ObservableClient/common";
+import type { ObserveLinks } from "../../ObservableClient/ObserveLink";
+import { AbstractHelper } from "../AbstractHelper";
+import type { CacheKeys } from "../CacheKeys";
+import type { KnownCacheKey } from "../KnownCacheKey";
+import type { OrderByCanonicalizer } from "../OrderByCanonicalizer";
+import type { QuerySubscription } from "../QuerySubscription";
+import type { SelectCanonicalizer } from "../SelectCanonicalizer";
+import type { Store } from "../Store";
+import type { WhereClauseCanonicalizer } from "../WhereClauseCanonicalizer";
+import type { SpecificLinkCacheKey } from "./SpecificLinkCacheKey";
+import { SpecificLinkQuery } from "./SpecificLinkQuery";
 
 export interface LinksHelper {
   observe<

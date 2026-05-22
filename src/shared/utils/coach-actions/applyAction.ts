@@ -30,16 +30,16 @@ import type {
   DataValue,
   SyncApplyActionResponseV2,
 } from "../coach-types";
-import * as Actions from "../coach-types";
+import { Actions } from "../coach-types";
 import invariant from "../../coach-util/invariant";
-import type { MinimalClient } from "../MinimalClientContext.js";
-import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders.js";
-import { augmentRequestContext } from "../util/augmentRequestContext.js";
-import type { NOOP } from "../util/NOOP.js";
-import type { NullableProps } from "../util/NullableProps.js";
-import type { PartialBy } from "../util/partialBy.js";
-import { toDataValue } from "../util/toDataValue.js";
-import { ActionValidationError } from "./ActionValidationError.js";
+import type { MinimalClient } from "../MinimalClientContext";
+import { addUserAgentAndRequestContextHeaders } from "../util/addUserAgentAndRequestContextHeaders";
+import { augmentRequestContext } from "../util/augmentRequestContext";
+import type { NOOP } from "../util/NOOP";
+import type { NullableProps } from "../util/NullableProps";
+import type { PartialBy } from "../util/partialBy";
+import { toDataValue } from "../util/toDataValue";
+import { ActionValidationError } from "./ActionValidationError";
 
 type BaseType<APD extends Pick<ActionMetadata.Parameter<any>, "type">> =
   APD["type"] extends ActionMetadata.DataType.Object<infer TTargetType>

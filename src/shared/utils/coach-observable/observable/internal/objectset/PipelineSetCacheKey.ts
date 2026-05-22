@@ -14,11 +14,11 @@
  * 
  */
 
-import type { CollectionStorageData } from "../base-list/BaseCollectionQuery.js";
-import type { CacheKey } from "../CacheKey.js";
-import type { Canonical } from "../Canonical.js";
-import type { Rdp } from "../RdpCanonicalizer.js";
-import type { ObjectSetQuery } from "./ObjectSetQuery.js";
+import type { CollectionStorageData } from "../base-list/BaseCollectionQuery";
+import type { CacheKey } from "../CacheKey";
+import type { Canonical } from "../Canonical";
+import type { Rdp } from "../RdpCanonicalizer";
+import type { ObjectSetQuery } from "./PipelineSetQuery";
 
 export interface ObjectSetStorageData extends CollectionStorageData {}
 
