@@ -171,6 +171,74 @@
           @update:value="(val) => ca.setShowPlaystyleAdaptation(val)"
         />
       </ControlItem>
+      <ControlItem
+        class="control-item-margin"
+        :label="t('CoachAdvisorSettings.showGoldEfficiency.label')"
+        :label-width="400"
+      >
+        <NSwitch
+          size="small"
+          :value="cas.settings.showGoldEfficiency"
+          @update:value="(val) => ca.setShowGoldEfficiency(val)"
+        />
+      </ControlItem>
+      <ControlItem
+        class="control-item-margin"
+        :label="t('CoachAdvisorSettings.showTrueDamageWarning.label')"
+        :label-width="400"
+      >
+        <NSwitch
+          size="small"
+          :value="cas.settings.showTrueDamageWarning"
+          @update:value="(val) => ca.setShowTrueDamageWarning(val)"
+        />
+      </ControlItem>
+      <ControlItem
+        class="control-item-margin"
+        :label="t('CoachAdvisorSettings.showWinCondition.label')"
+        :label-width="400"
+      >
+        <NSwitch
+          size="small"
+          :value="cas.settings.showWinCondition"
+          @update:value="(val) => ca.setShowWinCondition(val)"
+        />
+      </ControlItem>
+      <ControlItem
+        class="control-item-margin"
+        :label="t('CoachAdvisorSettings.showKdaTrend.label')"
+        :label-width="400"
+      >
+        <NSwitch
+          size="small"
+          :value="cas.settings.showKdaTrend"
+          @update:value="(val) => ca.setShowKdaTrend(val)"
+        />
+      </ControlItem>
+    </NCard>
+
+    <NCard size="small" style="margin-top: 8px">
+      <template #header>
+        <span class="card-header-title">{{ t('CoachAdvisorSettings.titleAdvanced') }}</span>
+      </template>
+      <div class="advanced-info">
+        <div class="info-row">
+          <span class="info-label">{{ t('CoachAdvisorSettings.schedulerPhase') }}</span>
+          <span class="info-value">{{ cas.state.currentPhase || '-' }}</span>
+        </div>
+        <div class="info-row" v-if="captureStats">
+          <span class="info-label">{{ t('CoachAdvisorSettings.experimentEvents') }}</span>
+          <span class="info-value">{{ captureStats.eventCount }}</span>
+        </div>
+        <div class="info-row" v-if="captureStats">
+          <span class="info-label">{{ t('CoachAdvisorSettings.experimentSamples') }}</span>
+          <span class="info-value">{{ captureStats.sampleCount }}</span>
+        </div>
+        <div class="info-row" v-if="captureStats">
+          <span class="info-label">{{ t('CoachAdvisorSettings.sessionActive') }}</span>
+          <span class="info-value">{{ captureStats.isActive ? '\u2705' : '\u274C' }}</span>
+        </div>
+      </div>
     </NCard>
   </NScrollbar>
 </template>
@@ -181,10 +249,25 @@ import { useInstance } from '@renderer-shared/shards'
 import { CoachAdvisorRenderer, useCoachAdvisorStore } from '@renderer-shared/shards/coach-advisor'
 import { useTranslation } from 'i18next-vue'
 import { NCard, NInputNumber, NScrollbar, NSwitch } from 'naive-ui'
+import { ref, onMounted } from 'vue'
 
 const { t } = useTranslation()
 const cas = useCoachAdvisorStore()
 const ca = useInstance(CoachAdvisorRenderer)
+
+const captureStats = ref<{
+  sessionId: string
+  isActive: boolean
+  eventCount: number
+  sampleCount: number
+  mergeCount: number
+} | null>(null)
+
+onMounted(async () => {
+  try {
+    captureStats.value = await ca.getCaptureStats()
+  } catch (_) {}
+})
 </script>
 
 <style lang="less" scoped>
@@ -192,5 +275,27 @@ const ca = useInstance(CoachAdvisorRenderer)
   &:not(:last-child) {
     margin-bottom: 8px;
   }
+}
+
+.advanced-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.info-label {
+  opacity: 0.6;
+}
+
+.info-value {
+  font-family: monospace;
+  font-size: 11px;
 }
 </style>

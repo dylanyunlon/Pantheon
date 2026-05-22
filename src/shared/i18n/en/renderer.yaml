@@ -2276,11 +2276,19 @@ CoachPanel:
   teamBalanced: Even Match
   pipelineTooltip: Comprehensive assessment based on recent data from both teams
   generatedAt: 'Generated at {{time}}'
+  dimensionDetail: Dimension Comparison
+  confidence: Confidence
+  dataLoadFailed: '{{count}} player(s) failed to load'
+  retry: Retry
+  phaseEarly: Early Game
+  phaseMid: Mid Game
+  phaseLate: Late Game
 
 CoachAdvisorSettings:
   title: Coach Advisor
   titleCommon: General
   titleCategories: Advice Categories
+  titleAdvanced: Advanced
 
   enabled:
     label: Enable Coach Advisor
@@ -2327,3 +2335,20 @@ CoachAdvisorSettings:
 
   showPlaystyleAdaptation:
     label: Playstyle Adaptation
+
+  showGoldEfficiency:
+    label: Gold Efficiency Analysis
+
+  showTrueDamageWarning:
+    label: True Damage Warning
+
+  showWinCondition:
+    label: Win Condition Analysis
+
+  showKdaTrend:
+    label: KDA Trend Analysis
+
+  schedulerPhase: Current Scheduler Phase
+  experimentEvents: Experiment Events
+  experimentSamples: Training Samples
+  sessionActive: Session Status

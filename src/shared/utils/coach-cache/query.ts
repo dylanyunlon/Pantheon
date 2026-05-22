@@ -208,6 +208,45 @@ export class CoachDataTracker {
     }
   }
 
+  getWeightedTeamCompleteness(puuids: string[], weights?: Record<string, number>): number {
+    if (puuids.length === 0) return 0
+    const defaultWeight = 1.0
+    let totalWeight = 0
+    let weightedSum = 0
+    for (const puuid of puuids) {
+      const w = weights?.[puuid] ?? defaultWeight
+      weightedSum += this.getCompleteness(puuid) * w
+      totalWeight += w
+    }
+    return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0
+  }
+
+  getFailedPuuids(): string[] {
+    const result: string[] = []
+    for (const [puuid, avail] of this._availability) {
+      const statuses = [avail.analysis, avail.ranked, avail.matchHistory, avail.championMastery]
+      if (statuses.some((s) => s === 'error') && !statuses.some((s) => s === 'loading')) {
+        result.push(puuid)
+      }
+    }
+    return result
+  }
+
+  getLoadProgress(): { loaded: number; total: number; percentage: number } {
+    let loaded = 0
+    let total = 0
+    for (const [, avail] of this._availability) {
+      const statuses = [avail.analysis, avail.ranked, avail.matchHistory, avail.championMastery]
+      total += statuses.length
+      loaded += statuses.filter((s) => s === 'loaded').length
+    }
+    return {
+      loaded,
+      total,
+      percentage: total > 0 ? Math.round((loaded / total) * 100) : 0
+    }
+  }
+
   clear() {
     this._availability.clear()
   }

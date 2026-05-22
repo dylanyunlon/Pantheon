@@ -26,7 +26,11 @@ export const useCoachAdvisorStore = defineStore('coach-advisor', () => {
     showComposition: true,
     showItemization: true,
     showObjectiveTiming: true,
-    showPlaystyleAdaptation: true
+    showPlaystyleAdaptation: true,
+    showGoldEfficiency: true,
+    showTrueDamageWarning: true,
+    showWinCondition: true,
+    showKdaTrend: true
   })
 
   const state = ref({
@@ -122,6 +126,48 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
 
   setShowPlaystyleAdaptation(value: boolean) {
     return this._setting.set(COACH_SHARD_NAMESPACE, 'showPlaystyleAdaptation', value)
+  }
+
+  setShowGoldEfficiency(value: boolean) {
+    return this._setting.set(COACH_SHARD_NAMESPACE, 'showGoldEfficiency', value)
+  }
+
+  setShowTrueDamageWarning(value: boolean) {
+    return this._setting.set(COACH_SHARD_NAMESPACE, 'showTrueDamageWarning', value)
+  }
+
+  setShowWinCondition(value: boolean) {
+    return this._setting.set(COACH_SHARD_NAMESPACE, 'showWinCondition', value)
+  }
+
+  setShowKdaTrend(value: boolean) {
+    return this._setting.set(COACH_SHARD_NAMESPACE, 'showKdaTrend', value)
+  }
+
+  getSchedulerStats() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getSchedulerStats') as Promise<Record<string, number>>
+  }
+
+  getCaptureStats() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getCaptureStats') as Promise<{
+      sessionId: string
+      isActive: boolean
+      eventCount: number
+      sampleCount: number
+      mergeCount: number
+    }>
+  }
+
+  getLoadProgress() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getLoadProgress') as Promise<{
+      loaded: number
+      total: number
+      percentage: number
+    }>
+  }
+
+  getFailedPuuids() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getFailedPuuids') as Promise<string[]>
   }
 
   generateAdvices() {
@@ -257,7 +303,11 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
       'showComposition',
       'showItemization',
       'showObjectiveTiming',
-      'showPlaystyleAdaptation'
+      'showPlaystyleAdaptation',
+      'showGoldEfficiency',
+      'showTrueDamageWarning',
+      'showWinCondition',
+      'showKdaTrend'
     ])
     this._pm.sync(COACH_SHARD_NAMESPACE, 'state', store.state, [
       'advices',

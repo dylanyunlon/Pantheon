@@ -6,6 +6,7 @@ import {
   CoachEngine,
   createCoachEngine
 } from '@shared/utils/coach-engine'
+import { getPhaseDisplayName } from '@shared/utils/coach-scheduler'
 import { CoachDataTracker } from '@shared/utils/coach-cache'
 import type { CoachDataType, CoachQueryStatus } from '@shared/utils/coach-cache'
 import type { GamePhase } from '@shared/utils/coach-scheduler'
@@ -37,6 +38,10 @@ export class CoachAdvisorSettings {
   showItemization: boolean = true
   showObjectiveTiming: boolean = true
   showPlaystyleAdaptation: boolean = true
+  showGoldEfficiency: boolean = true
+  showTrueDamageWarning: boolean = true
+  showWinCondition: boolean = true
+  showKdaTrend: boolean = true
 
   setEnabled(v: boolean) {
     this.enabled = v
@@ -139,7 +144,11 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         showComposition: { default: this.settings.showComposition },
         showItemization: { default: this.settings.showItemization },
         showObjectiveTiming: { default: this.settings.showObjectiveTiming },
-        showPlaystyleAdaptation: { default: this.settings.showPlaystyleAdaptation }
+        showPlaystyleAdaptation: { default: this.settings.showPlaystyleAdaptation },
+        showGoldEfficiency: { default: this.settings.showGoldEfficiency },
+        showTrueDamageWarning: { default: this.settings.showTrueDamageWarning },
+        showWinCondition: { default: this.settings.showWinCondition },
+        showKdaTrend: { default: this.settings.showKdaTrend }
       },
       this.settings
     )
@@ -175,7 +184,11 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       'showComposition',
       'showItemization',
       'showObjectiveTiming',
-      'showPlaystyleAdaptation'
+      'showPlaystyleAdaptation',
+      'showGoldEfficiency',
+      'showTrueDamageWarning',
+      'showWinCondition',
+      'showKdaTrend'
     ])
     this._mobx.propSync(CoachAdvisorMain.id, 'state', this.state, [
       'advices',
@@ -354,6 +367,14 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         filtered = filtered.filter((a) => a.type !== CoachAdviceType.OBJECTIVE_TIMING)
       if (!this.settings.showPlaystyleAdaptation)
         filtered = filtered.filter((a) => a.type !== CoachAdviceType.PLAYSTYLE_ADAPTATION)
+      if (!this.settings.showGoldEfficiency)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.GOLD_EFFICIENCY)
+      if (!this.settings.showTrueDamageWarning)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.TRUE_DAMAGE_WARNING)
+      if (!this.settings.showWinCondition)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.WIN_CONDITION)
+      if (!this.settings.showKdaTrend)
+        filtered = filtered.filter((a) => a.type !== CoachAdviceType.KDA_TREND)
 
       const truncated = filtered.slice(0, this.settings.maxAdviceCount)
       const messages = this._engine.formatAsMessages(truncated, {
@@ -424,6 +445,18 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         })
       }
     )
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getSchedulerStats', () => {
+      return this._engine.scheduler.getStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getLoadProgress', () => {
+      return this._dataTracker.getLoadProgress()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getFailedPuuids', () => {
+      return this._dataTracker.getFailedPuuids()
+    })
 
     this._ipc.onCall(CoachAdvisorMain.id, 'getDataAvailability', () => {
       return {

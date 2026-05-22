@@ -5,6 +5,8 @@ export interface CoachCacheKeyParams {
   gameMode: string
     rankedAvailability: string[]
     analysisAvailability: string[]
+    gamePhase?: string
+    positionAvailability?: string[]
 }
 
 export function canonicalizeCacheKey(params: CoachCacheKeyParams): string {
@@ -16,7 +18,9 @@ export function canonicalizeCacheKey(params: CoachCacheKeyParams): string {
   const rankedSorted = [...params.rankedAvailability].sort().join(',')
   const analysisSorted = [...params.analysisAvailability].sort().join(',')
 
-  return `${params.selfPuuid}|${champEntries}|${params.gameMode}|r:${rankedSorted}|a:${analysisSorted}`
+  const posSorted = params.positionAvailability ? [...params.positionAvailability].sort().join(',') : ''
+  const phase = params.gamePhase || ''
+  return `${params.selfPuuid}|${champEntries}|${params.gameMode}|r:${rankedSorted}|a:${analysisSorted}|p:${posSorted}|ph:${phase}`
 }
 
 export function computeDataCompleteness(params: CoachCacheKeyParams): number {
@@ -26,7 +30,8 @@ export function computeDataCompleteness(params: CoachCacheKeyParams): number {
   const analysisRatio = params.analysisAvailability.length / totalPlayers
   const rankedRatio = params.rankedAvailability.length / totalPlayers
 
-  return Math.round(analysisRatio * 70 + rankedRatio * 30)
+  const posRatio = params.positionAvailability ? params.positionAvailability.length / totalPlayers : 0
+  return Math.round(analysisRatio * 55 + rankedRatio * 25 + posRatio * 20)
 }
 
 export function shouldReplace(

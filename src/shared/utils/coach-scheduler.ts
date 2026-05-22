@@ -18,12 +18,15 @@ export interface ScheduledAdvice {
   phase: GamePhase
   relevanceScore: number
   suppressed: boolean
+  retryCount: number
+  batchId: string
 }
 
 export interface PhaseTransition {
   from: GamePhase
   to: GamePhase
   timestamp: number
+  queueSnapshot: number
 }
 
 export interface SchedulerConfig {
@@ -33,6 +36,9 @@ export interface SchedulerConfig {
   deduplicationWindowMs: number
   phaseTransitionCooldownMs: number
   minRelevanceThreshold: number
+  maxRetries: number
+  batchCooldownMs: number
+  urgentPhaseBoost: number
 }
 
 const DEFAULT_SCHEDULER_CONFIG: SchedulerConfig = {
@@ -41,7 +47,10 @@ const DEFAULT_SCHEDULER_CONFIG: SchedulerConfig = {
   maxQueueSize: 20,
   deduplicationWindowMs: 30_000,
   phaseTransitionCooldownMs: 5_000,
-  minRelevanceThreshold: 0.15
+  minRelevanceThreshold: 0.12
+  maxRetries: 2,
+  batchCooldownMs: 3_000,
+  urgentPhaseBoost: 1.3
 }
 
 const PHASE_RELEVANCE_MATRIX: Record<string, Record<GamePhase, number>> = {
@@ -174,6 +183,86 @@ const PHASE_RELEVANCE_MATRIX: Record<string, Record<GamePhase, number>> = {
     'late-game': 0.6,
     'post-game': 0.0,
     'unknown': 0.5
+  },
+  itemization_hint: {
+    'pre-game': 0.2,
+    'champ-select': 0.5,
+    'loading': 0.7,
+    'early-game': 0.8,
+    'mid-game': 1.0,
+    'late-game': 0.9,
+    'post-game': 0.0,
+    'unknown': 0.5
+  },
+  objective_timing: {
+    'pre-game': 0.1,
+    'champ-select': 0.2,
+    'loading': 0.4,
+    'early-game': 0.7,
+    'mid-game': 1.0,
+    'late-game': 0.9,
+    'post-game': 0.0,
+    'unknown': 0.5
+  },
+  playstyle_adaptation: {
+    'pre-game': 0.3,
+    'champ-select': 0.6,
+    'loading': 0.8,
+    'early-game': 0.9,
+    'mid-game': 1.0,
+    'late-game': 0.8,
+    'post-game': 0.0,
+    'unknown': 0.5
+  },
+  gold_efficiency: {
+    'pre-game': 0.1,
+    'champ-select': 0.3,
+    'loading': 0.5,
+    'early-game': 0.7,
+    'mid-game': 1.0,
+    'late-game': 0.9,
+    'post-game': 0.0,
+    'unknown': 0.5
+  },
+  true_damage_warning: {
+    'pre-game': 0.2,
+    'champ-select': 0.6,
+    'loading': 0.8,
+    'early-game': 0.7,
+    'mid-game': 0.9,
+    'late-game': 1.0,
+    'post-game': 0.0,
+    'unknown': 0.5
+  },
+  cherry_strategy: {
+    'pre-game': 0.3,
+    'champ-select': 0.9,
+    'loading': 1.0,
+    'early-game': 0.9,
+    'mid-game': 1.0,
+    'late-game': 0.8,
+    'post-game': 0.0,
+    'unknown': 0.5
+  },
+  win_condition: {
+    'pre-game': 0.4,
+    'champ-select': 0.7,
+    'loading': 1.0,
+    'early-game': 0.9,
+    'mid-game': 0.8,
+    'late-game': 0.6,
+    'post-game': 0.0,
+    'unknown': 0.5
+  },
+  kda_trend: {
+    'pre-game': 0.3,
+    'champ-select': 0.5,
+    'loading': 0.8,
+    'early-game': 0.9,
+    'mid-game': 0.7,
+    'late-game': 0.5,
+    'post-game': 0.0,
+    'unknown': 0.5
   }
 }
 
@@ -223,7 +312,8 @@ export class CoachScheduler {
     const transition: PhaseTransition = {
       from: this._currentPhase,
       to: newPhase,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      queueSnapshot: this._queue.filter((e) => e.deliveredAt === null && !e.suppressed).length
     }
     this._phaseHistory.push(transition)
     this._currentPhase = newPhase
@@ -252,6 +342,20 @@ export class CoachScheduler {
 
       if (relevanceScore < this._config.minRelevanceThreshold) continue
 
+      const pendingIdx = this._queue.findIndex(
+        (e) => e.deliveredAt === null && `${e.advice.type}:${e.advice.title}` === dedupeKey
+      )
+      if (pendingIdx >= 0) {
+        if (relevanceScore > this._queue[pendingIdx].relevanceScore) {
+          this._queue[pendingIdx].advice = advice
+          this._queue[pendingIdx].relevanceScore = relevanceScore
+          this._queue[pendingIdx].scheduledAt = now
+          this._queue[pendingIdx].expiresAt = now + this._config.adviceTtlMs
+          this._queue[pendingIdx].phase = this._currentPhase
+        }
+        continue
+      }
+
       const entry: ScheduledAdvice = {
         advice,
         scheduledAt: now,
@@ -259,7 +363,9 @@ export class CoachScheduler {
         expiresAt: now + this._config.adviceTtlMs,
         phase: this._currentPhase,
         relevanceScore,
-        suppressed: false
+        suppressed: false,
+        retryCount: 0,
+        batchId: `b-${now}`
       }
 
       this._queue.push(entry)
@@ -327,6 +433,32 @@ export class CoachScheduler {
         entry.suppressed = false
       }
     }
+  }
+
+  getSuppressedTypes(): string[] {
+    return [...this._suppressedTypes]
+  }
+
+  requeue(entry: ScheduledAdvice): boolean {
+    if (entry.retryCount >= this._config.maxRetries) return false
+    entry.retryCount++
+    entry.deliveredAt = null
+    entry.scheduledAt = Date.now()
+    entry.expiresAt = Date.now() + this._config.adviceTtlMs
+    const phaseRelevance = getPhaseRelevance(entry.advice.type, this._currentPhase)
+    const priorityBoost = (4 - entry.advice.priority) / 4.0
+    entry.relevanceScore = entry.advice.confidence * phaseRelevance * (0.6 + 0.4 * priorityBoost) * 0.8
+    return true
+  }
+
+  getQueueByType(): Record<string, number> {
+    const counts: Record<string, number> = {}
+    for (const entry of this._queue) {
+      if (entry.deliveredAt === null && !entry.suppressed) {
+        counts[entry.advice.type] = (counts[entry.advice.type] || 0) + 1
+      }
+    }
+    return counts
   }
 
   getStats(): {
@@ -401,14 +533,32 @@ export function mapQueryPhaseToGamePhase(
       return 'pre-game'
     case 'champ-select':
       return 'champ-select'
+    case 'loading':
+      return 'loading'
     case 'in-game':
       if (gameTimeSeconds === undefined) return 'early-game'
-      if (gameTimeSeconds < 900) return 'early-game'
-      if (gameTimeSeconds < 1800) return 'mid-game'
+      if (gameTimeSeconds < 840) return 'early-game'
+      if (gameTimeSeconds < 1500) return 'mid-game'
       return 'late-game'
+    case 'end-of-game':
+      return 'post-game'
     default:
       return 'unknown'
   }
+}
+
+export function getPhaseDisplayName(phase: GamePhase): string {
+  const names: Record<GamePhase, string> = {
+    'pre-game': '赛前',
+    'champ-select': '选人',
+    'loading': '加载中',
+    'early-game': '前期',
+    'mid-game': '中期',
+    'late-game': '后期',
+    'post-game': '赛后',
+    'unknown': '未知'
+  }
+  return names[phase] || '未知'
 }
 
 export function createCoachScheduler(config?: Partial<SchedulerConfig>): CoachScheduler {

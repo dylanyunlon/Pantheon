@@ -2280,11 +2280,19 @@ CoachPanel:
   teamBalanced: 实力接近
   pipelineTooltip: 基于双方近期数据的综合评估
   generatedAt: '生成于 {{time}}'
+  dimensionDetail: 维度对比明细
+  confidence: 置信度
+  dataLoadFailed: '{{count}} 名玩家数据加载失败'
+  retry: 重试
+  phaseEarly: 前期
+  phaseMid: 中期
+  phaseLate: 后期
 
 CoachAdvisorSettings:
   title: 教练系统
   titleCommon: 基础设置
   titleCategories: 建议类型
+  titleAdvanced: 高级信息
 
   enabled:
     label: 启用教练系统
@@ -2331,3 +2339,20 @@ CoachAdvisorSettings:
 
   showPlaystyleAdaptation:
     label: 风格适配建议
+
+  showGoldEfficiency:
+    label: 经济效率分析
+
+  showTrueDamageWarning:
+    label: 真实伤害预警
+
+  showWinCondition:
+    label: 胜利条件分析
+
+  showKdaTrend:
+    label: KDA趋势分析
+
+  schedulerPhase: 当前调度阶段
+  experimentEvents: 实验事件数
+  experimentSamples: 训练样本数
+  sessionActive: 会话状态

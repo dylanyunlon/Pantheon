@@ -149,6 +149,124 @@ function runCoachPipeline(env) {
     })
   }
 
+
+  // Stage 8: lane matchup via champion win rate delta
+  if (env.positionAssignments && env.championSelections) {
+    var selfPos = env.positionAssignments[selfPuuid]
+      ? env.positionAssignments[selfPuuid].position
+      : null
+    if (selfPos) {
+      env.enemyMembers.forEach(function (puuid) {
+        var enemyPos = env.positionAssignments[puuid]
+          ? env.positionAssignments[puuid].position
+          : null
+        if (enemyPos === selfPos) {
+          var enemyA = analyzePlayerStrength(env, puuid)
+          if (enemyA && enemyA.winRate < 0.35 && enemyA.count >= 5) {
+            var eName = env.championSelections[puuid] && env.gameData.champions[env.championSelections[puuid]]
+              ? env.gameData.champions[env.championSelections[puuid]].name
+              : '对线对手'
+            messages.push('[教练] 你的对线' + eName + '近期胜率低，可积极打出优势')
+          } else if (enemyA && enemyA.winRate > 0.65 && enemyA.count >= 5) {
+            var eNameH = env.championSelections[puuid] && env.gameData.champions[env.championSelections[puuid]]
+              ? env.gameData.champions[env.championSelections[puuid]].name
+              : '对线对手'
+            messages.push('[教练] 你的对线' + eNameH + '近期胜率高，对线需谨慎')
+          }
+        }
+      })
+    }
+  }
+
+  // Stage 9: composition damage type warning
+  if (env.playerStats && env.playerStats.players) {
+    var totalPhys = 0
+    var totalMagic = 0
+    var totalTrue = 0
+    var compCount = 0
+    env.allyMembers.forEach(function (puuid) {
+      var a = env.playerStats.players[puuid]
+      if (a && a.summary) {
+        totalPhys += a.summary.averagePhysicalDamageDealtToChampionShareOfTeam
+        totalMagic += a.summary.averageMagicDamageDealtToChampionShareOfTeam
+        totalTrue += a.summary.averageTrueDamageDealtToChampionShareOfTeam
+        compCount++
+      }
+    })
+    if (compCount >= 3) {
+      var avgPhys = totalPhys / compCount
+      var avgMagic = totalMagic / compCount
+      var avgTrue = totalTrue / compCount
+      if (avgPhys > 0.7 && avgMagic < 0.2) {
+        messages.push('[教练] 阵容物理伤害过高，注意穿甲装备选择')
+      } else if (avgMagic > 0.7 && avgPhys < 0.2) {
+        messages.push('[教练] 阵容魔法伤害过高，注意法穿装备')
+      }
+      if (avgTrue > 0.15) {
+        messages.push('[教练] 对方真伤占比高，优先堆生命值而非护甲魔抗')
+      }
+    }
+  }
+
+  // Stage 10: gold efficiency comparison
+  if (env.playerStats && env.playerStats.players) {
+    var selfA = env.playerStats.players[selfPuuid]
+    if (selfA && selfA.summary && selfA.summary.averageDamageGoldEfficiency < 0.6 && selfA.summary.count >= 5) {
+      messages.push('[教练] 你的经济转化效率偏低，注意优化出装路线')
+    }
+  }
+
+  // Stage 11: KDA trend and death analysis
+  if (env.playerStats && env.playerStats.players) {
+    var selfB = env.playerStats.players[selfPuuid]
+    if (selfB && selfB.summary) {
+      if (selfB.summary.averageKd < 1.0 && selfB.summary.count >= 5) {
+        messages.push('[教练] 近期死亡偏多，注意走位和地图意识')
+      }
+      if (selfB.summary.kdaCv > 0.8 && selfB.summary.count >= 5) {
+        messages.push('[教练] KDA波动大，表现不稳定，控制风险意识')
+      }
+    }
+  }
+
+  // Stage 12: win condition identification
+  if (env.playerStats && env.playerStats.players) {
+    var totalDmgWC = 0
+    var totalKdaWC = 0
+    var totalCsWC = 0
+    var wcCount = 0
+    env.allyMembers.forEach(function (puuid) {
+      var a = env.playerStats.players[puuid]
+      if (a && a.summary) {
+        totalDmgWC += a.summary.averageDamageDealtToChampionShareToTop
+        totalKdaWC += a.summary.averageKda
+        totalCsWC += a.summary.averageCsPerMinute
+        wcCount++
+      }
+    })
+    if (wcCount >= 3) {
+      var avgDmgWC = totalDmgWC / wcCount
+      var avgKdaWC = totalKdaWC / wcCount
+      var avgCsWC = totalCsWC / wcCount
+      if (avgDmgWC > 0.75 && avgKdaWC > 3.0) {
+        messages.push('[教练] 胜利条件: 团战输出，抓住机会打出伤害!')
+      } else if (avgCsWC > 7.0 && avgDmgWC < 0.6) {
+        messages.push('[教练] 胜利条件: 发育到后期，避免前期团战')
+      }
+    }
+  }
+
+  // Stage 13: CHERRY (arena) mode specific
+  if (env.gameMode === 'CHERRY' || env.queueType === 'CHERRY') {
+    messages.push('[教练] 斗魂竞技场: 优先选控制/爆发组合，增幅要匹配英雄特性')
+    var selfC = env.playerStats && env.playerStats.players[selfPuuid]
+    if (selfC && selfC.summary && selfC.summary.cherry && selfC.summary.cherry.count >= 3) {
+      if (selfC.summary.cherry.winRate < 0.3) {
+        messages.push('[教练] 近期竞技场胜率较低，尝试换英雄或增幅搭配')
+      }
+    }
+  }
+
   return messages
 }
 
@@ -160,7 +278,7 @@ function getMessages(env) {
 
     if (env.captureEnabled) {
       messages.push(
-        '[实验] pipeline=' + elapsed + 'ms stages=7 samples=' +
+        '[实验] pipeline=' + elapsed + 'ms stages=13 samples=' +
         (messages.length - 1) + ' session=' + (env.captureSessionId || 'n/a')
       )
     }

@@ -12,6 +12,9 @@ export type AggregationDimension =
   | 'cs'
   | 'gold'
   | 'participation'
+  | 'trueDamage'
+  | 'goldEfficiency'
+  | 'kdaTrend'
 
 export interface DimensionWeight {
   dimension: AggregationDimension
@@ -27,6 +30,9 @@ export interface AggregatedTeamProfile {
   avgCsPerMinute: number
   avgGoldShare: number
   avgParticipation: number
+  avgTrueDamageShare: number
+  avgGoldEfficiency: number
+  avgKdVariance: number
   memberCount: number
   loadedCount: number
   completeness: number
@@ -49,6 +55,9 @@ const EMPTY_PROFILE: AggregatedTeamProfile = {
   avgCsPerMinute: 0,
   avgGoldShare: 0,
   avgParticipation: 0,
+  avgTrueDamageShare: 0,
+  avgGoldEfficiency: 0,
+  avgKdVariance: 0,
   memberCount: 0,
   loadedCount: 0,
   completeness: 0
@@ -62,7 +71,10 @@ const DEFAULT_WEIGHTS: DimensionWeight[] = [
   { dimension: 'vision', weight: 0.05 },
   { dimension: 'cs', weight: 0.10 },
   { dimension: 'gold', weight: 0.10 },
-  { dimension: 'participation', weight: 0.10 }
+  { dimension: 'participation', weight: 0.08 },
+  { dimension: 'trueDamage', weight: 0.04 },
+  { dimension: 'goldEfficiency', weight: 0.05 },
+  { dimension: 'kdaTrend', weight: 0.03 }
 ]
 
 function extractDimensionValue(
@@ -86,6 +98,12 @@ function extractDimensionValue(
       return summary.averageGoldShareToTop
     case 'participation':
       return summary.averageKillParticipationRate
+    case 'trueDamage':
+      return summary.averageTrueDamageDealtToChampionShareOfTeam
+    case 'goldEfficiency':
+      return Math.min(summary.averageDamageGoldEfficiency / 2.0, 1.0)
+    case 'kdaTrend':
+      return Math.min(summary.averageKda / 5.0, 1.0) * (summary.winningStreak > 0 ? 1.1 : summary.losingStreak > 2 ? 0.8 : 1.0)
     default:
       return 0
   }
@@ -105,6 +123,9 @@ export function aggregateTeamProfile(
   let totalCsPerMinute = 0
   let totalGoldShare = 0
   let totalParticipation = 0
+  let totalTrueDamageShare = 0
+  let totalGoldEfficiency = 0
+  const kdaValues: number[] = []
   let loadedCount = 0
 
   for (const puuid of puuids) {
@@ -119,10 +140,18 @@ export function aggregateTeamProfile(
     totalCsPerMinute += s.averageCsPerMinute
     totalGoldShare += s.averageGoldShareToTop
     totalParticipation += s.averageKillParticipationRate
+    totalTrueDamageShare += s.averageTrueDamageDealtToChampionShareOfTeam
+    totalGoldEfficiency += s.averageDamageGoldEfficiency
+    kdaValues.push(s.averageKda)
     loadedCount++
   }
 
   if (loadedCount === 0) return { ...EMPTY_PROFILE, memberCount: puuids.length }
+
+  const avgKda = kdaValues.reduce((s, v) => s + v, 0) / loadedCount
+  const kdaVariance = kdaValues.length > 1
+    ? kdaValues.reduce((s, v) => s + Math.pow(v - avgKda, 2), 0) / kdaValues.length
+    : 0
 
   return {
     avgWinRate: totalWinRate / loadedCount,
@@ -133,6 +162,9 @@ export function aggregateTeamProfile(
     avgCsPerMinute: totalCsPerMinute / loadedCount,
     avgGoldShare: totalGoldShare / loadedCount,
     avgParticipation: totalParticipation / loadedCount,
+    avgTrueDamageShare: totalTrueDamageShare / loadedCount,
+    avgGoldEfficiency: totalGoldEfficiency / loadedCount,
+    avgKdVariance: kdaVariance,
     memberCount: puuids.length,
     loadedCount,
     completeness: Math.round((loadedCount / puuids.length) * 100)
@@ -155,7 +187,10 @@ export function compareTeams(
     vision: 0,
     cs: 0,
     gold: 0,
-    participation: 0
+    participation: 0,
+    trueDamage: 0,
+    goldEfficiency: 0,
+    kdaTrend: 0
   }
 
   let overallDelta = 0
@@ -176,7 +211,22 @@ export function compareTeams(
 
   const minLoaded = Math.min(allyProfile.loadedCount, enemyProfile.loadedCount)
   const maxMembers = Math.max(allyProfile.memberCount, enemyProfile.memberCount)
-  const confidence = maxMembers > 0 ? Math.min(minLoaded / maxMembers, 1.0) * 0.85 : 0
+  const coverageRatio = maxMembers > 0 ? Math.min(minLoaded / maxMembers, 1.0) : 0
+
+  let sampleConfidence = 0.5
+  const allPuuids = [...allyPuuids, ...enemyPuuids]
+  const gameCounts: number[] = []
+  for (const puuid of allPuuids) {
+    const analysis = analyses[puuid]
+    if (analysis) gameCounts.push(analysis.summary.count)
+  }
+  if (gameCounts.length > 0) {
+    const harmonicSum = gameCounts.reduce((s, c) => s + 1 / Math.max(c, 1), 0)
+    const harmonicMean = gameCounts.length / harmonicSum
+    sampleConfidence = Math.min(harmonicMean / 15, 1.0)
+  }
+
+  const confidence = coverageRatio * 0.5 + sampleConfidence * 0.35 + (allyProfile.completeness / 100) * 0.15
 
   return {
     allyProfile,
@@ -208,6 +258,12 @@ function getDimensionFromProfile(
       return profile.avgGoldShare
     case 'participation':
       return profile.avgParticipation
+    case 'trueDamage':
+      return profile.avgTrueDamageShare
+    case 'goldEfficiency':
+      return Math.min(profile.avgGoldEfficiency / 2.0, 1.0)
+    case 'kdaTrend':
+      return Math.min(profile.avgKda / 5.0, 1.0)
     default:
       return 0
   }
