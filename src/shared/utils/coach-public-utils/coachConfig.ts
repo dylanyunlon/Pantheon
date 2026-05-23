@@ -38,3 +38,6 @@ export function getCoachConfig(gameStateId: string): CoachConfig {
     gameStateId: getGameStateId(gameStateId)
   }
 }
+
+export const coachConfig = CoachConfig
+export type CoachConfigOptions = Parameters<typeof CoachConfig>[0]

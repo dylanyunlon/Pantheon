@@ -1,1 +1,1 @@
-export type { MediaPropertyLocation } from '../../../coach-types'
+export type { MediaPropertyLocation } from '../../coach-types'

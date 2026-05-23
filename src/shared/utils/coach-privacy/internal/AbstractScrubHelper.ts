@@ -4,7 +4,7 @@ import type { ScrubLayerEntry } from "./ScrubLayer"
 import type { ScrubListener } from "./ScrubSubjects"
 import { ScrubSubscription } from "./ScrubSubscription"
 import type { ScrubQuery } from "./ScrubQuery"
-import type { ScrubPrivacyStore } from "./ScrubPrivacyStore"
+import type { ScrubPrivacyStore as ScrubPrivacyStoreImport } from "./ScrubPrivacyStore"
 
 export interface ScrubObserveOptions {
   mode: "online" | "offline" | "force"

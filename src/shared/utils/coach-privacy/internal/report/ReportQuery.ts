@@ -31,8 +31,7 @@ import type { Store } from "../Store";
 import type { SubjectPayload } from "../SubjectPayload";
 import type {
   FunctionPiiFieldKey,
-  FunctionCacheValue,
-} from "./FunctionPiiFieldKey";
+  } from "./FunctionPiiFieldKey";
 
 type PrimaryKeyValue = string | number;
 type FunctionParams = Record<string, unknown>;
@@ -188,8 +187,7 @@ export class FunctionQuery extends Query<
   }
 
   writeToStore(
-    data: FunctionCacheValue,
-    status: "loading" | "loaded" | "error",
+    data:     status: "loading" | "loaded" | "error",
     batch: BatchContext,
   ): Entry<FunctionPiiFieldKey> {
     batch.write(this.piiFieldKey, data, status);
@@ -252,3 +250,5 @@ export class FunctionQuery extends Query<
     return this.#version;
   }
 }
+
+type FunctionCacheValue = unknown

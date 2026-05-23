@@ -29,9 +29,7 @@ import type { QuerySubscription } from "../QuerySubscription";
 import type { Rdp } from "../RdpScrubNormalizer";
 import { piiTombstone } from "../piiTombstone";
 import {
-  mergeObjectFields,
-  mergeSelectFields,
-} from "../utils/rdpFieldOperations";
+    } from "../utils/rdpFieldOperations";
 import { type ObjectPiiFieldKey } from "./ObjectPiiFieldKey";
 import { ObjectQuery } from "./ObjectQuery";
 

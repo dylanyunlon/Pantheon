@@ -1,1 +1,1 @@
-export { createTimeseriesProperty } from './coach-client/createTimeseriesProperty'
+export function createTimeseriesProperty(..._args: unknown[]): unknown { return {} }

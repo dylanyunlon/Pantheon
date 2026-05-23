@@ -35,36 +35,20 @@ import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";
 import { additionalContext } from "../../coach-engine";
 import {
   getWirePipelineSet,
-  isPipelineSet,
-} from "../../coach-pipeline/createPipeline";
+  } from "../../coach-pipeline/createPipeline";
 import { extractObjectOrInterfaceType } from "../../coach-util/extractObjectOrInterfaceType";
 import type { FunctionPayload } from "../FunctionPayload";
-import type { SpecificLinkPayload } from "../LinkPayload";
+import type {  } from "../LinkPayload";
 import type { ListPayload } from "../ListPayload";
 import type { ObjectPayload } from "../ObjectPayload";
-import type { ObjectSetPayload } from "../PipelineSetPayload";
+import type {  } from "../PipelineSetPayload";
 import type {
   CacheSnapshot,
-  ScrubNormalizedizedOptions,
-  ScrubNormalizedizeOptionsInput,
-  PrivacyScrubClient,
-  ObserveAggregationArgs,
-  ObserveAggregationOptions,
-  ObserveAggregationOptionsWithPipelineSet,
-  ObserveFunctionCallbackArgs,
-  ObserveFunctionOptions,
-  ObserveListOptions,
-  ObserveObjectCallbackArgs,
-  ObserveObjectOptions,
-  ObserveObjectsCallbackArgs,
-  ObserveObjectSetArgs,
-  ScrubDisposable,
-} from "../PrivacyScrubClient";
+                      ObserveObjectOptions,
+      } from "../PrivacyScrubClient";
 import type { Observer } from "../PrivacyScrubClient/common";
 import type {
-  MediaMetadataObserveOptions,
-  MediaMetadataPayload,
-} from "../PrivacyScrubClient/MediaPrivacyScrubTypes";
+    } from "../PrivacyScrubClient/MediaPrivacyScrubTypes";
 import type { MediaPropertyLocation } from "../PrivacyScrubClient/MediaTypes";
 import type { ObserveLinks } from "../PrivacyScrubClient/ObserveLink";
 import type { AggregationPayloadBase } from "./aggregation/AggregationQuery";
@@ -168,8 +152,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
   public observeFunction: <Q extends ScrubDefinition<unknown>>(
     queryDef: Q,
     params: Record<string, unknown> | undefined,
-    options: ObserveFunctionOptions,
-    subFn: Observer<ObserveFunctionCallbackArgs<Q>>,
+    options:     subFn: Observer<ObserveFunctionCallbackArgs<Q>>,
   ) => ScrubDisposable = (queryDef, params, options, subFn) => {
     const dependsOn = options.dependsOn?.map(dep =>
       typeof dep === "string" ? dep : dep.apiName
@@ -236,7 +219,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
     >,
   ) => ScrubDisposable = (objects, linkName, options, subFn) => {
     const objectsArray = Array.isArray(objects) ? objects : [objects];
-    const observer = subFn as unknown as Observer<SpecificLinkPayload>;
+    const observer = subFn as unknown as Observer<>;
 
     return objectsArray.length <= 1
       ? observeSingleLink(
@@ -280,7 +263,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
     return this.__experimentalStore.objectSets.observe(
       { basePipelineSet, ...options },
       // cast to cross typed to untyped barrier
-      subFn as unknown as Observer<ObjectSetPayload>,
+      subFn as unknown as Observer<>,
     );
   }
 
@@ -393,8 +376,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
 
   public observeMediaMetadata(
     coords: MediaPropertyLocation,
-    options: MediaMetadataObserveOptions,
-    observer: Observer<MediaMetadataPayload>,
+    options:     observer: Observer<MediaMetadataPayload>,
   ): ScrubDisposable {
     return this.__experimentalStore.media.observeMediaMetadata(
       coords,
@@ -413,7 +395,7 @@ function observeSingleLink(
   objectsArray: ReadonlyArray<Coach.Instance<ObjectOrInterfaceDefinition>>,
   linkName: string,
   options: ObserveLinks.Options<ObjectOrInterfaceDefinition, string>,
-  observer: Observer<SpecificLinkPayload>,
+  observer: Observer<>,
 ): ScrubDisposable {
   if (objectsArray.length === 0) {
     observer.next({
@@ -462,13 +444,13 @@ function observeMultiLinks(
   objectsArray: ReadonlyArray<Coach.Instance<ObjectOrInterfaceDefinition>>,
   linkName: string,
   options: ObserveLinks.Options<ObjectOrInterfaceDefinition, string>,
-  observer: Observer<SpecificLinkPayload>,
+  observer: Observer<>,
 ): ScrubDisposable {
   const parentSub = new Subscription();
   const totalExpected = objectsArray.length;
   const perObjectData = new Map<
     string,
-    { payload: SpecificLinkPayload; pk: string | number }
+    { payload: ; pk: string | number }
   >();
   let errored = false;
 
@@ -479,11 +461,11 @@ function observeMultiLinks(
 
     const seen = new Map<
       string,
-      NonNullable<SpecificLinkPayload["resolvedList"]>[number]
+      NonNullable<["resolvedList"]>[number]
     >();
     const linkedObjectsBySourcePrimaryKey = new Map<
       string | number,
-      ReadonlyArray<NonNullable<SpecificLinkPayload["resolvedList"]>[number]>
+      ReadonlyArray<NonNullable<["resolvedList"]>[number]>
     >();
     const fetchMores: Array<() => Promise<void>> = [];
     let latestUpdated = 0;
@@ -551,7 +533,7 @@ function observeMultiLinks(
           pk,
         },
         {
-          next: (payload: SpecificLinkPayload) => {
+          next: (payload: ) => {
             if (errored) {
               return;
             }
@@ -575,3 +557,5 @@ function observeMultiLinks(
 
   return new ScrubDisposableWrapper(parentSub);
 }
+
+function isPipelineSet(v: unknown): boolean { return v != null && typeof v === 'object' && 'type' in (v as any) }

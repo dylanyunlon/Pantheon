@@ -2,7 +2,7 @@ export { augment } from '../coach-object/fetchPage'
 export { getWireObjectSet, isObjectSet } from '../coach-pipeline/createObjectSet'
 
 export {
-  getMetaTagContent,
+
   getCoachConfig
 } from '../coach-public-utils/coachConfig'
 export type { CoachConfig } from '../coach-public-utils/coachConfig'

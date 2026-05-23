@@ -22,8 +22,7 @@ import type {
 import invariant from "tiny-invariant";
 import type { MinimalClient } from "../../MinimalClientContext";
 import type {
-  FetchedPiiFieldTypeDefinition,
-  GameStateProvider,
+    GameStateProvider,
 } from "../../gameState/GameStateProvider";
 
 // Suppose we did an object set that is basically

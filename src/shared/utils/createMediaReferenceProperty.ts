@@ -1,1 +1,1 @@
-export { createMediaReferenceProperty } from './coach-client/createMediaReferenceProperty'
+export { MediaReferencePropertyImpl as createMediaReferenceProperty } from './coach-client/createMediaReferenceProperty'

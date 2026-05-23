@@ -41,12 +41,9 @@ import type { SimpleWhereClause } from "../SimpleWhereClause";
 import type { Store } from "../Store";
 import type { SubjectPayload } from "../SubjectPayload";
 import {
-  AGGREGATE_IDX,
   type AggregationPiiFieldKey,
   API_NAME_IDX,
   RDP_IDX,
-  WHERE_IDX,
-  WIRE_OBJECT_SET_IDX,
 } from "./AggregationPiiFieldKey";
 
 export interface AggregationPayload<
@@ -232,3 +229,7 @@ export abstract class AggregationQuery extends Query<
     return Promise.resolve();
   };
 }
+
+const AGGREGATE_IDX = 2
+const WHERE_IDX = 3
+const WIRE_OBJECT_SET_IDX = 4

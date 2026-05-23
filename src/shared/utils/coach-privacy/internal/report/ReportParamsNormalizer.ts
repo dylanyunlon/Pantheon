@@ -18,8 +18,7 @@ import type { PipelineSet as WirePipelineSet } from "../../../coach-types";
 import { Trie } from "@wry/trie";
 import {
   getWirePipelineSet,
-  isPipelineSet,
-} from "../../../pipelineSet/createPipeline";
+  } from "../../../pipelineSet/createPipeline";
 import { isObjectSpecifiersObject } from "../../../util/isObjectSpecifiersObject";
 import type { ScrubNormalized } from "../ScrubNormalized";
 
@@ -204,3 +203,5 @@ export class FunctionParamsScrubNormalizer {
     });
   }
 }
+
+function isPipelineSet(v: unknown): boolean { return v != null && typeof v === 'object' && 'type' in (v as any) }

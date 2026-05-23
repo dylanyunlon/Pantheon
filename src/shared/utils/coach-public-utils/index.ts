@@ -8,12 +8,12 @@
  */
 
 export {
-  coachConfig,
-  type CoachConfigOptions
+  CoachConfig as coachConfig,
+  type CoachConfig as CoachConfigOptions
 } from './coachConfig'
 
 export {
-  createAndFetchTempPipelineSetRid
+  createAndFetchTempObjectSetRid as createAndFetchTempPipelineSetRid
 } from './createAndFetchTempObjectSetRid'
 
 export {
@@ -21,9 +21,9 @@ export {
 } from './hydrateAttachmentFromRid'
 
 export {
-  hydratePipelineSetFromObjectRids
+  hydrateObjectSetFromObjectRids as hydratePipelineSetFromObjectRids
 } from './hydrateObjectSetFromObjectRids'
 
 export {
-  hydratePipelineSetFromRid
+  hydrateObjectSetFromRid as hydratePipelineSetFromRid
 } from './hydrateObjectSetFromRid'

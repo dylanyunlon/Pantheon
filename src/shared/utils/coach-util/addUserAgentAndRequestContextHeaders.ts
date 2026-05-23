@@ -21,7 +21,7 @@ import type { MinimalClient } from "../MinimalClientContext";
 
 export const addUserAgentAndRequestContextHeaders = (
   client: MinimalClient,
-  withMetadata: Pick<ObjectOrInterfaceDefinition, "coachMetadata">,
+  withMetadata: Pick<ObjectOrInterfaceDefinition, "apiName" | "properties" | "type">,
 ): MinimalClient => ({
   ...client,
   fetch: createFetchHeaderMutator(

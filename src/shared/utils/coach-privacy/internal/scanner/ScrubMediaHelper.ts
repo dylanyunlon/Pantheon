@@ -26,9 +26,7 @@ import { createBlobMemoryManager } from "./BlobMemoryManager";
 import { getMediaPiiFieldKey } from "./getMediaPiiFieldKey";
 import type { MediaMetadataPiiFieldKey } from "./MediaMetadataPiiFieldKey";
 import type {
-  MediaMetadataObserveOptions,
-  MediaMetadataPayload,
-} from "./MediaMetadataQuery";
+    } from "./MediaMetadataQuery";
 import { MediaMetadataQuery } from "./MediaMetadataQuery";
 
 export class MediaHelper extends AbstractHelper<
@@ -74,8 +72,7 @@ export class MediaHelper extends AbstractHelper<
 
   observeMediaMetadata(
     coords: MediaPropertyLocation,
-    options: MediaMetadataObserveOptions,
-    observer: Observer<MediaMetadataPayload>,
+    options:     observer: Observer<MediaMetadataPayload>,
   ): ScrubDisposableWrapper {
     const query = this.getQuery({ ...options, coords });
     return this._subscribe(query, options, observer);

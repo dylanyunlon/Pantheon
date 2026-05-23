@@ -21,10 +21,15 @@ export type PageSize = number
 export type PageToken = string
 
 export interface ObjectTypeDefinition {
+  type: 'object'
   apiName: string
   displayName: string
   properties: Record<string, PropertyDefinition>
   primaryKey: string
+  primaryKeyApiName?: string
+  primaryKeyType?: PrimaryKeyTypes
+  links?: Record<string, LinkDefinition>
+  interfaceMap?: Record<string, Record<string, string>>
 }
 
 export interface PropertyDefinition {
@@ -32,11 +37,18 @@ export interface PropertyDefinition {
   dataType: string
   nullable: boolean
   displayName?: string
+  type?: string
+  multiplicity?: boolean
+  readonly?: boolean
 }
 
 export interface InterfaceMetadata {
+  type: 'interface'
   apiName: string
   properties: Record<string, PropertyDefinition>
+  links?: Record<string, { targetType: string; targetTypeApiName: string; multiplicity: boolean }>
+  implementedBy?: ReadonlyArray<string>
+  primaryKeyApiName?: string
 }
 
 export interface ObjectMetadata extends ObjectTypeDefinition {
@@ -49,9 +61,10 @@ export interface LinkDefinition {
   cardinality: 'ONE' | 'MANY'
 }
 
-export interface ActionDefinition {
+export interface ActionDefinition<_T = any> {
   apiName: string
   parameters: Record<string, ParameterDefinition>
+  __DefinitionMetadata?: unknown
 }
 
 export interface ParameterDefinition {
@@ -60,7 +73,16 @@ export interface ParameterDefinition {
 }
 
 export interface ActionEditResponse {
+  type?: 'edits' | 'largeScaleEdits'
   edits: Array<{ objectType: string; primaryKey: string; action: 'ADD' | 'MODIFY' | 'DELETE' }>
+  addedObjects?: Array<{ objectType: string; primaryKey: string }>
+  modifiedObjects?: Array<{ objectType: string; primaryKey: string }>
+  deletedObjects?: Array<{ objectType: string; primaryKey: string }>
+  addedLinks?: Array<{ linkType: string; sourcePrimaryKey: string; targetPrimaryKey: string }>
+  deletedLinks?: Array<{ linkType: string; sourcePrimaryKey: string; targetPrimaryKey: string }>
+  deletedLinksCount?: number
+  deletedObjectsCount?: number
+  editedPiiFieldTypes?: string[]
 }
 
 export type ActionValidationResponse = {
@@ -68,7 +90,7 @@ export type ActionValidationResponse = {
   errors: Array<{ message: string }>
 }
 
-export interface QueryDefinition {
+export interface QueryDefinition<_T = any> {
   apiName: string
   parameters: Record<string, ParameterDefinition>
   output: { dataType: string }
@@ -77,6 +99,14 @@ export interface QueryDefinition {
 export interface CompileTimeMetadata<T = unknown> {
   type: string
   definition: T
+  properties: Record<string, PropertyDefinition>
+  links: Record<string, { targetType: string; targetTypeApiName?: string; multiplicity?: boolean; __OsdkLinkTargetType?: unknown }>
+  props?: Record<string, unknown>
+  strictProps?: Record<string, unknown>
+  linksType?: unknown
+  signature?: unknown
+  parameters?: Record<string, ParameterDefinition>
+  output?: QueryDataTypeDefinition
 }
 
 
@@ -90,7 +120,11 @@ export type PropertyKeys<T> = keyof T & string
 
 export type WirePropertyTypes = string | number | boolean | null
 
-export interface WhereClause {
+export type WhereClause<_Q extends ObjectOrInterfaceDefinition = any, _RDPs = {}> = {
+  $and?: WhereClause[]
+  $or?: WhereClause[]
+  $not?: WhereClause
+} & {
   [field: string]: {
     $eq?: unknown
     $ne?: unknown
@@ -101,7 +135,7 @@ export interface WhereClause {
     $in?: unknown[]
     $contains?: string
     $isNull?: boolean
-  }
+  } | WhereClause[] | WhereClause | undefined
 }
 
 export type PossibleWhereClauseFilters =
@@ -144,9 +178,22 @@ export type SearchJsonQueryV2 = WhereClause
 
 export interface ObjectSet {
   type: 'base' | 'union' | 'intersect' | 'filter' | 'searchAround'
+    | 'interfaceLinkSearchAround' | 'interfaceBase' | 'withProperties'
+    | 'methodInput' | 'asType' | 'asBaseObjectTypes' | 'asBasePiiFieldTypes'
+    | 'reference' | 'static' | 'nearestNeighbors' | 'subtract'
   objectType?: string
   where?: WhereClause
   objectSets?: ObjectSet[]
+  objectSet?: ObjectSet
+  link?: string
+  interfaceLink?: string
+  interfaceType?: string
+  entityType?: string
+  pipelineSet?: ObjectSet
+  derivedProperties?: Record<string, unknown>
+  objectSetRid?: string
+  reference?: unknown
+  piiFieldType?: string
 }
 
 export type WireObjectSet = ObjectSet
@@ -210,8 +257,21 @@ export interface DerivedProperty {
   resultType: string
 }
 
+export namespace DerivedProperty {
+  export type Definition<_Q = unknown> = DerivedPropertyDefinition
+  export type Clause<_Q = unknown> = Record<string, DerivedPropertyDefinition>
+  export type Creator<_Q = unknown, _V = unknown> = () => DerivedPropertyDefinition
+}
+
 export interface DerivedPropertyDefinition extends DerivedProperty {
   objectTypes: string[]
+  type?: string
+  property?: DerivedPropertyDefinition
+  properties?: DerivedPropertyDefinition[]
+  left?: DerivedPropertyDefinition
+  right?: DerivedPropertyDefinition
+  objectSet?: ObjectSet
+  operation?: { type: string; selectedPropertyApiName?: string }
 }
 
 export type DataValue = string | number | boolean | null | DataValue[] | { [key: string]: DataValue }
@@ -250,11 +310,7 @@ export interface PropertySecurity {
   securityMarkings: string[]
 }
 
-export interface ObjectOrInterfaceDefinition {
-  apiName: string
-  properties: Record<string, PropertyDefinition>
-  type: 'object' | 'interface'
-}
+export type ObjectOrInterfaceDefinition = ObjectTypeDefinition | InterfaceDefinition
 
 export class CoachApiError extends Error {
   statusCode: number
@@ -331,6 +387,15 @@ export interface QueryDataTypeDefinition {
   type: string
   subType?: string
   objectTypeApiName?: string
+  nullable?: boolean
+  object?: string
+  interface?: string
+  pipelineSet?: string
+  set?: QueryDataTypeDefinition
+  array?: QueryDataTypeDefinition
+  keyType?: QueryDataTypeDefinition
+  valueType?: QueryDataTypeDefinition
+  struct?: Record<string, QueryDataTypeDefinition>
 }
 
 export interface TimeRange {
@@ -351,6 +416,8 @@ export interface TimeseriesDurationMapping {
 export interface TransformOptions {
   transformations: Transformation[]
   outputFormat?: string
+  pollIntervalMs?: number
+  pollTimeoutMs?: number
 }
 
 export const USER_AGENT_HEADER = 'X-Coach-User-Agent'
@@ -363,21 +430,29 @@ export interface GameStateObjectV2 {
 }
 
 
-export type InterfaceDefinition = ObjectOrInterfaceDefinition & { type: 'interface' }
+export interface InterfaceDefinition {
+  type: 'interface'
+  apiName: string
+  properties: Record<string, PropertyDefinition>
+  links?: Record<string, { targetType: string; targetTypeApiName: string; multiplicity: boolean }>
+  implementedBy?: ReadonlyArray<string>
+  primaryKeyApiName?: string
+  interfaceMap?: Record<string, Record<string, string>>
+}
 
 export type PiiFieldTypeDefinition = ObjectOrInterfaceDefinition
-export type PiiKeyType = string | number
+export type PiiKeyType<_T = unknown> = string | number
 export type PrivacyConfig = { enabled: boolean; rules: Record<string, unknown> }
-export type ScrubDefinition = { apiName: string; fields: string[] }
+export type ScrubDefinition<_T = unknown> = { apiName: string; fields: string[] }
 
-export type AsyncIterArgs<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
+export type AsyncIterArgs<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition, _L = unknown, _R = unknown, _A = unknown, _S = unknown, _T = unknown, _U = unknown, _O = unknown> = {
   $pageSize?: number
   $select?: PropertyKeys<Q>[]
 }
 
 export type Augments = Record<string, unknown>
 
-export type FetchPageResult<T> = PageResult<T>
+export type FetchPageResult<T, _L = unknown, _R = unknown, _S = unknown, _E = {}, _T = unknown, _O = unknown> = PageResult<T>
 
 export type LinkedType<Q extends ObjectOrInterfaceDefinition, _L extends string = string> = ObjectOrInterfaceDefinition & { __source: Q }
 
@@ -395,6 +470,14 @@ export type MinimalDirectedObjectLinkInstance = {
 
 export type NullabilityAdherence = 'strict' | 'loose'
 
+export namespace NullabilityAdherence {
+  export const Default: NullabilityAdherence = 'strict'
+}
+
+export namespace ObjectSetArgs {
+  export type OrderByOptions<_L = unknown> = Record<string, 'asc' | 'desc'>
+}
+
 export type ObjectSetArgs<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
   $pageSize?: number
   $select?: PropertyKeys<Q>[]
@@ -405,15 +488,24 @@ export type ObjectSetSubscription = {
   unsubscribe(): void
 }
 
+export namespace ObjectSetSubscription {
+  export type Listener<_Q = unknown, _P = unknown, _R = unknown> = {
+    onChange?(objects: unknown[]): void
+    onOutOfDate?(): void
+    onError?(error: unknown): void
+    onSuccessfulSubscription?(): void
+  }
+}
+
 export type Result<T> = { type: 'ok'; value: T } | { type: 'err'; error: unknown }
 
 export type SelectArg<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = PropertyKeys<Q>[]
 
-export type SingleOsdkResult<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = Coach.Instance<Q> | undefined
+export type SingleOsdkResult<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition, _L = unknown, _R = unknown, _S = unknown, _E = {}, _T = unknown, _O = unknown> = Coach.Instance<Q> | undefined
 
 export type PropertyApiName<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = PropertyKeys<Q>
 
-export type FetchLinksPageResult<T = unknown> = PageResult<T> & { sourceApiName: string }
+export type FetchLinksPageResult<T = unknown, _L = unknown> = PageResult<T> & { sourceApiName: string }
 
 export type ObjectIdentifiers<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
   readonly $apiName: Q['apiName']
@@ -465,12 +557,27 @@ export type SubscriptionClosed = {
 export type DataValueClientToWire<T = unknown> = T
 export type DataValueWireToClient<T = unknown> = T
 
-export type InterfaceQueryDataType = QueryDataTypeDefinition & { interface: string }
-export type ObjectQueryDataType = QueryDataTypeDefinition & { object: string }
-export type ObjectSetQueryDataType = QueryDataTypeDefinition & { objectSet: string }
+export type InterfaceQueryDataType<_T = unknown> = QueryDataTypeDefinition & { interface: string }
+export type ObjectQueryDataType<_T = unknown> = QueryDataTypeDefinition & { object: string }
+export type ObjectSetQueryDataType<_T = unknown> = QueryDataTypeDefinition & { objectSet: string }
 
 export type QueryParam<T = unknown> = T
+
+export namespace QueryParam {
+  export type ObjectType<_T = unknown> = { $objectType: string; $primaryKey: string | number }
+  export type InterfaceType<_T = unknown> = { $objectType: string; $primaryKey: string | number }
+  export type ObjectSetType<_T = unknown> = ObjectSet
+  export type PrimitiveType<_T = unknown> = string | number | boolean | null
+}
 export type QueryResult<T = unknown> = T
+
+export namespace QueryResult {
+  export type ObjectType<_T = unknown> = Coach.Instance
+  export type ObjectSetType<_T = unknown> = ObjectSet
+  export type PrimitiveType<_T = unknown> = string | number | boolean | null
+}
+
+export type OrderBy<_Q = unknown> = Record<string, 'asc' | 'desc' | undefined>
 
 export type AllowedBucketKeyTypes = string | number | boolean
 export type AllowedBucketTypes = string | number | boolean | Date
@@ -483,7 +590,7 @@ export type QueryMetadata = {
   output: QueryDataTypeDefinition
 }
 
-export type QueryParameterDefinition = ParameterDefinition
+export type QueryParameterDefinition<_T = any> = ParameterDefinition
 
 export class MediaTransformationFailedError extends Error {
   constructor(message: string) {
@@ -499,12 +606,18 @@ export class MediaTransformationTimeoutError extends Error {
   }
 }
 
-export type ObjectSpecifier<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
-  objectTypeApiName: Q['apiName']
-  primaryKeyValue: PrimaryKeyType<Q>
+export type ObjectSpecifier<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = string & {
+  readonly __objectSpecifier?: Q
 }
 
 export type ActionParam<T = unknown> = T
+
+export namespace ActionParam {
+  export type ObjectType<_T = unknown> = { $objectType: string; $primaryKey: string | number }
+  export type InterfaceType<_T = unknown> = { $objectType: string; $primaryKey: string | number; __isInterface: true }
+  export type ObjectSetType<_T = unknown> = ObjectSet
+  export type PrimitiveType<_T = unknown> = string | number | boolean | null
+}
 
 export type PrimaryKeyType<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = string | number
 
@@ -555,7 +668,7 @@ export const MediaReferenceProperties: MediaReferenceProperties = {
     return { path: '', sizeBytes: 0, mediaType: '', updatedAt: '' }
   },
   async getMediaContent(_client: unknown, _ref: MediaReference): Promise<Blob> {
-    return new Blob()
+    return new Blob([])
   },
 }
 
@@ -566,13 +679,13 @@ export type CoreMediaReference = MediaReference
 
 export type ActionReturnTypeForOptions = any
 export type AggregateObjectsRequestV2 = any
-export type AggregateOpts = any
+export type AggregateOpts<_Q = any> = Record<string, AggregationClause>
 export type AggregateOptsThatErrorsAndDisallowsOrderingWithMultipleGroupBy = any
 export type AggregationGroupByV2 = any
 export type AggregationRangeV2 = any
 export type AggregationResultsWithGroups = any
 export type AggregationResultsWithoutGroups = any
-export type AggregationsResults = any
+export type AggregationsResults<_Q = any, _A = any> = { data: unknown[]; excludedItems?: number }
 export type AndWhereClause = any
 export type ApplyActionOptions = any
 export type ApplyBatchActionOptions = any
@@ -592,7 +705,7 @@ export type DocumentToImageOperation = any
 export type DocumentToTextOperation = any
 export type EmailToAttachmentOperation = any
 export type EmailToTextOperation = any
-export type FetchPageArgs = any
+export type FetchPageArgs<_T = any> = { $pageSize?: number; $nextPageToken?: string; $select?: string[]; $orderBy?: Record<string, string>; $loadPropertySecurityMetadata?: boolean }
 export type GeotimeSeriesProperty = any
 export type ImageOperation = any
 export type ImageSpec = any
@@ -640,3 +753,63 @@ export type VideoToAudioOperation = any
 export type VideoToImageOperation = any
 export type VideoToTextOperation = any
 export type VlmPreprocessingConfig = any
+
+
+export type ObserveObjectOptions<_T = unknown> = { apiName: string; pk: PiiKeyType; $select?: string[]; $includeAllBaseObjectProperties?: boolean; $loadPropertySecurityMetadata?: boolean }
+export type ObserveScrubFieldOptions<_T = unknown, _RDPs = {}> = { apiName: string; where?: WhereClause; $select?: string[]; $orderBy?: OrderBy; pageSize?: number; dedupeInterval?: number; autoFetchMore?: number | boolean; $loadPropertySecurityMetadata?: boolean; $includeAllBaseObjectProperties?: boolean; withProperties?: Record<string, unknown> }
+export type ObserveObjectSetOptions<_T = unknown, _RDPs = {}> = ObserveScrubFieldOptions<_T, _RDPs>
+export type ObserveLinks = { objectApiName: string; linkApiName: string }
+export namespace ObserveLinks {
+  export type Options<_T = unknown, _L extends string = string> = { objectApiName: string; linkApiName: string; objects: unknown; $select?: string[]; $orderBy?: OrderBy; pageSize?: number; dedupeInterval?: number; autoFetchMore?: number | boolean; $loadPropertySecurityMetadata?: boolean; $includeAllBaseObjectProperties?: boolean }
+  export type CallbackArgs<_T = unknown> = { data: unknown[]; status: string; hasMore: boolean; fetchMore: () => Promise<void> }
+}
+export type Observer<T = unknown> = { onChange(value: T): void; onError?(error: unknown): void }
+export type Status = 'init' | 'loading' | 'loaded' | 'error'
+export type CommonObserveOptions = { dedupeInterval?: number }
+export type CacheEntry = { value: unknown; status: string; lastUpdated?: number }
+export type CacheSnapshot = { entries: () => MapIterator<[unknown, CacheEntry]>; size: number }
+
+export type ObjectUpdate<_O = unknown, _P extends string = string> = {
+  object: Coach.Instance
+  state: 'ADDED_OR_UPDATED' | 'REMOVED'
+}
+
+export type ObserveAggregationOptions<_T = unknown, _A = unknown> = { apiName: string; aggregate: unknown; where?: WhereClause; withProperties?: Record<string, unknown> }
+export type ObserveAggregationOptionsWithPipelineSet<_T = unknown, _A = unknown> = ObserveAggregationOptions<_T, _A> & { pipelineSet?: ObjectSet }
+export type ObserveFunctionOptions = { apiName: string; params?: unknown }
+export type ObserveFunctionCallbackArgs<_T = unknown> = { result: unknown; status: Status }
+export type ObserveListOptions<_T = unknown, _RDPs = {}> = ObserveScrubFieldOptions<_T, _RDPs>
+export type ObserveObjectCallbackArgs<_T = unknown> = { object: unknown; status: Status }
+export type ObserveObjectsCallbackArgs<_T = unknown> = ObserveObjectCallbackArgs<_T>
+export type ObserveObjectSetArgs<_T = unknown> = { apiName: string }
+export type ScrubDisposable = { unsubscribe(): void; dispose(): void; closed: boolean }
+
+export type ActionSignatureFromDef<_T = unknown> = {
+  applyAction(args: unknown, opts?: unknown): Promise<ActionEditResponse>
+}
+
+export type QueryParameterType<_T = unknown> = Record<string, unknown>
+export type QueryReturnType<_T = unknown> = unknown
+
+export type FetchedObjectTypeDefinition = ObjectTypeDefinition & {
+  links: Record<string, LinkDefinition>
+  interfaceMap?: Record<string, Record<string, string>>
+  primaryKeyApiName: string
+}
+
+export type FetchedPiiFieldTypeDefinition = FetchedObjectTypeDefinition
+
+export type ScrubRecord<_T = unknown> = Record<string, unknown> & {
+  $objectType: string
+  $primaryKey: string
+  $apiName?: string
+  $piiFieldType?: string
+  $piiKey?: string | number
+  $title?: string
+  $rid?: string
+  $as?: (apiName: string) => unknown
+}
+
+export type NormalizedProcedure<_C = unknown> = (def: ObjectOrInterfaceDefinition | string) => PipelineSet
+
+export type MinimalCoachClient = import('./coach-client/MinimalCoachClientContext').MinimalCoachClient

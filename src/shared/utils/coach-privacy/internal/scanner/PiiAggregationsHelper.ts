@@ -21,9 +21,7 @@ import type {
 } from "../../../coach-types";
 import { getWirePipelineSet } from "../../../pipelineSet/createPipeline";
 import type {
-  ObserveAggregationOptions,
-  ObserveAggregationOptionsWithPipelineSet,
-} from "../../PrivacyScrubClient";
+    } from "../../PrivacyScrubClient";
 import type { Observer } from "../../PrivacyScrubClient/common";
 import { AbstractHelper } from "../AbstractHelper";
 import type { PiiFieldKeys } from "../PiiFieldKeys";
@@ -180,3 +178,6 @@ export class AggregationsHelper extends AbstractHelper<
     return JSON.parse(JSON.stringify(aggregate)) as ScrubNormalized<A>;
   }
 }
+
+type ObserveAggregationOptions = any
+type ObserveAggregationOptionsWithPipelineSet = any

@@ -32,9 +32,7 @@ import {
 import { additionalContext } from "../../../coach-engine";
 import type { Status } from "../../PrivacyScrubClient/common";
 import type {
-  MediaMetadataObserveOptions,
-  MediaMetadataPayload,
-} from "../../PrivacyScrubClient/MediaPrivacyScrubTypes";
+    } from "../../PrivacyScrubClient/MediaPrivacyScrubTypes";
 import type { BatchContext } from "../BatchContext";
 import type { Changes } from "../Changes";
 import type { Entry } from "../Layer";
@@ -48,8 +46,7 @@ export type { MediaMetadataObserveOptions, MediaMetadataPayload };
 
 export class MediaMetadataQuery extends Query<
   MediaMetadataPiiFieldKey,
-  MediaMetadataPayload,
-  MediaMetadataObserveOptions
+    MediaMetadataObserveOptions
 > {
   #piiFieldType: string;
   #piiKey: PiiKeyType<PiiFieldTypeDefinition>;
@@ -63,8 +60,7 @@ export class MediaMetadataQuery extends Query<
     piiKey: PiiKeyType<PiiFieldTypeDefinition>,
     propertyName: string,
     piiFieldKey: MediaMetadataPiiFieldKey,
-    opts: MediaMetadataObserveOptions,
-  ) {
+    opts:   ) {
     super(
       store,
       subject,
