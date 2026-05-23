@@ -1,1 +1,1 @@
-export type AggregationsHelper = any
+export class AggregationsHelper { [key: string]: any }

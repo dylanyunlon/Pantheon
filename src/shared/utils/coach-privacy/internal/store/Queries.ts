@@ -1,1 +1,1 @@
-export type Queries = any
+export class Queries { get(_key: unknown, _factory?: () => unknown): unknown { return undefined }; peek(_key: unknown): unknown { return undefined }; keys(): Iterable<unknown> { return [] }; delete(_key: unknown): void {} }

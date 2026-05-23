@@ -1,1 +1,1 @@
-export type ObjectSetHelper = any
+export class ObjectSetHelper { [key: string]: any }

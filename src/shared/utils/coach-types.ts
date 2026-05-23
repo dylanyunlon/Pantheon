@@ -408,6 +408,10 @@ export interface TimeseriesDurationMapping {
   unit: string
   value: number
 }
+export const TimeseriesDurationMapping: Record<string, string> = {
+  YEARS: 'YEARS', MONTHS: 'MONTHS', WEEKS: 'WEEKS', DAYS: 'DAYS',
+  HOURS: 'HOURS', MINUTES: 'MINUTES', SECONDS: 'SECONDS', MILLISECONDS: 'MILLISECONDS',
+}
 
 export interface TransformOptions {
   transformations: Transformation[]
@@ -437,9 +441,7 @@ export interface InterfaceDefinition {
 }
 
 export type PiiFieldTypeDefinition = ObjectOrInterfaceDefinition
-export type PiiKeyType<_T = unknown> = string | number
 export type PrivacyConfig = { enabled: boolean; rules: Record<string, unknown> }
-export type ScrubDefinition<_T = unknown> = { apiName: string; fields: string[] }
 
 export type AsyncIterArgs<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition, _L = unknown, _R = unknown, _A = unknown, _S = unknown, _T = unknown, _U = unknown, _O = unknown> = {
   $pageSize?: number
@@ -573,8 +575,6 @@ export namespace QueryResult {
   export type PrimitiveType<_T = unknown> = string | number | boolean | null
 }
 
-export type OrderBy<_Q = unknown> = Record<string, 'asc' | 'desc' | undefined>
-
 export type AllowedBucketKeyTypes = string | number | boolean
 export type AllowedBucketTypes = string | number | boolean | Date
 
@@ -679,8 +679,8 @@ export type AggregateOpts<_Q = any> = Record<string, AggregationClause>
 export type AggregateOptsThatErrorsAndDisallowsOrderingWithMultipleGroupBy = any
 export type AggregationGroupByV2 = any
 export type AggregationRangeV2 = any
-export type AggregationResultsWithGroups = any
-export type AggregationResultsWithoutGroups = any
+
+
 export type AggregationsResults<_Q = any, _A = any> = { data: unknown[]; excludedItems?: number }
 export type AndWhereClause = any
 export type ApplyActionOptions = any
@@ -690,7 +690,7 @@ export type AudioOperation = any
 export type AudioToTextOperation = any
 export type Augment = any
 export type BatchApplyActionResponseV2 = any
-export type CoachRecordLinksObject = any
+
 export type DatetimeFormat = any
 export type DatetimeLocalizedFormat = any
 export type DatetimeTimezone = any
@@ -737,7 +737,7 @@ export type ReferenceValue = any
 export type SearchOrderByV2 = any
 export type SecuredPropertyValue = any
 export type SimplePropertyDef = any
-export type SingleLinkAccessor = any
+
 export type SpreadsheetToTextOperation = any
 export type SyncApplyActionResponseV2 = any
 export type TimeSeriesPoint = any
@@ -777,7 +777,7 @@ export type ObserveFunctionCallbackArgs<_T = unknown> = { result: unknown; statu
 export type ObserveListOptions<_T = unknown, _RDPs = {}> = ObserveScrubFieldOptions<_T, _RDPs>
 export type ObserveObjectCallbackArgs<_T = unknown> = { object: unknown; status: Status }
 export type ObserveObjectsCallbackArgs<_T = unknown> = ObserveObjectCallbackArgs<_T>
-export type ObserveObjectSetArgs<_T = unknown> = { apiName: string }
+
 export type ScrubDisposable = { unsubscribe(): void; dispose(): void; closed: boolean }
 
 export type ActionSignatureFromDef<_T = unknown> = {

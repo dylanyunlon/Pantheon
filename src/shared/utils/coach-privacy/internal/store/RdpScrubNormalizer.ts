@@ -1,2 +1,2 @@
 export type Rdp = any
-export type RdpScrubNormalizer = any
+export class RdpScrubNormalizer { scrubNormalize(_input: unknown): unknown { return _input } }

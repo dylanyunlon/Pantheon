@@ -1,1 +1,1 @@
-export type MediaHelper = any
+export class MediaHelper { [key: string]: any }

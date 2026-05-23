@@ -1,1 +1,1 @@
-export type RidListScrubNormalizer = any
+export class RidListScrubNormalizer { scrubNormalize(_input: unknown): unknown { return _input } }

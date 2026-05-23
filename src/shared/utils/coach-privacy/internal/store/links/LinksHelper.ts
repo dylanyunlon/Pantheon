@@ -1,1 +1,1 @@
-export type LinksHelper = any
+export class LinksHelper { [key: string]: any }

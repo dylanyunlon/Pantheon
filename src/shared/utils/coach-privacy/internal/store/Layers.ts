@@ -1,1 +1,1 @@
-export type Layers = any
+export class Layers { [key: string]: any }

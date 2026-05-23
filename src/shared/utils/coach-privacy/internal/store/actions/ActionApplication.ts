@@ -1,1 +1,1 @@
-export type ActionApplication = any
+export class ActionApplication { [key: string]: any }

@@ -5,7 +5,7 @@ declare module 'rxjs' {
     complete(): void
   }
 
-  export interface Subscription {
+  export class Subscription {
     unsubscribe(): void
     add(teardown: (() => void) | Subscription): void
     readonly closed: boolean

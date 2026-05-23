@@ -1,1 +1,1 @@
-export type ObjectScrubFieldQuery = any
+export { ObjectScrubFieldQuery } from "./ObjectPiiFieldQuery"

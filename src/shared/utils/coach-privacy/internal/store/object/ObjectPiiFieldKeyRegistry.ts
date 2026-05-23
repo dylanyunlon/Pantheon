@@ -1,1 +1,1 @@
-export type ObjectPiiFieldKeyRegistry = any
+export class ObjectPiiFieldKeyRegistry { [key: string]: any }

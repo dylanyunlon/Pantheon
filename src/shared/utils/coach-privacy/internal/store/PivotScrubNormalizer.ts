@@ -1,1 +1,1 @@
-export type PivotScrubNormalizer = any
+export class PivotScrubNormalizer { scrubNormalize(_input: unknown): unknown { return _input } }

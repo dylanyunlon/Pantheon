@@ -1,1 +1,1 @@
-export type InterfaceScrubFieldQuery = any
+export { InterfaceScrubFieldQuery } from "./InterfacePiiFieldQuery"

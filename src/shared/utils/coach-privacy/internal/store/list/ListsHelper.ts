@@ -1,1 +1,1 @@
-export type ListsHelper = any
+export class ListsHelper { [key: string]: any }

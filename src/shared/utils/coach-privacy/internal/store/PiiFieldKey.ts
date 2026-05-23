@@ -1,1 +1,1 @@
-export type DEBUG_ONLY__piiFieldKeyToString = any
+export function DEBUG_ONLY__piiFieldKeyToString(_key: unknown): string { return "" }

@@ -1,1 +1,1 @@
-export type WhereClauseScrubNormalizer = any
+export class WhereClauseScrubNormalizer { scrubNormalize(_input: unknown): unknown { return _input } }
