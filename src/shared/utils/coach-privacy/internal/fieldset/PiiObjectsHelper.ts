@@ -15,6 +15,7 @@
  */
 
 import type { ObjectOrInterfaceDefinition, Coach } from "../../../coach-types";
+import { mergeObjectFields, mergeSelectFields } from "../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import { UnderlyingCoachRecord } from "../../../object/convertWireToCoachRecords/InternalSymbols";
 import type { ScrubRecord } from "../../../object/convertWireToCoachRecords/ScrubRecord";

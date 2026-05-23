@@ -30,6 +30,23 @@ import type {
   SimplePropertyDef,
   WhereClause,
   WirePropertyTypes,
+  ScrubDisposable,
+  ScrubNormalized,
+  ObserveAggregationOptions,
+  ObserveAggregationOptionsWithPipelineSet,
+  ObserveAggregationArgs,
+  ObserveFunctionOptions,
+  ObserveFunctionCallbackArgs,
+  ObserveObjectCallbackArgs,
+  ObserveObjectsCallbackArgs,
+  ObserveObjectSetArgs,
+  ObserveListOptions,
+  MediaMetadataObserveOptions,
+  MediaMetadataPayload,
+  ScrubNormalizedizedOptions,
+  ScrubNormalizedizeOptionsInput,
+  CoachClient,
+  PrivacyScrubClient as PrivacyScrubClientType,
 } from "../../../coach-types";
 import { Subscription } from "rxjs";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";

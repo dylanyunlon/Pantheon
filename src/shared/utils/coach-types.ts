@@ -631,8 +631,12 @@ export type PipelineSet<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfac
   fetchOneWithErrors(pk: PrimaryKeyType<Q>): Promise<Result<Coach.Instance<Q>>>
   where(clause: WhereClause | unknown): PipelineSet<Q>
   union(other: PipelineSet<Q>): PipelineSet<Q>
-  intersect(other: PipelineSet<Q>): PipelineSet<Q>
+  intersect(...others: PipelineSet<Q>[]): PipelineSet<Q>
   subtract(other: PipelineSet<Q>): PipelineSet<Q>
+  pivotTo(linkName: string): PipelineSet<any>
+  withProperties(rdp: unknown): PipelineSet<Q>
+  subscribe(handlers: { onChange?(objects: unknown[]): void; onOutOfDate?(): void; onError?(err: unknown): void; onSuccessfulSubscription?(): void }): { close(): void }
+  applyAction?(args: unknown, opts?: unknown): Promise<unknown>
 }
 
 export type MinimalPipelineSet<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = PipelineSet<Q>
@@ -939,3 +943,34 @@ export type DerivedStatDefinition = { type: string; operation: { type: string; s
 export type OrderBy<_T = any> = Record<string, 'asc' | 'desc' | undefined>
 
 export type ObserveObjectSetArgs<_T = unknown, _RDPs = {}> = { data: unknown[]; status: Status; hasMore: boolean; fetchMore: () => Promise<void>; totalCount?: number }
+
+export type ScrubNormalizedizedOptions<T = unknown> = T
+export type ScrubNormalizedizeOptionsInput<T = unknown> = T
+export type PrivacyScrubClient = {
+  observeObject(...args: unknown[]): ScrubDisposable
+  observeScrubField(...args: unknown[]): ScrubDisposable
+  observeAggregation(...args: unknown[]): ScrubDisposable
+  observeFunction(...args: unknown[]): ScrubDisposable
+  observeLinks(...args: unknown[]): ScrubDisposable
+  observeMediaMetadata(...args: unknown[]): ScrubDisposable
+  observePipelineSet(...args: unknown[]): ScrubDisposable
+  applyAction(...args: unknown[]): Promise<unknown>
+  validateAction(...args: unknown[]): Promise<unknown>
+  invalidateAll(): Promise<void>
+  invalidateObjects(...args: unknown[]): Promise<void>
+  invalidatePiiFieldType(...args: unknown[]): Promise<void>
+  invalidateFunction(...args: unknown[]): Promise<void>
+  invalidateFunctionsByObject(...args: unknown[]): Promise<void>
+  scrubNormalizeWhereClause(...args: unknown[]): unknown
+  scrubNormalizeOptions(...args: unknown[]): unknown
+  getCacheSnapshot(): Promise<CacheSnapshot>
+}
+export type SpecificLinkPayload = LinkPayload
+export type ObjectSetPayload = ScrubFieldPayload
+export type ObserveScrubFieldCallbackArgs = { data: unknown[]; status: Status; hasMore: boolean; fetchMore: () => Promise<void>; totalCount?: number }
+export type ObserveLinksCallbackArgs = ObserveScrubFieldCallbackArgs
+export type mergeObjectFields = (...args: unknown[]) => unknown
+export type mergeSelectFields = (...args: unknown[]) => unknown
+export function mergeObjectFields(..._args: unknown[]): unknown { return {} }
+export function mergeSelectFields(..._args: unknown[]): unknown { return [] }
+export type MediaReferenceProperties_Static = typeof MediaReferenceProperties
