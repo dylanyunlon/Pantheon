@@ -824,9 +824,9 @@ export type ScrubNormalized<T = unknown> = T & { __scrubNormalized?: true }
 export type PrivacyScrub<T = unknown> = { subscribe(observer: Observer<T>): { unsubscribe(): void } }
 export type SubjectPayload<_K = unknown> = { value: unknown; status: string; lastUpdated?: number; isDeferred?: boolean }
 export type QuerySubscription<_Q = unknown> = ScrubDisposable
-export type AbstractHelper<_Q = unknown, _O = unknown> = { store: any; piiFieldKeys: any; _subscribe(...args: unknown[]): any }
-export type Query<_K = unknown, _P = unknown, _O = unknown> = {
-  piiFieldKey: PiiFieldKey
+export class AbstractHelper<_Q = unknown, _O = unknown> { store: any; piiFieldKeys: any; _subscribe(..._args: unknown[]): any { return {} } }
+export class Query<_K = unknown, _P = unknown, _O = unknown> {
+  piiFieldKey!: PiiFieldKey
   store: any
   logger?: Logger
   options: any
@@ -834,23 +834,24 @@ export type Query<_K = unknown, _P = unknown, _O = unknown> = {
   nextPageToken?: string
   pendingFetch?: Promise<void>
   abortController?: AbortController
-  revalidate(force: boolean): Promise<void>
-  setStatus(status: string, batch: unknown): void
-  writeToStore(...args: unknown[]): unknown
-  _updateScrubField(...args: unknown[]): void
-  createWebsocketSubscription(...args: unknown[]): void
-  getEffectiveFetchPageSize(): number
-  fetchMore(): Promise<void>
-  piiFieldKeys: PiiFieldKeys
-  apiName: string
+  revalidate(_force: boolean): Promise<void> { return Promise.resolve() }
+  setStatus(_status: string, _batch: unknown): void {}
+  writeToStore(..._args: unknown[]): unknown { return undefined }
+  _updateScrubField(..._args: unknown[]): void {}
+  createWebsocketSubscription(..._args: unknown[]): void {}
+  getEffectiveFetchPageSize(): number { return 100 }
+  fetchMore(): Promise<void> { return Promise.resolve() }
+  piiFieldKeys!: PiiFieldKeys
+  apiName!: string
   scrubNormalizedWhere: unknown
+  minResultsToLoad?: number
 }
-export type PiiFieldKeys<_K = unknown> = { get<T = unknown>(...args: unknown[]): T; retain(k: unknown): void; release(k: unknown): void }
-export type BaseScrubFieldQuery<_K = unknown, _P = unknown, _O = unknown> = Query<_K, _P, _O> & {
+export class PiiFieldKeys<_K = unknown> { get<T = unknown>(..._args: unknown[]): T { return undefined as any } retain(_k: unknown): void {} release(_k: unknown): void {} }
+export class BaseScrubFieldQuery<_K = unknown, _P = unknown, _O = unknown> extends Query<_K, _P, _O> {
   pendingPageFetch?: Promise<void>
   currentTotalCount?: string
 }
-export type CachingScrubNormalizer<_I = unknown, _O = unknown> = { scrubNormalize(input: unknown): unknown }
+export class CachingScrubNormalizer<_I = unknown, _O = unknown> { scrubNormalize(_input: unknown): unknown { return undefined } }
 export type ScrubDefinition<_T = unknown> = { apiName: string; fields?: string[] }
 export type PiiKeyType<_T = unknown> = string | number
 export type CollectionConnectableParams = { resolvedData?: unknown[]; isDeferred?: boolean; status?: string; lastUpdated?: number; totalCount?: number; hasMore?: boolean }
