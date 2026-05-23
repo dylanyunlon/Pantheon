@@ -8,7 +8,7 @@
  */
 
 import type { Attachment } from "@shared/utils/coach-types";
-import * as Attachments from "@shared/utils/coach-types/Attachment";
+import { Attachments } from "../coach-types";
 import { coachClientContext, type CoachClient } from "../coach-client/CoachClient";
 import type { MinimalCoachClient } from "../coach-client/MinimalCoachClientContext";
 

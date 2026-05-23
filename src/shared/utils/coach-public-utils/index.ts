@@ -8,9 +8,9 @@
  */
 
 export {
-  CoachConfig as coachConfig,
-  type CoachConfig as CoachConfigOptions
+  getCoachConfig as coachConfig,
 } from './coachConfig'
+export type { CoachConfig as CoachConfigOptions } from './coachConfig'
 
 export {
   createAndFetchTempObjectSetRid as createAndFetchTempPipelineSetRid

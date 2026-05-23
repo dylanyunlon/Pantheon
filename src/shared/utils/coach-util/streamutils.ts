@@ -99,7 +99,7 @@ function startsWith(a: Uint8Array, b: Uint8Array) {
 }
 
 function combineAndParse(
-  utf8decoder: TextDecoder,
+  utf8decoder: InstanceType<typeof TextDecoder>,
   prev: Uint8Array[],
   curr: Uint8Array,
 ) {

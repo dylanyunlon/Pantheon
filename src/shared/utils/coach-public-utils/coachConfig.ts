@@ -1,3 +1,6 @@
+declare const window: any
+declare const document: any
+
 function isProduction(): boolean {
   try {
     return typeof window !== 'undefined'
@@ -8,7 +11,7 @@ function isProduction(): boolean {
   }
 }
 
-function getMetaTagContent(name: string): string {
+export function getMetaTagContent(name: string): string {
   if (typeof document === 'undefined') return ''
   const meta = document.querySelector(`meta[name="${name}"]`)
   return meta?.getAttribute('content') || ''

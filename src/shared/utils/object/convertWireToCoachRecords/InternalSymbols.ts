@@ -1,1 +1,1 @@
-export { ObjectDefRef, UnderlyingCoachRecord } from '../../coach-object/convertPipelineToCoachRecords/InternalSymbols'
+export { ObjectDefRef, UnderlyingCoachRecord, ClientRef } from '../../coach-object/convertPipelineToCoachRecords/InternalSymbols'

@@ -1,1 +1,1 @@
-export { createPipeline, getWirePipelineSet } from "../../coach-pipeline/createPipeline"
+export { createPipeline, getWirePipelineSet, isPipelineSet } from "../../coach-pipeline/createPipeline"

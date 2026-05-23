@@ -14,7 +14,7 @@
  * 
  */
 
-import type { InterfaceMetadata } from "../../../coach-types";
+import type { InterfaceMetadata, FetchedPiiFieldTypeDefinition } from "../../../coach-types";
 import type {
   DerivedPropertyDefinition,
   PipelineSet as WirePipelineSet,

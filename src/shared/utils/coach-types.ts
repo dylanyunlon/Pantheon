@@ -3,12 +3,19 @@ import type { GamePhase } from './coach-scheduler'
 import type { MatchHistoryGamesAnalysisAll } from './analysis'
 import type { RankedStats } from '@shared/types/league-client/ranked'
 
+export namespace Logger {
+  export type LogFn = (...args: unknown[]) => void
+}
+
 export interface Logger {
   info(...args: unknown[]): void
   warn(...args: unknown[]): void
   error(...args: unknown[]): void
   debug(...args: unknown[]): void
+  trace?(...args: unknown[]): void
+  fatal?(...args: unknown[]): void
   child(meta: Record<string, unknown>, extra?: Record<string, unknown>): Logger
+  level?: string
 }
 
 export interface PageResult<T> {
@@ -124,18 +131,7 @@ export type WhereClause<_Q extends ObjectOrInterfaceDefinition = any, _RDPs = {}
   $and?: WhereClause[]
   $or?: WhereClause[]
   $not?: WhereClause
-} & {
-  [field: string]: {
-    $eq?: unknown
-    $ne?: unknown
-    $gt?: unknown
-    $gte?: unknown
-    $lt?: unknown
-    $lte?: unknown
-    $in?: unknown[]
-    $contains?: string
-    $isNull?: boolean
-  } | WhereClause[] | WhereClause | undefined
+  [field: string]: unknown
 }
 
 export type PossibleWhereClauseFilters =
@@ -813,3 +809,132 @@ export type ScrubRecord<_T = unknown> = Record<string, unknown> & {
 export type NormalizedProcedure<_C = unknown> = (def: ObjectOrInterfaceDefinition | string) => PipelineSet
 
 export type MinimalCoachClient = import('./coach-client/MinimalCoachClientContext').MinimalCoachClient
+
+export type AggregationResultsWithoutGroups<_Q = any, _AC = any> = { data: unknown[]; excludedItems?: number }
+export type AggregationResultsWithGroups<_Q = any, _AC = any> = { data: Array<{ group: Record<string, unknown>; metrics: Record<string, number> }> }
+export type CoachRecordLinksObject<_Q = any> = Record<string, unknown>
+export type SingleLinkAccessor<_Q = any, _L extends string = string> = { get(): Promise<Coach.Instance | undefined> }
+
+export type PiiFieldKey<_T extends string = string, _V = unknown, _Q = unknown, _O extends unknown[] = unknown[]> = {
+  type: string
+  otherKeys: unknown[]
+  __piiFieldKey?: { value: _V; query: unknown }
+}
+export type ScrubNormalized<T = unknown> = T & { __scrubNormalized?: true }
+export type PrivacyScrub<T = unknown> = { subscribe(observer: Observer<T>): { unsubscribe(): void } }
+export type SubjectPayload<_K = unknown> = { value: unknown; status: string; lastUpdated?: number; isDeferred?: boolean }
+export type QuerySubscription<_Q = unknown> = ScrubDisposable
+export type AbstractHelper<_Q = unknown, _O = unknown> = { store: any; piiFieldKeys: any; _subscribe(...args: unknown[]): any }
+export type Query<_K = unknown, _P = unknown, _O = unknown> = {
+  piiFieldKey: PiiFieldKey
+  store: any
+  logger?: Logger
+  options: any
+  sortingStrategy: any
+  nextPageToken?: string
+  pendingFetch?: Promise<void>
+  abortController?: AbortController
+  revalidate(force: boolean): Promise<void>
+  setStatus(status: string, batch: unknown): void
+  writeToStore(...args: unknown[]): unknown
+  _updateScrubField(...args: unknown[]): void
+  createWebsocketSubscription(...args: unknown[]): void
+  getEffectiveFetchPageSize(): number
+  fetchMore(): Promise<void>
+  piiFieldKeys: PiiFieldKeys
+  apiName: string
+  scrubNormalizedWhere: unknown
+}
+export type PiiFieldKeys<_K = unknown> = { get<T = unknown>(...args: unknown[]): T; retain(k: unknown): void; release(k: unknown): void }
+export type BaseScrubFieldQuery<_K = unknown, _P = unknown, _O = unknown> = Query<_K, _P, _O> & {
+  pendingPageFetch?: Promise<void>
+  currentTotalCount?: string
+}
+export type CachingScrubNormalizer<_I = unknown, _O = unknown> = { scrubNormalize(input: unknown): unknown }
+export type ScrubDefinition<_T = unknown> = { apiName: string; fields?: string[] }
+export type PiiKeyType<_T = unknown> = string | number
+export type CollectionConnectableParams = { resolvedData?: unknown[]; isDeferred?: boolean; status?: string; lastUpdated?: number; totalCount?: number; hasMore?: boolean }
+export type BatchContext = { read(key: unknown): { value: any } | undefined; write(key: unknown, data: unknown, status: string): unknown; delete(key: unknown, status: string): unknown; changes: Changes; deferredWrite?: boolean }
+export type Changes = { modified: Set<PiiFieldKey>; deleted: Set<PiiFieldKey>; addedObjects: Map<string, unknown>; modifiedObjects: Map<string, unknown>; registerPipelineSet(k: PiiFieldKey): void; registerScrubField(k: PiiFieldKey): void; registerFunction(k: PiiFieldKey): void; registerObject?(k: unknown, v: unknown, isNew: boolean): void; deleteObject?(k: unknown): void }
+export type Entry<_K = unknown> = { value: unknown; status: string; lastUpdated?: number }
+export type ObjectPayload = { status: Status; object?: unknown; lastUpdated?: number; isDeferred?: boolean }
+export type ScrubFieldPayload = { data: unknown[]; totalCount?: number; status: string; fetchMore?: () => Promise<void>; hasMore?: boolean; resolvedScrubField?: unknown[]; isDeferred?: boolean; lastUpdated?: number; pipelineSet?: unknown }
+export type LinkPayload = { data: unknown[]; totalCount?: number; status: string; fetchMore?: () => Promise<void>; hasMore?: boolean; resolvedScrubField?: unknown[]; isDeferred?: boolean; lastUpdated?: number; linkedObjectsBySourcePrimaryKey?: unknown }
+export type FunctionPayload = { result?: unknown; status: Status }
+export type Subscription = { unsubscribe(): void; add(teardown: () => void): void; closed: boolean }
+export const Subscription: { new(): Subscription } = class { unsubscribe() {} add(_t: () => void) {} closed = false } as any
+export type ScrubDisposableWrapper = ScrubDisposable
+export const ScrubDisposableWrapper: { new(sub: Subscription): ScrubDisposable } = class { constructor(public sub: any) {} unsubscribe() { this.sub?.unsubscribe() } dispose() { this.unsubscribe() } get closed() { return this.sub?.closed ?? true } } as any
+export type SortingStrategy = { sortPiiFieldKeys(keys: unknown[], batch: unknown): unknown[] }
+export type OrderBySortingStrategy = SortingStrategy
+export const OrderBySortingStrategy: { new(...args: unknown[]): SortingStrategy } = class { sortPiiFieldKeys(k: unknown[]) { return k } } as any
+export type PivotInfo = { linkName: string; sourceType: string; sourceTypeKind: 'object' | 'interface' }
+
+export type ScrubFieldQueryOptions<_T = any> = ObserveScrubFieldOptions<_T>
+export type FunctionObserveOptions = ObserveFunctionOptions & { dependsOn?: Array<string | { apiName: string }>; $parameters?: unknown }
+export type ObserveAggregationArgs = { apiName: string; aggregate?: unknown }
+export type ObjectPiiFieldKey = PiiFieldKey & { __objectKey?: true }
+export type ScrubFieldPiiFieldKey = PiiFieldKey & { __scrubFieldKey?: true }
+export type FunctionPiiFieldKey = PiiFieldKey & { __functionKey?: true }
+export type AggregationPiiFieldKey = PiiFieldKey & { __aggregationKey?: true }
+export type MediaMetadataPiiFieldKey = PiiFieldKey & { __mediaMetadataKey?: true }
+export type SpecificLinkPiiFieldKey = PiiFieldKey & { __specificLinkKey?: true }
+export type ObjectSetPiiFieldKey = PiiFieldKey & { __objectSetKey?: true }
+export type KnownPiiFieldKey = PiiFieldKey
+
+export type WeakRefTrie<V = unknown> = { lookupArray(keys: readonly unknown[]): V | undefined }
+
+export type ObjectSetArrayScrubNormalizer = { scrubNormalize(v: unknown): ScrubNormalized<unknown[]>; scrubNormalizeUnion?(v: unknown): ScrubNormalized<unknown[]>; scrubNormalizeIntersect?(v: unknown): ScrubNormalized<unknown[]>; scrubNormalizeSubtract?(v: unknown): ScrubNormalized<unknown[]> }
+
+export type SimpleCoachProperties = { $objectType: string; $primaryKey: string; $apiName?: string; $piiFieldType?: unknown; $piiKey?: unknown; $title?: string; $rid?: string; [key: string]: unknown }
+export type InterfaceHolder<_T = unknown> = Coach.Instance
+
+export type ObjectState_Enum = 'ADDED_OR_UPDATED' | 'REMOVED'
+
+export type RefCounts<_T = unknown> = { gc(): void; has(key: unknown): boolean; register(key: unknown): void }
+
+export type CoachClient = MinimalCoachClient
+
+export type MediaMetadataObserveOptions = { apiName?: string; piiKey?: unknown; preview?: boolean }
+export type MediaMetadataPayload = { metadata?: unknown; status: string; lastUpdated?: number; isDeferred?: boolean }
+
+export function objectMatchesWhereClause(_obj: unknown, _clause: unknown, _strict?: boolean): boolean { return true }
+export function removeDuplicates<T>(arr: T[], _batch?: unknown): T[] { return arr }
+export function getWirePipelineSet(os: unknown): ObjectSet { return os as ObjectSet }
+export function isPipelineSet(_v: unknown): boolean { return false }
+export function augmentRequestContext(ctx: unknown, _fn: unknown): unknown { return ctx }
+export function resolveBaseObjectSetType(_type: unknown): unknown { return {} }
+export function createCollectionConnectable<_K = unknown, _P = unknown>(..._args: unknown[]): unknown { return {} }
+export function reloadDataAsFullObjects(_client: unknown, data: unknown[]): Promise<unknown[]> { return Promise.resolve(data) }
+export function getBulkObjectLoader(_client: unknown): { load(...args: unknown[]): Promise<unknown> } { return { load: () => Promise.resolve(undefined) } }
+export function DEBUG_ONLY__changesToString(_changes: unknown): string { return '' }
+export function DEBUG_ONLY__piiFieldKeysToString(_keys: unknown): string { return '' }
+export function getPiiFieldTypesThatInvalidate(..._args: unknown[]): Promise<{ resultType: string; invalidationSet: Set<string> }> { return Promise.resolve({ resultType: '', invalidationSet: new Set() }) }
+export function createCoachRecord(_client: unknown, _def: unknown, _props: unknown): ScrubRecord { return { $objectType: '', $primaryKey: '' } as ScrubRecord }
+export function getMediaPiiFieldKey(_loc: unknown): string { return '' }
+
+export const ObjectDefRef: unique symbol = Symbol('ObjectDefRef') as any
+export const UnderlyingCoachRecord: unique symbol = Symbol('UnderlyingCoachRecord') as any
+export const ClientRef: unique symbol = Symbol('ClientRef') as any
+
+export type DeferredBuilder = { updateObject?(value: unknown): void; deleteObject?(value: unknown): void; addLink?(source: unknown, target: unknown, linkType: string): void; deleteLink?(source: unknown, target: unknown, linkType: string): void }
+
+export namespace GeoJSON { export type Point = { type: 'Point'; coordinates: [number, number] } }
+
+export namespace Store { export type ApplyActionOptions = { mode?: string } }
+
+export namespace ObjectMetadata { export type Link = LinkDefinition }
+
+export const additionalContext: unique symbol = Symbol('additionalContext') as any
+
+export type BlobMemoryManager = { get(key: string): Blob | undefined; add(key: string, blob: Blob): void; remove(key: string): void; clear(): void; dispose(): void; createBlobUrl(key: string): string | undefined; releaseBlobUrl(key: string): void }
+
+export type ObjectHolder<_T = unknown> = Coach.Instance & { $primaryKey: string | number }
+
+export type Chalk = { red(s: string): string; green(s: string): string; blue(s: string): string; yellow(s: string): string; gray(s: string): string; cyan(s: string): string; magenta(s: string): string; redBright(s: string): string; bgRed(s: string): string; bgGreen(s: string): string; bgCyan(s: string): string; bgGray(s: string): string; bgYellow(s: string): string; bgRedBright(s: string): string }
+
+export type DerivedStatDefinition = { type: string; operation: { type: string; selectedPropertyApiName?: string }; objectSet?: ObjectSet }
+
+export type OrderBy<_T = any> = Record<string, 'asc' | 'desc' | undefined>
+
+export type ObserveObjectSetArgs<_T = unknown, _RDPs = {}> = { data: unknown[]; status: Status; hasMore: boolean; fetchMore: () => Promise<void>; totalCount?: number }
