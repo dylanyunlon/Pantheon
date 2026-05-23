@@ -17,7 +17,7 @@
 import type {
   CompileTimeMetadata,
   ObjectOrInterfaceDefinition,
-} from "../../../../../coach-types";
+} from "../../../coach-types";
 import type { SpecificLinkPayload } from "../../LinkPayload";
 
 import type { Observer } from "../../PrivacyScrubClient/common";

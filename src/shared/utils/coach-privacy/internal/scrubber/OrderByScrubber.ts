@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PiiFieldTypeDefinition } from "../../../../coach-types";
+import type { PiiFieldTypeDefinition } from "../../../coach-types";
 import type { OrderBy } from "../PrivacyScrubClient";
 import type { ScrubNormalized } from "./ScrubNormalized";
 import { WeakRefTrie } from "./WeakRefTrie";

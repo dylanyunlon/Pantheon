@@ -1,0 +1,1 @@
+export class RefCounts { private counts = new Map<unknown, number>(); retain(k: unknown) { this.counts.set(k, (this.counts.get(k) ?? 0) + 1) }; release(k: unknown) { const c = (this.counts.get(k) ?? 0) - 1; if (c <= 0) this.counts.delete(k); else this.counts.set(k, c) } }

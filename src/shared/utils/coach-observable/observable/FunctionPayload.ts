@@ -14,7 +14,7 @@
  * 
  */
 
-import type { CompileTimeMetadata, QueryDefinition } from "../../../coach-types";
+import type { CompileTimeMetadata, QueryDefinition } from "../../coach-types";
 import type { QueryReturnType } from "../queries/types";
 import type { Status } from "./ObservableClient/common";
 

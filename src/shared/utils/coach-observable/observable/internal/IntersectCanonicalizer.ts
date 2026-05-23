@@ -18,7 +18,7 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 import type { Canonical } from "./Canonical";
 import { CachingCanonicalizer } from "./Canonicalizer";
 import type { SimpleWhereClause } from "./SimpleWhereClause";

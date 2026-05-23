@@ -21,8 +21,8 @@ import type {
   ObjectTypeDefinition,
   Coach,
   WhereClause,
-} from "../../../../../coach-types";
-// import { additionalContext } from "../../../coach-engine";
+} from "../../../../coach-types";
+import { additionalContext } from "../../../coach-engine";
 import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
 import type { Changes } from "../Changes";

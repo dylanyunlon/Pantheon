@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectMetadata, PropertyValueFormattingRule } from "../../../coach-types";
+import type { ObjectMetadata, PropertyValueFormattingRule } from "../../coach-types";
 import type { SimpleCoachProperties } from "../SimpleCoachProperties";
 import { formatBoolean } from "./formatBoolean";
 import { formatDateTime } from "./formatDateTime";

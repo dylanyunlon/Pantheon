@@ -20,7 +20,7 @@ import type {
   SelectArg,
   SingleLinkAccessor,
   WhereClause,
-} from "../../../coach-types";
+} from "../../coach-types";
 import { getWirePipelineSet } from "../../coach-pipeline/createPipeline";
 import { fetchSingle, fetchSingleWithErrors } from "../fetchSingle";
 import type { InterfaceHolder } from "./InterfaceHolder";

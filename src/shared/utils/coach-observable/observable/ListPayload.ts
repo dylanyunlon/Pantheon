@@ -14,7 +14,7 @@
  * 
  */
 
-import type { WirePropertyTypes } from "../../../coach-types";
+import type { WirePropertyTypes } from "../../coach-types";
 import type { InterfaceHolder } from "../object/convertWireToCoachRecords/InterfaceHolder";
 import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder";
 import type { ObserveObjectsCallbackArgs } from "./ObservableClient";

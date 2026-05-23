@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, WhereClause } from "../../../../../coach-types";
+import type { ObjectTypeDefinition, WhereClause } from "../../../../coach-types";
 import type { OrderBy } from "../../ObservableClient";
 import type { Canonical } from "../Canonical";
 import type { ListCacheKey } from "../list/ListCacheKey";

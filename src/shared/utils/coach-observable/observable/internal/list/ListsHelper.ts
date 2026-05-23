@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "../../../../../coach-types";
+import type { ObjectOrInterfaceDefinition } from "../../../../coach-types";
 import type { ListPayload } from "../../ListPayload";
 import type { ObserveListOptions } from "../../ObservableClient";
 import type { Observer } from "../../ObservableClient/common";

@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Logger } from "../../../../coach-types";
+import type { Logger } from "../../../coach-types";
 import { BehaviorSubject } from "rxjs";
 import { createInitEntry } from "./createInitEntry";
 import type { KnownCacheKey } from "./KnownCacheKey";

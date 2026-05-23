@@ -19,7 +19,7 @@ import type {
   ObjectTypeDefinition,
   Coach,
   PageResult,
-} from "../../../../../coach-types";
+} from "../../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import type { Connectable, Observable, Subscription } from "rxjs";
 import type {

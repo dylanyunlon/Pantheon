@@ -24,10 +24,10 @@ import type {
   PageResult,
   PropertyKeys,
   WhereClause,
-} from "../../../../../coach-types";
+} from "../../../coach-types";
 import type { PrivacyScrub, Subscription } from "rxjs";
 import invariant from "tiny-invariant";
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import type {
   ScrubRecord,

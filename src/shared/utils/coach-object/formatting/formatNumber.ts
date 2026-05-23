@@ -25,7 +25,7 @@ import type {
   NumberRatioType,
   NumberScaleType,
   PropertyNumberFormattingRuleType,
-} from "../../../coach-types";
+} from "../../coach-types";
 import type { SimpleCoachProperties } from "../SimpleCoachProperties";
 import { resolvePropertyReference } from "./propertyFormattingUtils";
 

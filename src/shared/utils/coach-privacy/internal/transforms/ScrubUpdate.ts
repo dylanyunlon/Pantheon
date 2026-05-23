@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PiiFieldTypeDefinition, PrivacyConfig, PropertyKeys } from "../../../../../coach-types";
+import type { PiiFieldTypeDefinition, PrivacyConfig, PropertyKeys } from "../../../coach-types";
 
 /**
  * Represents an update to an object in a websocket subscription.

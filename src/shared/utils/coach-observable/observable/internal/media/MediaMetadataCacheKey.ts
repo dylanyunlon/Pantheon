@@ -18,7 +18,7 @@ import type {
   MediaMetadata,
   ObjectTypeDefinition,
   PrimaryKeyType,
-} from "../../../../../coach-types";
+} from "../../../../coach-types";
 import type { CacheKey } from "../CacheKey";
 import type { MediaMetadataQuery } from "./MediaMetadataQuery";
 

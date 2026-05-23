@@ -14,9 +14,9 @@
  * 
  */
 
-import type { Attachment, Media, MediaMetadata } from "../../../../../coach-types";
-import * as OntologiesV2 from "../../../../../coach-types";
-// import { additionalContext } from "../../../coach-engine";
+import type { Attachment, Media, MediaMetadata } from "../../../../coach-types";
+import * as OntologiesV2 from "../../../../coach-types";
+import { additionalContext } from "../../../coach-engine";
 import type { Observer } from "../../ObservableClient/common";
 import type { MediaPropertyLocation } from "../../ObservableClient/MediaTypes";
 import { AbstractHelper } from "../AbstractHelper";

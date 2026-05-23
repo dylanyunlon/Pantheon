@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, CoachBase } from "../../../coach-types";
+import type { ObjectOrInterfaceDefinition, CoachBase } from "../../coach-types";
 import {
   type FetchedObjectTypeDefinition,
   InterfaceDefinitions,

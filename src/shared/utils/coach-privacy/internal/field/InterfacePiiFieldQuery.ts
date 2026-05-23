@@ -22,7 +22,7 @@ import type {
   PiiFieldTypeDefinition,
   PrivacyConfig,
   WhereClause,
-} from "../../../../../coach-types";
+} from "../../../coach-types";
 function groupBy<T>(
   arr: T[],
   fn: (item: T) => string,
@@ -35,7 +35,7 @@ function groupBy<T>(
   return result;
 }
 import invariant from "tiny-invariant";
-import { type Client } from "../../../coach-engine";
+import { additionalContext, type Client } from "../../../coach-engine";
 import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import { ObjectDefRef } from "../../../object/convertWireToCoachRecords/InternalSymbols";
 import type { ScrubRecord } from "../../../object/convertWireToCoachRecords/ScrubRecord";

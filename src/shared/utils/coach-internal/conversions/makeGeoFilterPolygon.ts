@@ -17,7 +17,7 @@
 import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
-} from "../../../coach-types";
+} from "../../coach-types";
 import type { Position } from "geojson";
 
 export function makeGeoFilterPolygon(

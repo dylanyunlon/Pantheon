@@ -19,10 +19,10 @@ import type {
   InterfaceDefinition,
   PiiFieldTypeDefinition,
   PiiKeyType,
-} from "../../../../../coach-types";
+} from "../../../coach-types";
 import type { Connectable, PrivacyScrub, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type { ScrubRecord } from "../../../object/convertWireToCoachRecords/ScrubRecord";
 import type { DefType } from "../../../util/interfaceUtils";
 import type { ObjectPayload } from "../../ObjectPayload";

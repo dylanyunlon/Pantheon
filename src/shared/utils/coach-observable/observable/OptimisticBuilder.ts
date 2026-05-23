@@ -19,7 +19,7 @@ import type {
   ObjectTypeDefinition,
   Coach,
   PrimaryKeyType,
-} from "../../../coach-types";
+} from "../../coach-types";
 
 export interface OptimisticBuilder {
   updateObject: <T extends ObjectTypeDefinition>(

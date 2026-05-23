@@ -29,10 +29,10 @@ import type {
   SimplePropertyDef,
   WhereClause,
   WirePropertyTypes,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 import { Subscription } from "rxjs";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";
-// import { additionalContext } from "../../coach-engine";
+import { additionalContext } from "../../coach-engine";
 import {
   getWirePipelineSet,
   isPipelineSet,

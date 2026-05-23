@@ -32,10 +32,10 @@ import type {
   SimplePropertyDef,
   WhereClause,
   WirePropertyTypes,
-} from "../../../coach-types";
-import { createFetchHeaderMutator } from "../../../coach-types";
+} from "../../coach-types";
+import { createFetchHeaderMutator } from "../../coach-types";
 import type { ActionSignatureFromDef } from "../actions/applyAction";
-import { type Client } from "../coach-engine";
+import { additionalContext, type Client } from "../coach-engine";
 import { createClientFromContext } from "../createClient";
 import type { QueryReturnType } from "../queries/types";
 import { OBSERVABLE_USER_AGENT } from "../util/UserAgent";

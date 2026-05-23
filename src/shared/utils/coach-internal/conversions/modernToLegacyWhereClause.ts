@@ -22,12 +22,12 @@ import type {
   PossibleWhereClauseFilters,
   SimplePropertyDef,
   WhereClause,
-} from "../../../coach-types";
+} from "../../coach-types";
 
 import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
-} from "../../../coach-types";
+} from "../../coach-types";
 import invariant from "tiny-invariant";
 import { fullyQualifyPropName } from "./fullyQualifyPropName";
 import { makeGeoFilterIntersects } from "./makeGeoFilterIntersects";

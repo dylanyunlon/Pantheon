@@ -14,10 +14,10 @@
  * 
  */
 
-import type { QueryDefinition } from "../../../../../coach-types";
+import type { QueryDefinition } from "../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type { MinimalClient } from "../../../MinimalClientContext";
 import { applyQuery } from "../../../queries/applyQuery";
 import type { FunctionPayload } from "../../FunctionPayload";

@@ -23,10 +23,10 @@ import type {
   PrivacyConfig,
   PiiKeyType,
   ScrubDefinition,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 import invariant from "tiny-invariant";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";
-import { type Client } from "../../coach-engine";
+import { additionalContext, type Client } from "../../coach-engine";
 import { DEBUG_REFCOUNTS } from "../DebugFlags";
 import type { CacheEntry, CacheSnapshot } from "../PrivacyScrubClient";
 import type { DeferredBuilder } from "../DeferredBuilder";

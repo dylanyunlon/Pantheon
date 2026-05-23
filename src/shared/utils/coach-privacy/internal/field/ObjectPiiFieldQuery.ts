@@ -21,8 +21,8 @@ import type {
   PiiFieldTypeDefinition,
   PrivacyConfig,
   WhereClause,
-} from "../../../../../coach-types";
-// import { additionalContext } from "../../../coach-engine";
+} from "../../../coach-types";
+import { additionalContext } from "../../../coach-engine";
 import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import type { ScrubRecord } from "../../../object/convertWireToCoachRecords/ScrubRecord";
 import type { Changes } from "../Changes";

@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Logger } from "../../../../coach-types";
+import type { Logger } from "../../../coach-types";
 import type {
   Connectable,
   Observable,
@@ -22,7 +22,7 @@ import type {
   Subscribable,
   Subscription,
 } from "rxjs";
-// import { additionalContext } from "../../coach-engine";
+import { additionalContext } from "../../coach-engine";
 import type {
   CommonObserveOptions,
   Status,

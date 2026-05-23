@@ -45,8 +45,8 @@ import type {
   VideoToImageOperation,
   VideoToTextOperation,
   VlmPreprocessingConfig,
-} from "../../../coach-types";
-import type { Transformation } from "../../../coach-types";
+} from "../../coach-types";
+import type { Transformation } from "../../coach-types";
 
 export function makeMediaTransformation(
   transformation: MediaTransformation,

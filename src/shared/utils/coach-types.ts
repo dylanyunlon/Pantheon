@@ -8,7 +8,7 @@ export interface Logger {
   warn(...args: unknown[]): void
   error(...args: unknown[]): void
   debug(...args: unknown[]): void
-  child(meta: Record<string, unknown>): Logger
+  child(meta: Record<string, unknown>, extra?: Record<string, unknown>): Logger
 }
 
 export interface PageResult<T> {
@@ -19,7 +19,6 @@ export interface PageResult<T> {
 
 export type PageSize = number
 export type PageToken = string
-export type PrimaryKeyType = string
 
 export interface ObjectTypeDefinition {
   apiName: string
@@ -80,7 +79,6 @@ export interface CompileTimeMetadata<T = unknown> {
   definition: T
 }
 
-export type Coach = CoachAdvice
 
 export interface CoachRecordBase {
   $objectType: string
@@ -323,13 +321,9 @@ export const MediaSets = {
   getUrl: (_client: unknown, _ref: MediaReference) => ''
 }
 
-export type CoachBase = CoachRecordBase
 
-export type MinimalPipelineSet = MinimalObjectSet
 
-export type PipelineSet = ObjectSet
 
-export type WirePipelineSet = ObjectSet
 
 export type PrimaryKeyTypes = string | number
 
@@ -367,3 +361,204 @@ export interface GameStateObjectV2 {
   __rid?: string
   [key: string]: unknown
 }
+
+
+export type InterfaceDefinition = ObjectOrInterfaceDefinition & { type: 'interface' }
+
+export type PiiFieldTypeDefinition = ObjectOrInterfaceDefinition
+export type PiiKeyType = string | number
+export type PrivacyConfig = { enabled: boolean; rules: Record<string, unknown> }
+export type ScrubDefinition = { apiName: string; fields: string[] }
+
+export type AsyncIterArgs<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
+  $pageSize?: number
+  $select?: PropertyKeys<Q>[]
+}
+
+export type Augments = Record<string, unknown>
+
+export type FetchPageResult<T> = PageResult<T>
+
+export type LinkedType<Q extends ObjectOrInterfaceDefinition, _L extends string = string> = ObjectOrInterfaceDefinition & { __source: Q }
+
+export type LinkNames<Q extends ObjectOrInterfaceDefinition> = string & { __linkOf: Q }
+
+export type LinkTypeApiNamesFor<Q extends ObjectOrInterfaceDefinition> = string & { __linkTypeOf: Q }
+
+export type MinimalDirectedObjectLinkInstance = {
+  sourceObjectApiName: string
+  sourcePrimaryKey: string
+  targetObjectApiName: string
+  targetPrimaryKey: string
+  linkTypeApiName: string
+}
+
+export type NullabilityAdherence = 'strict' | 'loose'
+
+export type ObjectSetArgs<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
+  $pageSize?: number
+  $select?: PropertyKeys<Q>[]
+  $where?: WhereClause
+}
+
+export type ObjectSetSubscription = {
+  unsubscribe(): void
+}
+
+export type Result<T> = { type: 'ok'; value: T } | { type: 'err'; error: unknown }
+
+export type SelectArg<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = PropertyKeys<Q>[]
+
+export type SingleOsdkResult<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = Coach.Instance<Q> | undefined
+
+export type PropertyApiName<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = PropertyKeys<Q>
+
+export type FetchLinksPageResult<T = unknown> = PageResult<T> & { sourceApiName: string }
+
+export type ObjectIdentifiers<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
+  readonly $apiName: Q['apiName']
+  readonly $primaryKey: PrimaryKeyType<Q>
+}
+
+export type LoadObjectSetLinksResponseV2 = {
+  data: MinimalDirectedObjectLinkInstance[]
+  nextPageToken?: string
+}
+
+export type ObjectSetStreamSubscribeRequest = {
+  objectSetRid: string
+  objectTypes: string[]
+}
+
+export type ObjectSetStreamSubscribeRequests = ObjectSetStreamSubscribeRequest[]
+
+export type ObjectSetSubscribeResponses = {
+  subscriptionId: string
+}
+
+export type ObjectSetUpdates = {
+  type: 'objectAdded' | 'objectModified' | 'objectRemoved'
+  objectType: string
+  primaryKey: string
+  properties?: Record<string, unknown>
+}
+
+export type ObjectState = {
+  objectType: string
+  primaryKey: string
+  properties: Record<string, unknown>
+}
+
+export type RefreshPipelineSet = WirePipelineSet & { refresh: boolean }
+
+export type StreamMessage =
+  | { type: 'subscribeResponses'; data: ObjectSetSubscribeResponses }
+  | { type: 'objectSetUpdates'; data: ObjectSetUpdates }
+  | { type: 'refreshObjectSet'; data: RefreshPipelineSet }
+  | { type: 'subscriptionClosed'; data: SubscriptionClosed }
+
+export type SubscriptionClosed = {
+  subscriptionId: string
+  reason: string
+}
+
+export type DataValueClientToWire<T = unknown> = T
+export type DataValueWireToClient<T = unknown> = T
+
+export type InterfaceQueryDataType = QueryDataTypeDefinition & { interface: string }
+export type ObjectQueryDataType = QueryDataTypeDefinition & { object: string }
+export type ObjectSetQueryDataType = QueryDataTypeDefinition & { objectSet: string }
+
+export type QueryParam<T = unknown> = T
+export type QueryResult<T = unknown> = T
+
+export type AllowedBucketKeyTypes = string | number | boolean
+export type AllowedBucketTypes = string | number | boolean | Date
+
+export type QueryMetadata = {
+  apiName: string
+  displayName?: string
+  description?: string
+  parameters: Record<string, ParameterDefinition>
+  output: QueryDataTypeDefinition
+}
+
+export type QueryParameterDefinition = ParameterDefinition
+
+export class MediaTransformationFailedError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'MediaTransformationFailedError'
+  }
+}
+
+export class MediaTransformationTimeoutError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'MediaTransformationTimeoutError'
+  }
+}
+
+export type ObjectSpecifier<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = {
+  objectTypeApiName: Q['apiName']
+  primaryKeyValue: PrimaryKeyType<Q>
+}
+
+export type ActionParam<T = unknown> = T
+
+export type PrimaryKeyType<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = string | number
+
+export type CoachBase<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = ObjectIdentifiers<Q> & {
+  readonly $objectType: string
+  readonly $title?: string
+}
+
+export type PipelineSet<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = ObjectSet & {
+  readonly __objectType?: Q
+  aggregate(...args: unknown[]): Promise<unknown>
+  fetchPage(args?: unknown): Promise<PageResult<Coach.Instance<Q>>>
+  fetchPageWithErrors(args?: unknown): Promise<Result<PageResult<Coach.Instance<Q>>>>
+  fetchOne(pk: PrimaryKeyType<Q>): Promise<Coach.Instance<Q>>
+  fetchOneWithErrors(pk: PrimaryKeyType<Q>): Promise<Result<Coach.Instance<Q>>>
+  where(clause: WhereClause | unknown): PipelineSet<Q>
+  union(other: PipelineSet<Q>): PipelineSet<Q>
+  intersect(other: PipelineSet<Q>): PipelineSet<Q>
+  subtract(other: PipelineSet<Q>): PipelineSet<Q>
+}
+
+export type MinimalPipelineSet<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = PipelineSet<Q>
+
+export type WirePipelineSet = ObjectSet
+
+export namespace Coach {
+  export type Instance<
+    Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition,
+    _N = never,
+    _P extends string = string,
+    _E = {}
+  > = CoachRecordBase & {
+    readonly $objectType: string
+    readonly $primaryKey: string
+    readonly $apiName: string
+    $as(apiName: string): Coach.Instance<Q>
+    [key: string]: unknown
+  }
+}
+
+export type MediaReferenceProperties = {
+  getMediaMetadata(client: unknown, ref: MediaReference): Promise<MediaMetadata>
+  getMediaContent(client: unknown, ref: MediaReference): Promise<Blob>
+}
+
+export const MediaReferenceProperties: MediaReferenceProperties = {
+  async getMediaMetadata(_client: unknown, _ref: MediaReference): Promise<MediaMetadata> {
+    return { path: '', sizeBytes: 0, mediaType: '', updatedAt: '' }
+  },
+  async getMediaContent(_client: unknown, _ref: MediaReference): Promise<Blob> {
+    return new Blob()
+  },
+}
+
+export type TimeSeriesPropertiesV2 = Record<string, unknown>
+export type TimeSeriesValueBankProperties = Record<string, unknown>
+export type CoreMediaReference = MediaReference

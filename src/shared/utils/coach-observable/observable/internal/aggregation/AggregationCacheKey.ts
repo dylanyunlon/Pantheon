@@ -18,7 +18,7 @@ import type {
   AggregateOpts,
   AggregationsResults,
   ObjectOrInterfaceDefinition,
-} from "../../../../../coach-types";
+} from "../../../../coach-types";
 import type { CacheKey } from "../CacheKey";
 import type { Canonical } from "../Canonical";
 import type { Rdp } from "../RdpCanonicalizer";

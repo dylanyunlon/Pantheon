@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, Coach } from "../../../coach-types";
+import type { ObjectTypeDefinition, Coach } from "../../coach-types";
 import type { ObjectHolder } from "../object/convertWireToCoachRecords/ObjectHolder";
 import type { ObserveObjectCallbackArgs } from "./ObservableClient";
 

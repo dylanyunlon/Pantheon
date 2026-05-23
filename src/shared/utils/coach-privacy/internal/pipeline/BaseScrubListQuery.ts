@@ -19,7 +19,7 @@ import type {
   PiiFieldTypeDefinition,
   PrivacyConfig,
   PageResult,
-} from "../../../../../coach-types";
+} from "../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import type { Connectable, PrivacyScrub, Subscription } from "rxjs";
 import type {

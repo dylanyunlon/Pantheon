@@ -18,11 +18,11 @@ import type {
   InterfaceDefinition,
   Logger,
   ObjectTypeDefinition,
-} from "../../../../coach-types";
-import { dylanyunlonApiError } from "../../../../coach-types";
+} from "../../../coach-types";
+import { dylanyunlonApiError } from "../../../coach-types";
 import type { DeferredPromise } from "p-defer";
 import pDefer from "p-defer";
-import { type Client } from "../../coach-engine";
+import { additionalContext, type Client } from "../../coach-engine";
 import type {
   ObjectHolder,
 } from "../../coach-object/convertWireToCoachRecords/ObjectHolder";

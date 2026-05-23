@@ -14,7 +14,7 @@
  * 
  */
 
-import type { InterfaceMetadata, ObjectMetadata, Coach } from "../../../coach-types";
+import type { InterfaceMetadata, ObjectMetadata, Coach } from "../../coach-types";
 import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter";
 import type { BaseHolder } from "./BaseHolder";
 import type { InterfaceDefRef } from "./InternalSymbols";

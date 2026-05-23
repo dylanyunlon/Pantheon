@@ -18,7 +18,7 @@ import type {
   AggregateOpts,
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
-} from "../../../../../coach-types";
+} from "../../../../coach-types";
 import { getWirePipelineSet } from "../../../pipelineSet/createPipeline";
 import type {
   ObserveAggregationOptions,

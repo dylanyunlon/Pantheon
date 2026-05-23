@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition } from "../../../../coach-types";
+import type { ObjectTypeDefinition } from "../../../coach-types";
 import type { OrderBy } from "../ObservableClient";
 import type { Canonical } from "./Canonical";
 import { WeakRefTrie } from "./WeakRefTrie";

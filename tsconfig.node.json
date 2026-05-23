@@ -17,6 +17,7 @@
       "@shared/*": ["src/shared/*"],
       "@main/*": ["src/main/*"]
     },
+    "typeRoots": ["src/shared/utils/coach-stubs", "node_modules/@types"],
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "strictPropertyInitialization": false,

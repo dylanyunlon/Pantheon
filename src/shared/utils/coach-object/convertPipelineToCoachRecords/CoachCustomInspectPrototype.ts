@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, Coach } from "../../../coach-types";
+import type { ObjectOrInterfaceDefinition, Coach } from "../../coach-types";
 import type { inspect, InspectOptionsStylized } from "node:util";
 import type { HolderBase } from "./InternalSymbols";
 import {

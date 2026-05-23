@@ -21,7 +21,7 @@ import type {
   Coach,
   PrimaryKeyType,
   WhereClause,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 import type { Unsubscribable } from "../Unsubscribable";
 import type {
   CommonObserveOptions,

@@ -19,7 +19,7 @@ import type {
   ObjectOrInterfaceDefinition,
   ObjectSpecifier,
   PropertySecurity,
-} from "../../../coach-types";
+} from "../../coach-types";
 import type { FormatPropertyOptions } from "../formatting/applyPropertyFormatter";
 import type { InterfaceHolder } from "./InterfaceHolder";
 import type {

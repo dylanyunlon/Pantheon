@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PiiFieldTypeDefinition, PiiKeyType } from "../../../../../coach-types";
+import type { PiiFieldTypeDefinition, PiiKeyType } from "../../../coach-types";
 import type { CollectionStorageData } from "../base-scrubField/BaseCollectionQuery";
 import type { PiiFieldKey } from "../PiiFieldKey";
 import type { ScrubNormalized } from "../ScrubNormalized";

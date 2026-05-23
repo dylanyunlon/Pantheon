@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "../../../../../coach-types";
+import type { ObjectOrInterfaceDefinition } from "../../../coach-types";
 import type { ScrubFieldPayload } from "../../ScrubFieldPayload";
 import type { ObserveScrubFieldOptions } from "../../PrivacyScrubClient";
 import type { Observer } from "../../PrivacyScrubClient/common";

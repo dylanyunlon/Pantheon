@@ -14,15 +14,15 @@
  * 
  */
 
-import type { PropertySecurity } from "../../../coach-types";
-import type { MediaReference } from "../../../coach-types";
+import type { PropertySecurity } from "../../coach-types";
+import type { MediaReference } from "../../coach-types";
 import type {
   Attachment,
   PropertySecurities,
   PropertySecurity as WirePropertySecurity,
   ReferenceValue,
   SecuredPropertyValue,
-} from "../../../coach-types";
+} from "../../coach-types";
 import invariant from "tiny-invariant";
 import { GeotimeSeriesPropertyImpl } from "../../createGeotimeSeriesProperty";
 import { MediaReferencePropertyImpl } from "../../createMediaReferenceProperty";

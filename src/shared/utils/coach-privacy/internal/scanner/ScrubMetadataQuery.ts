@@ -18,8 +18,8 @@ import type {
   MediaMetadata,
   PiiFieldTypeDefinition,
   PiiKeyType,
-} from "../../../../../coach-types";
-import * as OntologiesV2 from "../../../../../coach-types";
+} from "../../../coach-types";
+import * as OntologiesV2 from "../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import {
   BehaviorSubject,
@@ -29,7 +29,7 @@ import {
   type PrivacyScrub,
   type Subject,
 } from "rxjs";
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type { Status } from "../../PrivacyScrubClient/common";
 import type {
   MediaMetadataObserveOptions,

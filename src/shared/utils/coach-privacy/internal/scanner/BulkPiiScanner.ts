@@ -18,11 +18,11 @@ import type {
   InterfaceDefinition,
   Logger,
   PiiFieldTypeDefinition,
-} from "../../../../coach-types";
-import { dylanyunlonApiError } from "../../../../coach-types";
+} from "../../../coach-types";
+import { dylanyunlonApiError } from "../../../coach-types";
 import type { DeferredPromise } from "p-defer";
 import pDefer from "p-defer";
-import { type Client } from "../../coach-engine";
+import { additionalContext, type Client } from "../../coach-engine";
 import type {
   ScrubRecord,
 } from "../../coach-object/convertWireToCoachRecords/ScrubRecord";

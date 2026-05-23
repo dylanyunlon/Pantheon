@@ -14,7 +14,7 @@
  * 
  */
 
-import type { Coach } from "../../../coach-types";
+import type { Coach } from "../../coach-types";
 import type { MinimalClient } from "../../MinimalClientContext";
 import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
 import type { BaseHolder } from "./BaseHolder";

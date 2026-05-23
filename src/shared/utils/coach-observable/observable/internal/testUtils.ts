@@ -26,7 +26,7 @@ import type {
   CoachBase,
   PageResult,
   WhereClause,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 import { Chalk } from "chalk";
 import { inspect } from "node:util";
 import type { DeferredPromise } from "p-defer";
@@ -37,7 +37,7 @@ import type { Mock, MockedObject } from "vitest";
 import { afterEach, beforeEach, expect, vi, vitest } from "vitest";
 import type { ActionSignatureFromDef } from "../../coach-actions/applyAction";
 import type { Client } from "../../coach-engine";
-// import { additionalContext } from "../../coach-engine";
+import { additionalContext } from "../../coach-engine";
 import type { ObjectHolder } from "../../coach-object/convertWireToCoachRecords/ObjectHolder";
 import type { SpecificLinkPayload } from "../LinkPayload";
 import type { ListPayload } from "../ListPayload";

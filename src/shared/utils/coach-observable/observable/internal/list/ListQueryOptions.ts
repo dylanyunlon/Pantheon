@@ -18,7 +18,7 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "../../../../../coach-types";
+} from "../../../../coach-types";
 import type { CommonObserveOptions } from "../../ObservableClient/common";
 
 export interface ListQueryOptions<

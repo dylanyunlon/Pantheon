@@ -22,7 +22,7 @@ import type {
   PropertyKeys,
   WhereClause,
   WirePropertyTypes,
-} from "../../../../../coach-types";
+} from "../../../../coach-types";
 import type { CommonObserveOptions } from "../../ObservableClient/common";
 
 export interface ObserveObjectSetOptions<

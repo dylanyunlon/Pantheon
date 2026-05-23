@@ -1765,3 +1765,27 @@ export class CoachEngine {
 export function createCoachEngine(schedulerConfig?: Partial<SchedulerConfig>): CoachEngine {
   return new CoachEngine(schedulerConfig)
 }
+
+export const additionalContext: unique symbol = Symbol("additionalContext")
+
+export interface Client {
+  <Q extends import('./coach-types').ObjectOrInterfaceDefinition>(
+    o: Q,
+  ): import('./coach-types').PipelineSet<Q>
+
+  fetchMetadata(o: unknown): Promise<unknown>
+
+  [additionalContext]: {
+    baseUrl: string
+    tokenProvider: () => Promise<string>
+    fetch: typeof globalThis.fetch
+    gameStateRid: string | Promise<string>
+    gameStateProvider: unknown
+    logger?: import('./coach-types').Logger
+    branch?: string
+    objectFactory: (...args: unknown[]) => unknown
+    narrowTypeInterfaceOrObjectMapping: Record<string, 'pipeline' | 'interface'>
+  }
+
+  branch?: string
+}

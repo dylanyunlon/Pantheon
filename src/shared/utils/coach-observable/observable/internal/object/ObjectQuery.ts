@@ -19,10 +19,10 @@ import type {
   InterfaceDefinition,
   ObjectTypeDefinition,
   PrimaryKeyType,
-} from "../../../../../coach-types";
+} from "../../../../coach-types";
 import type { Connectable, Observable, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
 import type { DefType } from "../../../util/interfaceUtils";
 import type { ObjectPayload } from "../../ObjectPayload";

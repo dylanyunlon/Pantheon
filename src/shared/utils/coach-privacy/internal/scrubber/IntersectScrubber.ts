@@ -18,7 +18,7 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 import type { ScrubNormalized } from "./ScrubNormalized";
 import { CachingScrubNormalizer } from "./ScrubNormalizer";
 import type { SimpleWhereClause } from "./SimpleWhereClause";

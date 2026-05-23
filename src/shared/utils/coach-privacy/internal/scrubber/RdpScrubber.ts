@@ -18,8 +18,8 @@ import type {
   DerivedProperty,
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
-} from "../../../../coach-types";
-import type { DerivedPropertyDefinition } from "../../../../coach-types";
+} from "../../../coach-types";
+import type { DerivedPropertyDefinition } from "../../../coach-types";
 import { createWithPropertiesPipelineSet } from "../../derivedProperties/createWithPropertiesPipelineSet";
 import type { ScrubNormalized } from "./ScrubNormalized";
 import { CachingScrubNormalizer } from "./ScrubNormalizer";

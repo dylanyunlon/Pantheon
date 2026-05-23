@@ -14,10 +14,10 @@
  * 
  */
 
-import type { PipelineSet, PrivacyConfig, PageResult } from "../../../../../coach-types";
-import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
+import type { PipelineSet, PrivacyConfig, PageResult } from "../../../coach-types";
+import type { PipelineSet as WirePipelineSet } from "../../../coach-types";
 import type { PrivacyScrub, Subscription } from "rxjs";
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type { InterfaceHolder } from "../../../object/convertWireToCoachRecords/InterfaceHolder";
 import type { ScrubRecord } from "../../../object/convertWireToCoachRecords/ScrubRecord";
 import { getWirePipelineSet } from "../../../pipelineSet/createPipeline";

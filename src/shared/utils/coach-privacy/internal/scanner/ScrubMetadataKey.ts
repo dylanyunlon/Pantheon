@@ -18,7 +18,7 @@ import type {
   MediaMetadata,
   PiiFieldTypeDefinition,
   PiiKeyType,
-} from "../../../../../coach-types";
+} from "../../../coach-types";
 import type { PiiFieldKey } from "../PiiFieldKey";
 import type { MediaMetadataQuery } from "./MediaMetadataQuery";
 

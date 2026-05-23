@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
+import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../coach-types";
 import type { CollectionStorageData } from "../base-list/BaseCollectionQuery";
 import type { CacheKey } from "../CacheKey";
 import type { Canonical } from "../Canonical";

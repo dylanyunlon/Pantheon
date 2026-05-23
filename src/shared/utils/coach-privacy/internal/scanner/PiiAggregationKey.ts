@@ -18,7 +18,7 @@ import type {
   AggregateOpts,
   AggregationsResults,
   ObjectOrInterfaceDefinition,
-} from "../../../../../coach-types";
+} from "../../../coach-types";
 import type { PiiFieldKey } from "../PiiFieldKey";
 import type { ScrubNormalized } from "../ScrubNormalized";
 import type { Rdp } from "../RdpScrubNormalizer";

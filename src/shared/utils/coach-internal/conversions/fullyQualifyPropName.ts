@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition } from "../../../coach-types";
+import type { ObjectOrInterfaceDefinition } from "../../coach-types";
 import { extractNamespace } from "./extractNamespace";
 
 export function fullyQualifyPropName(

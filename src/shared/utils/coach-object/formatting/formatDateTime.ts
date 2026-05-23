@@ -18,8 +18,8 @@ import type {
   DatetimeFormat,
   DatetimeLocalizedFormat,
   DatetimeTimezone,
-} from "../../../coach-types";
-import type { DatetimeLocalizedFormatType } from "../../../coach-types";
+} from "../../coach-types";
+import type { DatetimeLocalizedFormatType } from "../../coach-types";
 import type { SimpleCoachProperties } from "../SimpleCoachProperties";
 import { resolvePropertyReference } from "./propertyFormattingUtils";
 

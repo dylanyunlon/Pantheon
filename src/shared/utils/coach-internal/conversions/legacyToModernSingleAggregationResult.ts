@@ -18,8 +18,8 @@ import type {
   AggregationClause,
   AggregationResultsWithoutGroups,
   ObjectOrInterfaceDefinition,
-} from "../../../coach-types";
-import type { AggregateObjectsResponseV2 } from "../../../coach-types";
+} from "../../coach-types";
+import type { AggregateObjectsResponseV2 } from "../../coach-types";
 import type { ArrayElement } from "../../coach-util/ArrayElement";
 import { splitAggregationKey } from "./modernToLegacyAggregationClause";
 

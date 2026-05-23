@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PossibleWhereClauseFilters } from "../../../../coach-types";
+import type { PossibleWhereClauseFilters } from "../../../coach-types";
 import invariant from "tiny-invariant";
 
 /**

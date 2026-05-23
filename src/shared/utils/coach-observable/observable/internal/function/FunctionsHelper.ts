@@ -14,7 +14,7 @@
  * 
  */
 
-import type { QueryDefinition } from "../../../../../coach-types";
+import type { QueryDefinition } from "../../../../coach-types";
 import type { FunctionPayload } from "../../FunctionPayload";
 import type { Observer } from "../../ObservableClient/common";
 import { AbstractHelper } from "../AbstractHelper";

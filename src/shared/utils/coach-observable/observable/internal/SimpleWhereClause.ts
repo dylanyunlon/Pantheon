@@ -18,7 +18,7 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 
 /**
  * A where clause without specific type information - used for runtime matching logic.

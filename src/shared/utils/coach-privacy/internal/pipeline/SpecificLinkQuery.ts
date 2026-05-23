@@ -1,0 +1,1 @@
+export class SpecificLinkQuery { protected store: any; protected piiFieldKey: any; protected logger: any; protected sortingStrategy: any; protected nextPageToken?: string; revalidate(_force: boolean): Promise<void> { return Promise.resolve() }; getEffectiveFetchPageSize(): number { return 100 } }

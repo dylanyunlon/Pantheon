@@ -14,11 +14,11 @@
  * 
  */
 
-import type { GeoFilterOptions } from "../../../coach-types";
+import type { GeoFilterOptions } from "../../coach-types";
 import type {
   PropertyIdentifier,
   SearchJsonQueryV2,
-} from "../../../coach-types";
+} from "../../coach-types";
 import { makeGeoFilterBbox } from "./makeGeoFilterBbox";
 import { makeGeoFilterPolygon } from "./makeGeoFilterPolygon";
 

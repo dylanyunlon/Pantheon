@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PropertyTypeReferenceOrStringConstant } from "../../../coach-types";
+import type { PropertyTypeReferenceOrStringConstant } from "../../coach-types";
 import type { SimpleCoachProperties } from "../SimpleCoachProperties";
 
 /**

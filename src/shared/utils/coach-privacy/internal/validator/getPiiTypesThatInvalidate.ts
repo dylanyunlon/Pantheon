@@ -14,11 +14,11 @@
  * 
  */
 
-import type { InterfaceMetadata } from "../../../../coach-types";
+import type { InterfaceMetadata } from "../../../coach-types";
 import type {
   DerivedPropertyDefinition,
   PipelineSet as WirePipelineSet,
-} from "../../../../coach-types";
+} from "../../../coach-types";
 import invariant from "tiny-invariant";
 import type { MinimalClient } from "../../MinimalClientContext";
 import type {

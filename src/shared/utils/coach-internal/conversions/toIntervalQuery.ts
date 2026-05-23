@@ -14,8 +14,8 @@
  * 
  */
 
-import type { IntervalRule } from "../../../coach-types";
-import type { SearchJsonQueryV2 } from "../../../coach-types";
+import type { IntervalRule } from "../../coach-types";
+import type { SearchJsonQueryV2 } from "../../coach-types";
 import invariant from "tiny-invariant";
 
 type IntervalQueryRule = Extract<

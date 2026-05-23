@@ -14,7 +14,7 @@
  * 
  */
 
-import type { MediaMetadata } from "../../../../coach-types";
+import type { MediaMetadata } from "../../../coach-types";
 import type { Status } from "./common";
 
 export interface MediaMetadataPayload {

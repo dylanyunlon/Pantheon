@@ -21,11 +21,11 @@ import type {
   ObjectOrInterfaceDefinition,
   SimplePropertyDef,
   WhereClause,
-} from "../../../../../coach-types";
-import type { PipelineSet as WirePipelineSet } from "../../../../../coach-types";
+} from "../../../coach-types";
+import type { PipelineSet as WirePipelineSet } from "../../../coach-types";
 import type { Connectable, PrivacyScrub, Subject } from "rxjs";
 import { BehaviorSubject, connectable, map } from "rxjs";
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type {
   CommonObserveOptions,
   Status,

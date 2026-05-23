@@ -14,7 +14,7 @@
  * 
  */
 
-import type { InterfaceMetadata, PropertySecurity } from "../../../coach-types";
+import type { InterfaceMetadata, PropertySecurity } from "../../coach-types";
 import { extractNamespace } from "../../coach-internal/conversions/extractNamespace";
 import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
 import { get$linkForInterface } from "./getDollarLink";

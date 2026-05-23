@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PossibleWhereClauseFilters } from "../../../../coach-types";
+import type { PossibleWhereClauseFilters } from "../../../coach-types";
 import deepEqual from "fast-deep-equal";
 import invariant from "tiny-invariant";
 import type { InterfaceHolder } from "../../coach-object/convertWireToCoachRecords/InterfaceHolder";

@@ -14,7 +14,7 @@
  * 
  */
 
-import type { PropertyBooleanFormattingRule } from "../../../coach-types";
+import type { PropertyBooleanFormattingRule } from "../../coach-types";
 
 /**
  * Formats a boolean value according to the specified formatting rule

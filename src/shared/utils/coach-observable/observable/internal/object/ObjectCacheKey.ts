@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../../coach-types";
+import type { ObjectTypeDefinition, PrimaryKeyType } from "../../../../coach-types";
 import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
 import type { CacheKey } from "../CacheKey";
 import type { Canonical } from "../Canonical";

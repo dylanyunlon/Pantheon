@@ -14,8 +14,8 @@
  * 
  */
 
-import type { ObjectOrInterfaceDefinition, CoachBase } from "../../../coach-types";
-import type { PropertySecurities } from "../../../coach-types";
+import type { ObjectOrInterfaceDefinition, CoachBase } from "../../coach-types";
+import type { PropertySecurities } from "../../coach-types";
 
 /** @internal */
 export const UnderlyingCoachRecord = Symbol(

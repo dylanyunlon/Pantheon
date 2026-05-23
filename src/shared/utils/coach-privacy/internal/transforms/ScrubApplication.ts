@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ActionDefinition, ActionEditResponse } from "../../../../../coach-types";
+import type { ActionDefinition, ActionEditResponse } from "../../../coach-types";
 import type { ActionSignatureFromDef } from "../../../actions/applyAction";
 import { API_NAME_IDX } from "../list/ListPiiFieldKey";
 import type { Store } from "../Store";

@@ -14,8 +14,8 @@
  * 
  */
 
-import type { DerivedProperty, PiiFieldTypeDefinition } from "../../../../../coach-types";
-// import { additionalContext } from "../../../coach-engine";
+import type { DerivedProperty, PiiFieldTypeDefinition } from "../../../coach-types";
+import { additionalContext } from "../../../coach-engine";
 import { createPipeline } from "../../../pipelineSet/createPipeline";
 import {
   type AggregationPiiFieldKey,

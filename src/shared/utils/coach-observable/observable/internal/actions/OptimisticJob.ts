@@ -14,7 +14,7 @@
  * 
  */
 
-// import { additionalContext } from "../../../coach-engine";
+import { additionalContext } from "../../../coach-engine";
 import type { ObjectHolder } from "../../../object/convertWireToCoachRecords/ObjectHolder";
 import type { OptimisticBuilder } from "../../OptimisticBuilder";
 import { type Changes } from "../Changes";

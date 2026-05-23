@@ -14,7 +14,7 @@
  * 
  */
 
-import type { ScrubDefinition } from "../../../../../coach-types";
+import type { ScrubDefinition } from "../../../coach-types";
 import type { FunctionPayload } from "../../FunctionPayload";
 import type { Observer } from "../../PrivacyScrubClient/common";
 import { AbstractHelper } from "../AbstractHelper";
