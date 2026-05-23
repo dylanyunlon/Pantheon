@@ -1,1 +1,1 @@
-export class ObjectPiiFieldKeyRegistry { [key: string]: any }
+export class ObjectPiiFieldKeyRegistry { constructor(..._args: unknown[]) {}; [key: string]: any }

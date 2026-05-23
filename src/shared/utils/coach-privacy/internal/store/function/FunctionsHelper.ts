@@ -1,1 +1,1 @@
-export class FunctionsHelper { [key: string]: any }
+export class FunctionsHelper { constructor(..._args: unknown[]) {}; [key: string]: any }

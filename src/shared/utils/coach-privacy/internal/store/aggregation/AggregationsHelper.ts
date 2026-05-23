@@ -1,1 +1,1 @@
-export class AggregationsHelper { [key: string]: any }
+export class AggregationsHelper { constructor(..._args: unknown[]) {}; [key: string]: any }

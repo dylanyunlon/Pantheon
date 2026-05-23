@@ -1,4 +1,5 @@
 export class BaseScrubFieldQuery<_K = unknown, _P = unknown, _O = unknown> {
+  constructor(..._args: unknown[]) {}
   protected store: any
   protected piiFieldKey: any
   protected piiFieldKeys: any

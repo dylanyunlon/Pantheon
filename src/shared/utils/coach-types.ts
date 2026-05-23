@@ -141,7 +141,7 @@ export type PossibleWhereClauseFilters =
   | '$containsAnyTerm' | '$interval' | '$matchesRegex'
   | '$intersects' | '$within'
 
-export interface AggregationClause {
+export interface AggregationClause<_T = unknown> {
   field: string
   operation: 'sum' | 'avg' | 'min' | 'max' | 'count'
 }
@@ -254,7 +254,7 @@ export interface DerivedProperty {
 }
 
 export namespace DerivedProperty {
-  export type Definition<_Q = unknown> = DerivedPropertyDefinition
+  export type Definition<_Q = unknown, _V = unknown> = DerivedPropertyDefinition
   export type Clause<_Q = unknown> = Record<string, DerivedPropertyDefinition>
   export type Creator<_Q = unknown, _V = unknown> = () => DerivedPropertyDefinition
 }
@@ -347,6 +347,10 @@ export class Trie<V> {
 export type ValidateActionResponseV2 = ActionValidationResponse
 
 export type ActionMetadata = ActionDefinition & { displayName?: string }
+export namespace ActionMetadata {
+  export type Parameters = Record<string, { dataType: DataType; required?: boolean }>
+  export type DataType = { type: string }
+}
 
 export const Actions = {
   applyAction: async (_client: unknown, _action: unknown, _params: unknown) => ({} as ActionEditResponse)
@@ -497,7 +501,7 @@ export namespace ObjectSetSubscription {
 
 export type Result<T> = { type: 'ok'; value: T } | { type: 'err'; error: unknown }
 
-export type SelectArg<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = PropertyKeys<Q>[]
+export type SelectArg<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition, _L = any, _R = any, _A = any> = PropertyKeys<Q>[]
 
 export type SingleOsdkResult<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition, _L = unknown, _R = unknown, _S = unknown, _E = {}, _T = unknown, _O = unknown> = Coach.Instance<Q> | undefined
 
@@ -622,7 +626,7 @@ export type CoachBase<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceD
   readonly $title?: string
 }
 
-export type PipelineSet<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition> = ObjectSet & {
+export type PipelineSet<Q extends ObjectOrInterfaceDefinition = ObjectOrInterfaceDefinition, _RDPs = {}> = ObjectSet & {
   readonly __objectType?: Q
   aggregate(...args: unknown[]): Promise<unknown>
   fetchPage(args?: unknown): Promise<PageResult<Coach.Instance<Q>>>
@@ -677,7 +681,7 @@ export type TimeSeriesValueBankProperties = Record<string, unknown>
 export type CoreMediaReference = MediaReference
 
 
-export type ActionReturnTypeForOptions = any
+export type ActionReturnTypeForOptions<_T = unknown, _O = unknown> = unknown
 export type AggregateObjectsRequestV2 = any
 export type AggregateOpts<_Q = any> = Record<string, AggregationClause>
 export type AggregateOptsThatErrorsAndDisallowsOrderingWithMultipleGroupBy = any
@@ -705,7 +709,7 @@ export type DocumentToImageOperation = any
 export type DocumentToTextOperation = any
 export type EmailToAttachmentOperation = any
 export type EmailToTextOperation = any
-export type FetchPageArgs<_T = any> = { $pageSize?: number; $nextPageToken?: string; $select?: string[]; $orderBy?: Record<string, string>; $loadPropertySecurityMetadata?: boolean }
+export type FetchPageArgs<_T = any, _L = any, _R = any, _A = any, _S = any, _U = any> = { $pageSize?: number; $nextPageToken?: string; $select?: string[]; $orderBy?: Record<string, string>; $loadPropertySecurityMetadata?: boolean }
 export type GeotimeSeriesProperty = any
 export type ImageOperation = any
 export type ImageSpec = any
@@ -744,8 +748,8 @@ export type SimplePropertyDef = any
 
 export type SpreadsheetToTextOperation = any
 export type SyncApplyActionResponseV2 = any
-export type TimeSeriesPoint = any
-export type TimeSeriesProperty = any
+export type TimeSeriesPoint<_T = unknown> = { time: string; value: _T }
+export type TimeSeriesProperty<_T = unknown> = { getFirstPoint(): Promise<TimeSeriesPoint<_T> | undefined>; getLastPoint(): Promise<TimeSeriesPoint<_T> | undefined>; getAllPoints(query?: unknown): Promise<TimeSeriesPoint<_T>[]> }
 export type TranscribeOutputFormat = any
 export type VideoOperation = any
 export type VideoToArchiveOperation = any
@@ -780,7 +784,7 @@ export type ObserveFunctionOptions = { apiName: string; params?: unknown }
 export type ObserveFunctionCallbackArgs<_T = unknown> = { result: unknown; status: Status }
 export type ObserveListOptions<_T = unknown, _RDPs = {}> = ObserveScrubFieldOptions<_T, _RDPs>
 export type ObserveObjectCallbackArgs<_T = unknown> = { object: unknown; status: Status }
-export type ObserveObjectsCallbackArgs<_T = unknown> = ObserveObjectCallbackArgs<_T>
+export type ObserveObjectsCallbackArgs<_T = unknown, _RDPs = {}> = ObserveObjectCallbackArgs<_T>
 
 export type ScrubDisposable = { unsubscribe(): void; dispose(): void; closed: boolean }
 
@@ -877,7 +881,7 @@ export type PivotInfo = { linkName: string; sourceType: string; sourceTypeKind: 
 
 export type ScrubFieldQueryOptions<_T = any> = ObserveScrubFieldOptions<_T>
 export type FunctionObserveOptions = ObserveFunctionOptions & { dependsOn?: Array<string | { apiName: string }>; $parameters?: unknown }
-export type ObserveAggregationArgs = { apiName: string; aggregate?: unknown }
+export type ObserveAggregationArgs<_T = unknown, _A = unknown> = { apiName: string; aggregate?: unknown }
 export type ObjectPiiFieldKey = PiiFieldKey & { __objectKey?: true }
 export type ScrubFieldPiiFieldKey = PiiFieldKey & { __scrubFieldKey?: true }
 export type FunctionPiiFieldKey = PiiFieldKey & { __functionKey?: true }

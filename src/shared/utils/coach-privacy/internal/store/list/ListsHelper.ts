@@ -1,1 +1,1 @@
-export class ListsHelper { [key: string]: any }
+export class ListsHelper { constructor(..._args: unknown[]) {}; [key: string]: any }

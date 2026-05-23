@@ -1,1 +1,1 @@
-export type ObserveLinks = Record<string, unknown>
+export { ObserveLinks } from "../../coach-types"

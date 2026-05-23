@@ -1,1 +1,1 @@
-export class MediaHelper { [key: string]: any }
+export class MediaHelper { constructor(..._args: unknown[]) {}; [key: string]: any }
