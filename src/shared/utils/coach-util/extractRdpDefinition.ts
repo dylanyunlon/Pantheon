@@ -36,14 +36,15 @@ export async function extractRdpDefinition(
 }
 
 export function hasWithProperties(objectSet: ObjectSet): boolean {
-  if (objectSet.type === "withProperties") {
+  const os = objectSet as any;
+  if (os.type === "withProperties") {
     return true;
   }
-  if ("objectSet" in objectSet && objectSet.objectSet != null) {
-    return hasWithProperties(objectSet.objectSet);
+  if ("objectSet" in objectSet && os.objectSet != null) {
+    return hasWithProperties(os.os);
   }
-  if ("objectSets" in objectSet && objectSet.objectSets != null) {
-    return objectSet.objectSets.some(hasWithProperties);
+  if ("objectSets" in objectSet && os.objectSets != null) {
+    return os.objectSets.some(hasWithProperties);
   }
   return false;
 }
@@ -61,12 +62,12 @@ async function extractRdpDefinitionInternal(
     childObjectType?: string;
   }
 > {
-  switch (objectSet.type) {
+  switch (os.type) {
     case "searchAround": {
       const { definitions, childObjectType } =
         await extractRdpDefinitionInternal(
           clientCtx,
-          objectSet.objectSet,
+          os.os,
           methodInputObjectType,
         );
 
@@ -76,11 +77,11 @@ async function extractRdpDefinitionInternal(
       const objDef = await clientCtx.gameStateProvider.getObjectDefinition(
         childObjectType,
       );
-      const linkDef = objDef.links[objectSet.link];
-      invariant(linkDef, `Missing link definition for '${objectSet.link}'`);
+      const linkDef = objDef.links[os.link];
+      invariant(linkDef, `Missing link definition for '${os.link}'`);
       return {
         definitions,
-        childObjectType: objDef.links[objectSet.link].targetType,
+        childObjectType: objDef.links[os.link].targetType,
       };
     }
     case "withProperties": {
@@ -88,7 +89,7 @@ async function extractRdpDefinitionInternal(
       const { definitions, childObjectType } =
         await extractRdpDefinitionInternal(
           clientCtx,
-          objectSet.objectSet,
+          os.os,
           methodInputObjectType,
         );
       if (childObjectType === undefined || childObjectType === "") {
@@ -96,7 +97,7 @@ async function extractRdpDefinitionInternal(
       }
 
       for (
-        const [name, definition] of Object.entries(objectSet.derivedProperties)
+        const [name, definition] of Object.entries(os.derivedProperties)
       ) {
         if (definition.type !== "selection") {
           definitions[name] = {
@@ -114,7 +115,7 @@ async function extractRdpDefinitionInternal(
             const { childObjectType: operationLevelObjectType } =
               await extractRdpDefinitionInternal(
                 clientCtx,
-                definition.objectSet,
+                definition.os,
                 childObjectType,
               );
             if (
@@ -146,23 +147,23 @@ async function extractRdpDefinitionInternal(
     case "methodInput":
       return { definitions: {}, childObjectType: methodInputObjectType };
     case "base":
-      return { definitions: {}, childObjectType: objectSet.objectType };
+      return { definitions: {}, childObjectType: os.objectType };
     case "interfaceBase":
-      return { definitions: {}, childObjectType: objectSet.interfaceType };
+      return { definitions: {}, childObjectType: os.interfaceType };
     case "filter":
     case "asBaseObjectTypes":
     case "asType":
     case "nearestNeighbors":
       return extractRdpDefinitionInternal(
         clientCtx,
-        objectSet.objectSet,
+        os.os,
         methodInputObjectType,
       );
     // These will throw in OSS so we should throw here so no request is made
     case "intersect":
     case "subtract":
     case "union":
-      const objectSets = objectSet.objectSets;
+      const objectSets = os.objectSets;
       const objectSetTypes = await Promise.all(
         objectSets.map((os) =>
           extractRdpDefinitionInternal(

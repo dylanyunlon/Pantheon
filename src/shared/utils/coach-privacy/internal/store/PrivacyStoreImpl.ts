@@ -70,7 +70,6 @@ import type {
 import type { MediaPropertyLocation } from "../PrivacyScrubClient/MediaTypes";
 import type { ObserveLinks } from "../PrivacyScrubClient/ObserveLink";
 import type { AggregationPayloadBase } from "./aggregation/AggregationQuery";
-import type { ScrubNormalized } from "./ScrubNormalized";
 import type { ObserveObjectSetOptions } from "./objectset/PipelineSetQueryOptions";
 import type { Rdp } from "./RdpScrubNormalizer";
 import type { Store } from "./Store";

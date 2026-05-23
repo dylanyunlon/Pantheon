@@ -28,7 +28,7 @@ export type PageSize = number
 export type PageToken = string
 
 export interface ObjectTypeDefinition {
-  type: 'object'
+  type: 'object' | 'interface' | string
   apiName: string
   displayName: string
   properties: Record<string, PropertyDefinition>
@@ -50,7 +50,7 @@ export interface PropertyDefinition {
 }
 
 export interface InterfaceMetadata {
-  type: 'interface'
+  type: 'interface' | 'object'
   apiName: string
   properties: Record<string, PropertyDefinition>
   links?: Record<string, { targetType: string; targetTypeApiName: string; multiplicity: boolean }>
@@ -72,6 +72,10 @@ export interface ActionDefinition<_T = any> {
   apiName: string
   parameters: Record<string, ParameterDefinition>
   __DefinitionMetadata?: unknown
+  version?: string | number
+  isFixedVersion?: boolean
+  signatures?: unknown[]
+  unsanitizedApiName?: string
 }
 
 export interface ParameterDefinition {
@@ -100,7 +104,9 @@ export type ActionValidationResponse = {
 export interface QueryDefinition<_T = any> {
   apiName: string
   parameters: Record<string, ParameterDefinition>
-  output: { dataType: string }
+  output: QueryDataTypeDefinition
+  version?: string | number
+  isFixedVersion?: boolean
 }
 
 export interface CompileTimeMetadata<T = unknown> {
@@ -168,15 +174,20 @@ export interface IntervalRule {
   field: string
   interval: number
   unit: string
+  $match?: unknown
+  $prefixOnLastTerm?: boolean
+  $fuzzy?: boolean
+  $exactMatch?: string
+  $phrase?: string
+  $wildcardMatch?: string
+  $regex?: string
+  [key: string]: unknown
 }
 
 export type SearchJsonQueryV2 = WhereClause
 
 export interface ObjectSet {
-  type: 'base' | 'union' | 'intersect' | 'filter' | 'searchAround'
-    | 'interfaceLinkSearchAround' | 'interfaceBase' | 'withProperties'
-    | 'methodInput' | 'asType' | 'asBaseObjectTypes' | 'asBasePiiFieldTypes'
-    | 'reference' | 'static' | 'nearestNeighbors' | 'subtract'
+  type: string
   objectType?: string
   where?: WhereClause
   objectSets?: ObjectSet[]
@@ -190,6 +201,7 @@ export interface ObjectSet {
   objectSetRid?: string
   reference?: unknown
   piiFieldType?: string
+  [key: string]: unknown
 }
 
 export type WireObjectSet = ObjectSet
@@ -270,7 +282,7 @@ export interface DerivedPropertyDefinition extends DerivedProperty {
   operation?: { type: string; selectedPropertyApiName?: string }
 }
 
-export type DataValue = string | number | boolean | null | DataValue[] | { [key: string]: DataValue }
+export type DataValue = string | number | boolean | null | DataValue[] | { [key: string]: DataValue | undefined; key?: DataValue; value?: DataValue; groups?: DataValue[] }
 
 export type DatetimeLocalizedFormatType = 'short' | 'medium' | 'long' | 'full'
 
@@ -356,12 +368,13 @@ export const Actions = {
   applyAction: async (_client: unknown, _action: unknown, _params: unknown) => ({} as ActionEditResponse)
 }
 
-export const Attachments = {
-  upload: async (_client: unknown, _upload: AttachmentUpload) => ({} as Attachment)
+export const Attachments: Record<string, any> = {
+  upload: async (_client: unknown, _upload: AttachmentUpload, ..._args: unknown[]) => ({} as Attachment),
 }
 
-export const Functions = {
-  applyFunction: async (_client: unknown, _fn: unknown, _params: unknown) => ({} as unknown)
+export const Functions: Record<string, any> = {
+  applyFunction: async (_client: unknown, _fn: unknown, _params: unknown, ..._args: unknown[]) => ({} as unknown),
+  streamingExecute: async (_client: unknown, _fn: unknown, _params: unknown, ..._args: unknown[]) => ({} as any),
 }
 
 export const GameStateObjectSets = {
@@ -490,6 +503,11 @@ export type ObjectSetSubscription = {
   unsubscribe(): void
 }
 
+export interface ObjectSetSubscription {
+  id: string
+  updates?: unknown[]
+  responses?: unknown[]
+}
 export namespace ObjectSetSubscription {
   export type Listener<_Q = unknown, _P = unknown, _R = unknown> = {
     onChange?(objects: unknown[]): void
@@ -655,10 +673,11 @@ export namespace Coach {
     _E = {}
   > = CoachRecordBase & {
     readonly $objectType: string
-    readonly $primaryKey: string
+    readonly $primaryKey: string | number
     readonly $apiName: string
     $as(apiName: string): Coach.Instance<Q>
     [key: string]: unknown
+    [key: symbol]: unknown
   }
 }
 
@@ -667,13 +686,14 @@ export type MediaReferenceProperties = {
   getMediaContent(client: unknown, ref: MediaReference): Promise<Blob>
 }
 
-export const MediaReferenceProperties: MediaReferenceProperties = {
+export const MediaReferenceProperties: Record<string, any> = {
   async getMediaMetadata(_client: unknown, _ref: MediaReference): Promise<MediaMetadata> {
     return { path: '', sizeBytes: 0, mediaType: '', updatedAt: '' }
   },
   async getMediaContent(_client: unknown, _ref: MediaReference): Promise<Blob> {
-    return new Blob([])
+    return new Blob([] as any[])
   },
+  async getMediaContentUrl(..._args: unknown[]): Promise<string> { return '' },
 }
 
 export type TimeSeriesPropertiesV2 = Record<string, unknown>
@@ -795,7 +815,7 @@ export type ActionSignatureFromDef<_T = unknown> = {
 export type QueryParameterType<_T = unknown> = Record<string, unknown>
 export type QueryReturnType<_T = unknown> = unknown
 
-export type FetchedObjectTypeDefinition = ObjectTypeDefinition & {
+export type FetchedObjectTypeDefinition = ObjectTypeDefinition & ObjectOrInterfaceDefinition & {
   links: Record<string, LinkDefinition>
   interfaceMap?: Record<string, Record<string, string>>
   primaryKeyApiName: string
@@ -803,9 +823,11 @@ export type FetchedObjectTypeDefinition = ObjectTypeDefinition & {
 
 export type FetchedPiiFieldTypeDefinition = FetchedObjectTypeDefinition
 
-export type ScrubRecord<_T = unknown> = Record<string, unknown> & {
+export type ScrubRecord<_T = unknown> = {
+  [key: string]: unknown
+  [key: symbol]: unknown
   $objectType: string
-  $primaryKey: string
+  $primaryKey: string | number
   $apiName?: string
   $piiFieldType?: string
   $piiKey?: string | number
@@ -895,7 +917,7 @@ export type WeakRefTrie<V = unknown> = { lookupArray(keys: readonly unknown[]): 
 
 export type ObjectSetArrayScrubNormalizer = { scrubNormalize(v: unknown): ScrubNormalized<unknown[]>; scrubNormalizeUnion?(v: unknown): ScrubNormalized<unknown[]>; scrubNormalizeIntersect?(v: unknown): ScrubNormalized<unknown[]>; scrubNormalizeSubtract?(v: unknown): ScrubNormalized<unknown[]> }
 
-export type SimpleCoachProperties = { $objectType: string; $primaryKey: string; $apiName?: string; $piiFieldType?: unknown; $piiKey?: unknown; $title?: string; $rid?: string; [key: string]: unknown }
+export type SimpleCoachProperties = { $objectType: string; $primaryKey: string | number; [key: symbol]: unknown; $apiName?: string; $piiFieldType?: unknown; $piiKey?: unknown; $title?: string; $rid?: string; [key: string]: unknown }
 export type InterfaceHolder<_T = unknown> = Coach.Instance
 
 export type ObjectState_Enum = 'ADDED_OR_UPDATED' | 'REMOVED'
@@ -922,9 +944,9 @@ export function getPiiFieldTypesThatInvalidate(..._args: unknown[]): Promise<{ r
 export function createCoachRecord(_client: unknown, _def: unknown, _props: unknown): ScrubRecord { return { $objectType: '', $primaryKey: '' } as ScrubRecord }
 export function getMediaPiiFieldKey(_loc: unknown): string { return '' }
 
-export const ObjectDefRef: unique symbol = Symbol('ObjectDefRef') as any
-export const UnderlyingCoachRecord: unique symbol = Symbol('UnderlyingCoachRecord') as any
-export const ClientRef: unique symbol = Symbol('ClientRef') as any
+export const ObjectDefRef = Symbol('ObjectDefRef')
+export const UnderlyingCoachRecord = Symbol('UnderlyingCoachRecord')
+export const ClientRef = Symbol('ClientRef')
 
 export type DeferredBuilder = { updateObject?(value: unknown): void; deleteObject?(value: unknown): void; addLink?(source: unknown, target: unknown, linkType: string): void; deleteLink?(source: unknown, target: unknown, linkType: string): void }
 
@@ -934,11 +956,11 @@ export namespace Store { export type ApplyActionOptions = { mode?: string } }
 
 export namespace ObjectMetadata { export type Link = LinkDefinition }
 
-export const additionalContext: unique symbol = Symbol('additionalContext') as any
+export const additionalContext = Symbol('additionalContext')
 
 export type BlobMemoryManager = { get(key: string): Blob | undefined; add(key: string, blob: Blob): void; remove(key: string): void; clear(): void; dispose(): void; createBlobUrl(key: string): string | undefined; releaseBlobUrl(key: string): void }
 
-export type ObjectHolder<_T = unknown> = Coach.Instance & { $primaryKey: string | number }
+export type ObjectHolder<_T = unknown> = Coach.Instance & { $primaryKey: string | number; [key: symbol]: unknown }
 
 export type Chalk = { red(s: string): string; green(s: string): string; blue(s: string): string; yellow(s: string): string; gray(s: string): string; cyan(s: string): string; magenta(s: string): string; redBright(s: string): string; bgRed(s: string): string; bgGreen(s: string): string; bgCyan(s: string): string; bgGray(s: string): string; bgYellow(s: string): string; bgRedBright(s: string): string }
 

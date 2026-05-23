@@ -28,11 +28,12 @@ export async function extractObjectOrInterfaceType(
 ): Promise<
   ObjectOrInterfaceDefinition | undefined
 > {
-  switch (objectSet.type) {
+  const os = objectSet as any;
+  switch (os.type) {
     case "searchAround": {
       const def = await extractObjectOrInterfaceType(
         clientCtx,
-        objectSet.objectSet,
+        os.os,
       );
       if (def === undefined) {
         return undefined;
@@ -44,46 +45,46 @@ export async function extractObjectOrInterfaceType(
         : await clientCtx.gameStateProvider.getInterfaceDefinition(
           def.apiName,
         );
-      const linkDef = objOrInterfaceDef.links[objectSet.link];
-      invariant(linkDef, `Missing link definition for '${objectSet.link}'`);
+      const linkDef = objOrInterfaceDef.links[os.link];
+      invariant(linkDef, `Missing link definition for '${os.link}'`);
 
       return objOrInterfaceDef.type === "object"
         ? {
-          apiName: objOrInterfaceDef.links[objectSet.link].targetType,
+          apiName: objOrInterfaceDef.links[os.link].targetType,
           type: "object",
         }
         : {
-          apiName: objOrInterfaceDef.links[objectSet.link].targetTypeApiName,
-          type: objOrInterfaceDef.links[objectSet.link].targetType,
+          apiName: objOrInterfaceDef.links[os.link].targetTypeApiName,
+          type: objOrInterfaceDef.links[os.link].targetType,
         };
     }
     case "withProperties": {
       return extractObjectOrInterfaceType(
         clientCtx,
-        objectSet.objectSet,
+        os.os,
       );
     }
     case "methodInput":
       return undefined;
     case "base":
-      return { type: "object", apiName: objectSet.objectType };
+      return { type: "object", apiName: os.objectType };
     case "interfaceBase":
-      return { type: "interface", apiName: objectSet.interfaceType };
+      return { type: "interface", apiName: os.interfaceType };
     case "filter":
     case "asBaseObjectTypes":
     case "nearestNeighbors":
       return extractObjectOrInterfaceType(
         clientCtx,
-        objectSet.objectSet,
+        os.os,
       );
     case "asType":
       return {
         type:
-          clientCtx.narrowTypeInterfaceOrObjectMapping[objectSet.entityType],
-        apiName: objectSet.entityType,
+          clientCtx.narrowTypeInterfaceOrObjectMapping[os.entityType],
+        apiName: os.entityType,
       };
     case "intersect": {
-      const objectSets = objectSet.objectSets;
+      const objectSets = os.objectSets;
       const objectSetTypes = await Promise.all(
         objectSets.map((os) =>
           extractObjectOrInterfaceType(
@@ -106,7 +107,7 @@ export async function extractObjectOrInterfaceType(
     }
     case "subtract":
     case "union":
-      const objectSets = objectSet.objectSets;
+      const objectSets = os.objectSets;
       const objectSetTypes = await Promise.all(
         objectSets.map((os) =>
           extractObjectOrInterfaceType(
@@ -134,7 +135,7 @@ export async function extractObjectOrInterfaceType(
     case "interfaceLinkSearchAround":
       const def = await extractObjectOrInterfaceType(
         clientCtx,
-        objectSet.objectSet,
+        os.os,
       );
       if (def === undefined) {
         return undefined;
@@ -146,20 +147,20 @@ export async function extractObjectOrInterfaceType(
         : await clientCtx.gameStateProvider.getInterfaceDefinition(
           def.apiName,
         );
-      const linkDef = objOrInterfaceDef.links[objectSet.interfaceLink];
+      const linkDef = objOrInterfaceDef.links[os.interfaceLink];
       invariant(
         linkDef,
-        `Missing link definition for '${objectSet.interfaceLink}'`,
+        `Missing link definition for '${os.interfaceLink}'`,
       );
       return objOrInterfaceDef.type === "object"
         ? {
-          apiName: objOrInterfaceDef.links[objectSet.interfaceLink].targetType,
+          apiName: objOrInterfaceDef.links[os.interfaceLink].targetType,
           type: "object",
         }
         : {
           apiName:
-            objOrInterfaceDef.links[objectSet.interfaceLink].targetTypeApiName,
-          type: objOrInterfaceDef.links[objectSet.interfaceLink].targetType,
+            objOrInterfaceDef.links[os.interfaceLink].targetTypeApiName,
+          type: objOrInterfaceDef.links[os.interfaceLink].targetType,
         };
     // We don't have to worry about new object sets being added and doing a runtime break and breaking people since the COACH is always constructing these.
     default:
