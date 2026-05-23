@@ -33,9 +33,9 @@ import type { MinimalClient } from "../MinimalClientContext";
 import {
   type FetchedObjectTypeDefinition,
 } from "../gameState/GameStateProvider";
-import { createCoachRecord } from "./convertWireToCoachRecords/createCoachRecord";
-import type { InterfaceHolder } from "./convertWireToCoachRecords/InterfaceHolder";
-import type { ObjectHolder } from "./convertWireToCoachRecords/ObjectHolder";
+import { createCoachRecord } from "./convertPipelineToCoachRecords/createCoachRecord";
+import type { InterfaceHolder } from "./convertPipelineToCoachRecords/InterfaceHolder";
+import type { ObjectHolder } from "./convertPipelineToCoachRecords/ObjectHolder";
 import type { SimpleCoachProperties } from "./SimpleCoachProperties";
 
 /**
