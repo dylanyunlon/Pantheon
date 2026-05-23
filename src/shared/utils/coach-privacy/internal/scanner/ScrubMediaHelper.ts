@@ -72,7 +72,8 @@ export class MediaHelper extends AbstractHelper<
 
   observeMediaMetadata(
     coords: MediaPropertyLocation,
-    options:     observer: Observer<MediaMetadataPayload>,
+    options: MediaMetadataObserveOptions,
+    observer: Observer<MediaMetadataPayload>,
   ): ScrubDisposableWrapper {
     const query = this.getQuery({ ...options, coords });
     return this._subscribe(query, options, observer);

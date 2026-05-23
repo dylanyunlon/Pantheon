@@ -60,7 +60,8 @@ export class MediaMetadataQuery extends Query<
     piiKey: PiiKeyType<PiiFieldTypeDefinition>,
     propertyName: string,
     piiFieldKey: MediaMetadataPiiFieldKey,
-    opts:   ) {
+    opts: MediaMetadataObserveOptions,
+  ) {
     super(
       store,
       subject,

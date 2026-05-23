@@ -187,7 +187,8 @@ export class FunctionQuery extends Query<
   }
 
   writeToStore(
-    data:     status: "loading" | "loaded" | "error",
+    data: unknown,
+    status: "loading" | "loaded" | "error",
     batch: BatchContext,
   ): Entry<FunctionPiiFieldKey> {
     batch.write(this.piiFieldKey, data, status);

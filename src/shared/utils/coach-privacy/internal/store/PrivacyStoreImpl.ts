@@ -152,7 +152,8 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
   public observeFunction: <Q extends ScrubDefinition<unknown>>(
     queryDef: Q,
     params: Record<string, unknown> | undefined,
-    options:     subFn: Observer<ObserveFunctionCallbackArgs<Q>>,
+    options: ObserveFunctionOptions,
+    subFn: Observer<ObserveFunctionCallbackArgs>,
   ) => ScrubDisposable = (queryDef, params, options, subFn) => {
     const dependsOn = options.dependsOn?.map(dep =>
       typeof dep === "string" ? dep : dep.apiName
@@ -376,7 +377,8 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
 
   public observeMediaMetadata(
     coords: MediaPropertyLocation,
-    options:     observer: Observer<MediaMetadataPayload>,
+    options: MediaMetadataObserveOptions,
+    observer: Observer<MediaMetadataPayload>,
   ): ScrubDisposable {
     return this.__experimentalStore.media.observeMediaMetadata(
       coords,
@@ -450,7 +452,7 @@ function observeMultiLinks(
   const totalExpected = objectsArray.length;
   const perObjectData = new Map<
     string,
-    { payload: ; pk: string | number }
+    { payload: unknown; pk: string | number }
   >();
   let errored = false;
 
@@ -533,7 +535,7 @@ function observeMultiLinks(
           pk,
         },
         {
-          next: (payload: ) => {
+          next: (payload: unknown) => {
             if (errored) {
               return;
             }
