@@ -1,1 +1,1 @@
-export { GeotimeSeriesPropertyImpl as createGeotimeSeriesProperty } from './coach-client/createGeotimeSeriesProperty'
+export { GeotimeSeriesPropertyImpl as createGeotimeSeriesProperty } from './client/createGeotimeSeriesProperty'

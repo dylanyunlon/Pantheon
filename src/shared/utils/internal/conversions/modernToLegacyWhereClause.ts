@@ -1,1 +1,1 @@
-export { modernToLegacyWhereClause } from '../../coach-internal/conversions/modernToLegacyWhereClause'
+export { modernToLegacyWhereClause } from '../../internal/conversions/modernToLegacyWhereClause'

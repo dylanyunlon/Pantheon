@@ -1,1 +1,1 @@
-export { createWithStatsPipeline as createWithPropertiesPipelineSet } from '../coach-derived/createWithStatsPipeline'
+export { createWithStatsPipeline as createWithPropertiesPipelineSet } from '../derived/createWithStatsPipeline'

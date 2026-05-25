@@ -1,0 +1,37 @@
+/*
+ * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon Pantheon architecture patterns.
+ * 
+ * 
+ *
+ *     Advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { Coach } from "../../types";
+import type { MinimalClient } from "../../MinimalClientContext";
+import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
+import type { BaseHolder } from "./BaseHolder";
+import type { get$link } from "./getDollarLink";
+import type { ClientRef, ObjectDefRef } from "./InternalSymbols";
+
+/**
+ * @internal
+ *
+ * The unused generic parameter `_Q` can be used as an added check when casting.
+ * That is its only purpose
+ */
+export interface ObjectHolder<_Q extends Coach.Instance<any> = never>
+  extends BaseHolder
+{
+  readonly [ObjectDefRef]: FetchedObjectTypeDefinition;
+  readonly [ClientRef]: MinimalClient;
+
+  readonly "$link": ReturnType<typeof get$link>;
+}

@@ -1,0 +1,756 @@
+// @ts-nocheck
+/*
+ * Copyright 2025 dylanyunlon <dylanyunlong@gmail.com>. Advisor infrastructure.
+ *
+ * Licensed under MIT. Derived from dylanyunlon Pantheon architecture patterns.
+ * 
+ * 
+ *
+ *     Advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type {
+  ActionDefinition,
+  ActionEditResponse,
+  ActionValidationResponse,
+  Logger,
+  ObjectTypeDefinition,
+  Coach,
+  PrimaryKeyType,
+  QueryDefinition,
+} from "../../../types";
+import invariant from "tiny-invariant";
+import type { ActionSignatureFromDef } from "../../actions/applyAction";
+import { additionalContext, type Client } from "../../engine";
+import { DEBUG_REFCOUNTS } from "../DebugFlags";
+import type { CacheEntry, CacheSnapshot } from "../ObservableClient";
+import type { OptimisticBuilder } from "../OptimisticBuilder";
+import { ActionApplication } from "./actions/ActionApplication";
+import {
+  API_NAME_IDX as AGGREGATION_API_NAME_IDX,
+  RDP_IDX as AGGREGATION_RDP_IDX,
+} from "./aggregation/AggregationCacheKey";
+import { AggregationsHelper } from "./aggregation/AggregationsHelper";
+import type { BatchContext } from "./BatchContext";
+import { DEBUG_ONLY__cacheKeyToString } from "./CacheKey";
+import { CacheKeys } from "./CacheKeys";
+import type { Canonical } from "./Canonical";
+import {
+  type Changes,
+  createChangedObjects,
+  DEBUG_ONLY__changesToString,
+} from "./Changes";
+import { FunctionsHelper } from "./function/FunctionsHelper";
+import { GenericCanonicalizer } from "./GenericCanonicalizer";
+import { IntersectCanonicalizer } from "./IntersectCanonicalizer";
+import type { KnownCacheKey } from "./KnownCacheKey";
+import type { Entry } from "./Layer";
+import { Layers } from "./Layers";
+import { LinksHelper } from "./links/LinksHelper";
+import {
+  SOURCE_API_NAME_IDX as LINK_API_NAME_IDX,
+} from "./links/SpecificLinkCacheKey";
+import {
+  API_NAME_IDX as LIST_API_NAME_IDX,
+  RDP_IDX as LIST_RDP_IDX,
+} from "./list/ListCacheKey";
+import { ListsHelper } from "./list/ListsHelper";
+import { MediaHelper } from "./media/MediaHelper";
+import {
+  API_NAME_IDX as OBJECT_API_NAME_IDX,
+  RDP_CONFIG_IDX as OBJECT_RDP_CONFIG_IDX,
+} from "./object/ObjectCacheKey";
+import { ObjectCacheKeyRegistry } from "./object/ObjectCacheKeyRegistry";
+import { ObjectsHelper } from "./object/ObjectsHelper";
+import { ObjectSetHelper } from "./objectset/PipelineSetHelper";
+import { ObjectSetArrayCanonicalizer } from "./PipelineSetArrayCanonicalizer";
+import { type OptimisticId } from "./OptimisticId";
+import { OrderByCanonicalizer } from "./OrderByCanonicalizer";
+import { PivotCanonicalizer } from "./PivotCanonicalizer";
+import { Queries } from "./Queries";
+import { type Rdp, RdpCanonicalizer } from "./RdpCanonicalizer";
+import { RidListCanonicalizer } from "./RidListCanonicalizer";
+import { SelectCanonicalizer } from "./SelectCanonicalizer";
+import type { Subjects } from "./Subjects";
+import { WhereClauseCanonicalizer } from "./WhereClauseCanonicalizer";
+
+export namespace Store {
+  export interface ApplyActionOptions {
+    optimisticUpdate?: (ctx: OptimisticBuilder) => void;
+  }
+}
+
+/*
+  Notes:
+    - Subjects are one per type per store (by cache key)
+    - Data is one per layer per cache key
+*/
+
+const __DEV__ = typeof process === "undefined"
+  || process.env.NODE_ENV !== "production";
+
+/**
+ * Central data store with layered cache architecture.
+ * - Truth layer: server state | Optimistic layers: pending changes
+ * - Reference counting prevents memory leaks
+ * - Batch operations ensure consistency
+ */
+export class Store {
+  readonly whereCanonicalizer: WhereClauseCanonicalizer =
+    new WhereClauseCanonicalizer();
+  readonly orderByCanonicalizer: OrderByCanonicalizer =
+    new OrderByCanonicalizer();
+  readonly rdpCanonicalizer: RdpCanonicalizer = new RdpCanonicalizer();
+  readonly intersectCanonicalizer: IntersectCanonicalizer =
+    new IntersectCanonicalizer(this.whereCanonicalizer);
+  readonly pivotCanonicalizer: PivotCanonicalizer = new PivotCanonicalizer();
+  readonly ridListCanonicalizer: RidListCanonicalizer =
+    new RidListCanonicalizer();
+  readonly selectCanonicalizer: SelectCanonicalizer = new SelectCanonicalizer();
+  readonly objectSetArrayCanonicalizer: ObjectSetArrayCanonicalizer =
+    new ObjectSetArrayCanonicalizer();
+  readonly genericCanonicalizer: GenericCanonicalizer =
+    new GenericCanonicalizer();
+
+  readonly client: Client;
+
+  /** @internal */
+  readonly logger?: Logger;
+
+  readonly cacheKeys: CacheKeys<KnownCacheKey>;
+  readonly queries: Queries = new Queries();
+
+  /**
+   * Tracks cache keys with deferred cleanup. During React unmount-remount
+   * cycles, a subscription may be cleaned up and immediately re-created.
+   * By deferring cleanup to a microtask, we prevent propagateWrite from
+   * skipping keys that are momentarily between subscriptions.
+   *
+   * The value is a count (not a boolean) so multiple unsubscribes within the
+   * same tick schedule the correct number of releases.
+   * @internal
+   */
+  readonly pendingCleanup: Map<KnownCacheKey, number> = new Map();
+
+  readonly objectCacheKeyRegistry: ObjectCacheKeyRegistry =
+    new ObjectCacheKeyRegistry();
+
+  readonly layers: Layers = new Layers({
+    logger: this.logger,
+    onRevalidate: this.#maybeRevalidateQueries.bind(this),
+  });
+  readonly subjects: Subjects = this.layers.subjects;
+
+  // these are hopefully temporary
+  readonly aggregations: AggregationsHelper;
+  readonly functions: FunctionsHelper;
+  readonly lists: ListsHelper;
+  readonly objects: ObjectsHelper;
+  readonly links: LinksHelper;
+  readonly media: MediaHelper;
+  readonly objectSets: ObjectSetHelper;
+
+  constructor(client: Client) {
+    this.logger = client[additionalContext].logger?.child({}, {
+      msgPrefix: "Store",
+    });
+    this.client = client;
+
+    this.cacheKeys = new CacheKeys<KnownCacheKey>({
+      onDestroy: this.#cleanupCacheKey,
+    });
+
+    this.aggregations = new AggregationsHelper(
+      this,
+      this.cacheKeys,
+      this.whereCanonicalizer,
+      this.rdpCanonicalizer,
+      this.intersectCanonicalizer,
+    );
+    this.functions = new FunctionsHelper(this, this.cacheKeys);
+    this.lists = new ListsHelper(
+      this,
+      this.cacheKeys,
+      this.whereCanonicalizer,
+      this.orderByCanonicalizer,
+      this.rdpCanonicalizer,
+      this.intersectCanonicalizer,
+      this.pivotCanonicalizer,
+      this.ridListCanonicalizer,
+      this.selectCanonicalizer,
+    );
+    this.objects = new ObjectsHelper(this, this.cacheKeys);
+    this.links = new LinksHelper(
+      this,
+      this.cacheKeys,
+      this.whereCanonicalizer,
+      this.orderByCanonicalizer,
+      this.selectCanonicalizer,
+    );
+    this.media = new MediaHelper(this, this.cacheKeys);
+    this.objectSets = new ObjectSetHelper(
+      this,
+      this.cacheKeys,
+      this.whereCanonicalizer,
+      this.orderByCanonicalizer,
+      this.rdpCanonicalizer,
+      this.selectCanonicalizer,
+      this.objectSetArrayCanonicalizer,
+    );
+  }
+
+  /**
+   * Called after a key is no longer retained and the timeout has elapsed
+   * @param key
+   */
+  #cleanupCacheKey = (key: KnownCacheKey) => {
+    const subject = this.subjects.peek(key);
+
+    if (DEBUG_REFCOUNTS) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `CacheKey cleaning up (${
+          JSON.stringify({
+            closed: (subject as any)?.closed,
+            observed: (subject as any)?.observed,
+          })
+        })`,
+        JSON.stringify([key.type, ...key.otherKeys], null, 2),
+      );
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      invariant(subject);
+    }
+
+    this.subjects.delete(key);
+    this.queries.delete(key);
+
+    if (key.type === "object") {
+      this.objectCacheKeyRegistry.unregister(key);
+    }
+  };
+
+  applyAction: <Q extends ActionDefinition<any>>(
+    action: Q,
+    args:
+      | Parameters<ActionSignatureFromDef<Q>["applyAction"]>[0]
+      | Array<Parameters<ActionSignatureFromDef<Q>["applyAction"]>[0]>,
+    opts?: Store.ApplyActionOptions,
+  ) => Promise<ActionEditResponse> = async (action, args, opts) => {
+    return await new ActionApplication(this).applyAction(action, args, opts);
+  };
+
+  validateAction: <Q extends ActionDefinition<any>>(
+    action: Q,
+    args: Parameters<ActionSignatureFromDef<Q>["applyAction"]>[0],
+  ) => Promise<ActionValidationResponse> = async (action, args) => {
+    const result = await this.client(action).applyAction(args as any, {
+      $validateOnly: true,
+      $returnEdits: false,
+    });
+    return result as ActionValidationResponse;
+  };
+
+  public getValue<K extends KnownCacheKey>(
+    cacheKey: K,
+  ): Entry<K> | undefined {
+    return this.layers.top.get(cacheKey);
+  }
+
+  batch<X>(
+    { optimisticId, changes = createChangedObjects() }: {
+      optimisticId?: OptimisticId;
+      changes?: Changes;
+    },
+    batchFn: (batchContext: BatchContext) => X,
+  ): {
+    batchResult: BatchContext;
+    retVal: X;
+    changes: Changes;
+  } {
+    return this.layers.batch({ optimisticId, changes }, batchFn);
+  }
+
+  public invalidateObject<T extends ObjectTypeDefinition>(
+    apiName: T["apiName"] | T,
+    pk: PrimaryKeyType<T>,
+  ): Promise<unknown> {
+    if (typeof apiName !== "string") {
+      apiName = apiName.apiName;
+    }
+    const variants = this.objectCacheKeyRegistry.getVariants(apiName, pk);
+
+    // Invalidate all variant cache entries
+    // Using Promise.allSettled to ensure if one invalidation fails, others will still complete.
+    // This prevents a single failing query from blocking invalidation of other cache variants for the same object.
+    const promises: Promise<void>[] = [];
+
+    if (variants.size === 0) {
+      // No registered variants - create and revalidate the base variant (no RDP)
+      promises.push(
+        this.objects.getQuery({
+          apiName,
+          pk,
+        }, undefined).revalidate(/* force */ true),
+      );
+    } else {
+      // Revalidate all registered variants
+      for (const key of variants) {
+        const query = this.queries.peek(key);
+        if (query) {
+          promises.push(query.revalidate(/* force */ true));
+        }
+      }
+    }
+
+    // Per-PK invalidation doesn't propagate to specificLink queries (they're
+    // keyed on srcType+srcPk+linkName, not the linked object's pk).
+    promises.push(this.invalidateLinkQueriesForType(apiName));
+
+    // Function queries with explicit `dependsOnObjects` need to be told the
+    // edited PK directly — they aren't object-cache variants and so aren't
+    // reachable via objectCacheKeyRegistry.
+    promises.push(this.functions.invalidateFunctionsByObject(apiName, pk));
+
+    return Promise.allSettled(promises);
+  }
+
+  /**
+   * Force every cached `specificLink` query to re-evaluate against the given
+   * apiName. Link queries are keyed on `(srcType, srcPk, linkName, ...)` rather
+   * than the linked object's pk, so per-object propagation never marks them
+   * as modified.
+   *
+   * TODO: make SpecificLinkQuery self-invalidate from per-type changes so
+   * callers don't need this manual kick.
+   */
+  public invalidateLinkQueriesForType(apiName: string): Promise<void> {
+    if (process.env.NODE_ENV !== "production") {
+      this.logger?.child({ methodName: "invalidateLinkQueriesForType" }).debug(
+        apiName,
+      );
+    }
+
+    const promises: Array<Promise<void>> = [];
+    for (const cacheKey of this.queries.keys()) {
+      if (cacheKey.type !== "specificLink") {
+        continue;
+      }
+      const query = this.queries.peek(cacheKey);
+      if (!query) {
+        continue;
+      }
+      promises.push(query.invalidateObjectType(apiName, undefined));
+    }
+    return Promise.allSettled(promises).then(() => void 0);
+  }
+
+  async #maybeRevalidateQueries(
+    changes: Changes,
+    optimisticId?: OptimisticId | undefined,
+  ): Promise<void> {
+    const logger = process.env.NODE_ENV !== "production"
+      ? this.logger?.child({ methodName: "maybeRevalidateQueries" })
+      : undefined;
+
+    if (changes.isEmpty()) {
+      if (process.env.NODE_ENV !== "production") {
+        logger?.debug("No changes, aborting");
+      }
+      return;
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      logger?.debug(DEBUG_ONLY__changesToString(changes), { optimisticId });
+    }
+
+    try {
+      const promises: Array<Promise<unknown>> = [];
+      for (const cacheKey of this.queries.keys()) {
+        const query = this.queries.peek(cacheKey);
+        if (!query?.maybeUpdateAndRevalidate) {
+          continue;
+        }
+
+        // Only propagate to queries that should receive these changes
+        if (
+          !this.#shouldPropagateToQuery(
+            {
+              cacheKey,
+              maybeUpdateAndRevalidate: query.maybeUpdateAndRevalidate,
+            },
+            changes,
+            optimisticId,
+          )
+        ) {
+          continue;
+        }
+
+        const promise = query.maybeUpdateAndRevalidate(changes, optimisticId);
+        if (promise) promises.push(promise);
+      }
+      await Promise.all(promises);
+    } finally {
+      if (process.env.NODE_ENV !== "production") {
+        logger?.debug("in finally", DEBUG_ONLY__changesToString(changes));
+      }
+    }
+  }
+
+  /**
+   * Determines whether changes should propagate to a specific query.
+   * Prevents unnecessary observable pipeline execution for cross-propagation.
+   *
+   * @param query - The query to check
+   * @param changes - The changes that occurred
+   * @param optimisticId - Optional optimistic update ID
+   * @returns true if the query should be notified of these changes
+   */
+  #shouldPropagateToQuery(
+    query: {
+      cacheKey: KnownCacheKey;
+      maybeUpdateAndRevalidate?: (
+        changes: Changes,
+        optimisticId: OptimisticId | undefined,
+      ) => Promise<void> | undefined;
+    },
+    changes: Changes,
+    optimisticId?: OptimisticId,
+  ): boolean {
+    // Always propagate optimistic updates (user-initiated actions need immediate feedback)
+    if (optimisticId) {
+      return true;
+    }
+
+    // If the query's own cache key was modified (direct fetch), always propagate
+    if (changes.modified.has(query.cacheKey)) {
+      return true;
+    }
+
+    // Check if the query's object type is affected by the changes
+    if (this.#shouldPropagateForObjectTypeChanges(query.cacheKey, changes)) {
+      return true;
+    }
+
+    // For other cross-propagation (e.g., RDP field updates from unrelated object types):
+    // Only propagate to queries WITH RDP configurations
+    const queryRdpConfig = this.#getQueryRdpConfig(query.cacheKey);
+
+    // If query has no RDP, don't propagate unrelated object changes to it
+    // (it will get updates from its own direct fetches only)
+    return queryRdpConfig != null;
+  }
+
+  /**
+   * Checks if changes to an object type should propagate to a query.
+   * This ensures queries receive updates when objects of their type are added/modified.
+   *
+   * @param cacheKey - The cache key of the query
+   * @param changes - The changes that occurred
+   * @returns true if the query should be notified based on object type changes
+   */
+  #shouldPropagateForObjectTypeChanges(
+    cacheKey: KnownCacheKey,
+    changes: Changes,
+  ): boolean {
+    if (cacheKey.type === "pipelineSet" || cacheKey.type === "list") {
+      const query = this.queries.peek(cacheKey);
+      // Both ObjectSetQuery and ListQuery expose objectTypes: ReadonlySet<string>
+      if (query && "objectTypes" in query) {
+        for (
+          const objectType of (query as { objectTypes: ReadonlySet<string> })
+            .objectTypes
+        ) {
+          if (this.#changesAffectObjectType(changes, objectType)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    const queryObjectType = this.#getQueryObjectType(cacheKey);
+    if (!queryObjectType) {
+      return false;
+    }
+
+    const affected = this.#changesAffectObjectType(changes, queryObjectType);
+
+    if (process.env.NODE_ENV !== "production") {
+      this.logger?.child({ methodName: "shouldPropagateToQuery" }).debug(
+        `Query type: ${queryObjectType}, affected: ${affected}`,
+        {
+          queryKey: DEBUG_ONLY__cacheKeyToString(cacheKey),
+          addedCount: changes.addedObjects.get(queryObjectType)?.length ?? 0,
+          modifiedCount: changes.modifiedObjects.get(queryObjectType)?.length
+            ?? 0,
+        },
+      );
+    }
+
+    return affected;
+  }
+
+  /**
+   * Extracts RDP configuration from a cache key if present.
+   *
+   * @param cacheKey - The cache key to check
+   * @returns The RDP configuration, null, or undefined
+   */
+  #getQueryRdpConfig(
+    cacheKey: KnownCacheKey,
+  ): Canonical<Rdp> | null | undefined {
+    if ("otherKeys" in cacheKey && Array.isArray(cacheKey.otherKeys)) {
+      if (cacheKey.type === "object") {
+        return cacheKey.otherKeys[OBJECT_RDP_CONFIG_IDX];
+      } else if (cacheKey.type === "list") {
+        return cacheKey.otherKeys[LIST_RDP_IDX];
+      } else if (cacheKey.type === "aggregation") {
+        return cacheKey.otherKeys[AGGREGATION_RDP_IDX];
+      } else if (cacheKey.type === "pipelineSet") {
+        const query = this.queries.peek(cacheKey);
+        if (query) {
+          return query.rdpConfig;
+        }
+      } else if (cacheKey.type === "mediaMetadata") {
+        return undefined;
+      }
+      // Links and other types would also be at LIST_RDP_IDX
+    }
+    return undefined;
+  }
+
+  /**
+   * Extracts the object type (apiName) from a cache key.
+   *
+   * @param cacheKey - The cache key to check
+   * @returns The object type/apiName, or undefined if not applicable
+   */
+  #getQueryObjectType(cacheKey: KnownCacheKey): string | undefined {
+    if ("otherKeys" in cacheKey && Array.isArray(cacheKey.otherKeys)) {
+      if (cacheKey.type === "object") {
+        return cacheKey.otherKeys[OBJECT_API_NAME_IDX];
+      } else if (cacheKey.type === "list") {
+        return cacheKey.otherKeys[LIST_API_NAME_IDX];
+      } else if (cacheKey.type === "aggregation") {
+        return cacheKey.otherKeys[AGGREGATION_API_NAME_IDX];
+      } else if (cacheKey.type === "mediaMetadata") {
+        return cacheKey.otherKeys[0];
+      }
+      // Links would have apiName at a different position
+    }
+    return undefined;
+  }
+
+  /**
+   * Checks if changes affect a specific object type.
+   *
+   * @param changes - The changes to check
+   * @param objectType - The object type to check for
+   * @returns true if the changes include added or modified objects of this type
+   */
+  #changesAffectObjectType(changes: Changes, objectType: string): boolean {
+    // Check added objects (MultiMap.get returns an array)
+    const addedForType = changes.addedObjects.get(objectType);
+    if (addedForType && addedForType.length > 0) {
+      return true;
+    }
+
+    // Check modified objects (MultiMap.get returns an array)
+    const modifiedForType = changes.modifiedObjects.get(objectType);
+    if (modifiedForType && modifiedForType.length > 0) {
+      return true;
+    }
+
+    for (const deletedKey of changes.deleted) {
+      if (
+        deletedKey.type === "object"
+        && deletedKey.otherKeys[OBJECT_API_NAME_IDX] === objectType
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Invalidates all cache entries for a specific object type.
+   * This will revalidate:
+   * 1. All objects of the specified type
+   * 2. All lists of the specified type
+   * 3. All links where the source object is of the specified type
+   *
+   * @param apiName - The API name of the object type to invalidate
+   * @param changes - Optional changes object to track what has been modified
+   * @returns Promise that resolves when all invalidations are complete
+   */
+  public invalidateObjectType<T extends ObjectTypeDefinition>(
+    apiName: T["apiName"] | T,
+    changes: Changes | undefined,
+  ): Promise<void> {
+    if (typeof apiName !== "string") {
+      apiName = apiName.apiName;
+    }
+    if (process.env.NODE_ENV !== "production") {
+      this.logger?.child({ methodName: "invalidateObjectType" }).info(
+        changes ? DEBUG_ONLY__changesToString(changes) : void 0,
+      );
+    }
+
+    const promises: Array<Promise<void>> = [];
+
+    for (const cacheKey of this.layers.truth.keys()) {
+      if (
+        cacheKey.type !== "mediaMetadata"
+        && changes
+        && changes.modified.has(cacheKey)
+      ) {
+        continue;
+      }
+      const query = this.queries.peek(cacheKey);
+      if (!query) continue;
+
+      promises.push(query.invalidateObjectType(apiName, changes));
+    }
+
+    // we use allSettled here because we don't care if it succeeds or fails, just that they all complete.
+    return Promise.allSettled(promises).then(() => void 0);
+  }
+
+  public async invalidateAll(): Promise<void> {
+    const promises: Array<Promise<unknown>> = [];
+    for (const cacheKey of this.queries.keys()) {
+      const query = this.queries.peek(cacheKey);
+      if (query) {
+        promises.push(query.revalidate(true));
+      }
+    }
+    // we use allSettled here because we don't care if it succeeds or fails, just that they all complete.
+    return Promise.allSettled(promises).then(() => void 0);
+  }
+
+  public async invalidateObjects(
+    objects:
+      | Coach.Instance<ObjectTypeDefinition>
+      | ReadonlyArray<Coach.Instance<ObjectTypeDefinition>>,
+  ): Promise<void> {
+    const objectsArray = Array.isArray(objects) ? objects : [objects];
+    const promises: Array<Promise<unknown>> = [];
+
+    for (const obj of objectsArray) {
+      promises.push(this.invalidateObject(obj.$objectType, obj.$primaryKey));
+    }
+
+    // we use allSettled here because we don't care if it succeeds or fails, just that they all complete.
+    return Promise.allSettled(promises).then(() => void 0);
+  }
+
+  public async invalidateFunction(
+    apiName: string | QueryDefinition<unknown>,
+    params?: Record<string, unknown>,
+  ): Promise<void> {
+    return this.functions.invalidateFunction(apiName, params);
+  }
+
+  public async invalidateFunctionsByObject(
+    apiName: string,
+    primaryKey: string | number,
+  ): Promise<void> {
+    return this.functions.invalidateFunctionsByObject(apiName, primaryKey);
+  }
+
+  #sizeCache: WeakMap<object, number> | undefined;
+
+  public getCacheSnapshot(): CacheSnapshot {
+    if (__DEV__) {
+      const sizeCache = this.#sizeCache ??= new WeakMap<object, number>();
+      const entries: CacheEntry[] = [];
+      let totalSize = 0;
+
+      for (const cacheKey of this.layers.truth.keys()) {
+        const entry = this.layers.top.get(cacheKey);
+        if (!entry) {
+          continue;
+        }
+
+        let entryType: CacheEntry["type"] | undefined;
+        let objectType = "";
+
+        if (cacheKey.type === "object") {
+          entryType = "object";
+          objectType = cacheKey.otherKeys[OBJECT_API_NAME_IDX];
+        } else if (cacheKey.type === "list") {
+          entryType = "list";
+          objectType = cacheKey.otherKeys[LIST_API_NAME_IDX];
+        } else if (cacheKey.type === "specificLink") {
+          entryType = "link";
+          objectType = cacheKey.otherKeys[LINK_API_NAME_IDX];
+        } else if (cacheKey.type === "pipelineSet") {
+          entryType = "pipelineSet";
+          objectType = "";
+        }
+
+        if (!entryType) {
+          continue;
+        }
+
+        let estimatedSize = 0;
+        if (entry.value != null && typeof entry.value === "object") {
+          const objectValue = entry.value;
+          const cached = sizeCache.get(objectValue);
+          if (cached !== undefined) {
+            estimatedSize = cached;
+          } else {
+            try {
+              estimatedSize = JSON.stringify(entry.value).length * 2;
+            } catch {
+              // TODO: surface unserializable entries to devtools users
+              estimatedSize = 0;
+            }
+            sizeCache.set(objectValue, estimatedSize);
+          }
+        } else if (entry.value != null) {
+          try {
+            estimatedSize = JSON.stringify(entry.value).length * 2;
+          } catch {
+            estimatedSize = 0;
+          }
+        }
+        totalSize += estimatedSize;
+
+        entries.push({
+          key: DEBUG_ONLY__cacheKeyToString(cacheKey),
+          type: entryType,
+          objectType,
+          metadata: {
+            timestamp: entry.lastUpdated,
+            status: entry.status,
+            size: estimatedSize,
+          },
+          data: entry.value,
+        });
+      }
+
+      return {
+        entries,
+        stats: {
+          totalEntries: entries.length,
+          totalSize,
+        },
+      };
+    }
+
+    return {
+      entries: [],
+      stats: { totalEntries: 0, totalSize: 0 },
+    };
+  }
+}

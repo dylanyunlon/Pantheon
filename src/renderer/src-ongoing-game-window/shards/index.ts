@@ -1,6 +1,6 @@
 import { createManager } from '@renderer-shared/shards'
 import { AppCommonRenderer } from '@renderer-shared/shards/app-common'
-import { CoachAdvisorRenderer } from '@renderer-shared/shards/coach-advisor'
+import { CoachAdvisorRenderer } from '@renderer-shared/shards/advisor'
 import { AkariIpcRenderer } from '@renderer-shared/shards/ipc'
 import { LeagueClientRenderer } from '@renderer-shared/shards/league-client'
 import { LoggerRenderer } from '@renderer-shared/shards/logger'

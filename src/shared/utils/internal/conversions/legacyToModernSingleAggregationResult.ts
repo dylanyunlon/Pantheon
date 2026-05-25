@@ -1,1 +1,1 @@
-export { legacyToModernSingleAggregationResult } from '../../coach-internal/conversions/legacyToModernSingleAggregationResult'
+export { legacyToModernSingleAggregationResult } from '../../internal/conversions/legacyToModernSingleAggregationResult'

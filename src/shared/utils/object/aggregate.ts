@@ -1,1 +1,1 @@
-export { aggregate } from '../coach-object/aggregate'
+export { aggregate } from '../object/aggregate'

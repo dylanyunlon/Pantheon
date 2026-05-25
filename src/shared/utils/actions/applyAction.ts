@@ -1,1 +1,1 @@
-export type { ActionSignatureFromDef } from '../coach-actions/applyAction'
+export type { ActionSignatureFromDef } from '../actions/applyAction'

@@ -1,1 +1,1 @@
-export { hasWithProperties, extractRdpDefinition } from '../coach-util/extractRdpDefinition'
+export { hasWithProperties, extractRdpDefinition } from '../util/extractRdpDefinition'

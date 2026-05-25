@@ -20,23 +20,23 @@
     "noUnusedParameters": false,
     "noImplicitAny": true,
     "paths": {
-      "@coach/pantheon.core": [
-        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      "@pantheon/pantheon.core": [
+        "src/shared/utils/stubs/pantheon-ontologies"
       ],
-      "@coach/pantheon.functions/*": [
-        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      "@pantheon/pantheon.functions/*": [
+        "src/shared/utils/stubs/pantheon-ontologies"
       ],
-      "@coach/pantheon.mediasets": [
-        "src/shared/utils/coach-stubs/pantheon-mediasets"
+      "@pantheon/pantheon.mediasets": [
+        "src/shared/utils/stubs/pantheon-mediasets"
       ],
-      "@coach/pantheon.ontologies": [
-        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      "@pantheon/pantheon.ontologies": [
+        "src/shared/utils/stubs/pantheon-ontologies"
       ],
-      "@coach/pantheon.ontologies/*": [
-        "src/shared/utils/coach-stubs/pantheon-ontologies"
+      "@pantheon/pantheon.ontologies/*": [
+        "src/shared/utils/stubs/pantheon-ontologies"
       ],
-      "@coach/shared.client.impl": [
-        "src/shared/utils/coach-stubs/shared-client-impl"
+      "@pantheon/shared.client.impl": [
+        "src/shared/utils/stubs/shared-client-impl"
       ]
     }
   }

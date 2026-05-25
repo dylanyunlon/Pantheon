@@ -1,1 +1,1 @@
-export { fetchPage, fetchPageWithErrors, fetchPageInternal, fetchPageWithErrorsInternal } from '../coach-object/fetchPage'
+export { fetchPage, fetchPageWithErrors, fetchPageInternal, fetchPageWithErrorsInternal } from '../object/fetchPage'

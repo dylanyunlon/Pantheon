@@ -1,0 +1,71 @@
+// @ts-nocheck
+/*
+ * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon Pantheon architecture patterns.
+ * 
+ * 
+ *
+ *     Advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { TimeSeriesQuery } from "../types";
+import { TimeseriesDurationMapping } from "../types";
+import type { TimeRange } from "../types";
+import { iterateReadableStream, parseStreamedResponse } from "./streamutils";
+
+export function getTimeRange(body: TimeSeriesQuery): TimeRange {
+  if ("$startTime" in body || "$endTime" in body) {
+    return {
+      type: "absolute",
+      startTime: body.$startTime,
+      endTime: body.$endTime,
+    };
+  }
+  return body.$before
+    ? {
+      type: "relative",
+      startTime: {
+        when: "BEFORE",
+        value: body.$before,
+        unit: TimeseriesDurationMapping[(body as any).$unit],
+      },
+    }
+    : {
+      type: "relative",
+      endTime: {
+        when: "AFTER",
+        value: body.$after!,
+        unit: TimeseriesDurationMapping[(body as any).$unit],
+      },
+    };
+}
+
+export async function* asyncIterPointsHelper<
+  T extends number | string | GeoJSON.Point,
+>(
+  iterator: Response,
+): AsyncGenerator<
+  {
+    time: any;
+    value: T;
+  },
+  void,
+  unknown
+> {
+  const reader = iterator.body?.getReader()!;
+  for await (
+    const point of parseStreamedResponse(iterateReadableStream(reader))
+  ) {
+    yield {
+      time: point.time,
+      value: point.value as T,
+    };
+  }
+}

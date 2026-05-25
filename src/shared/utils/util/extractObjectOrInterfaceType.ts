@@ -1,1 +1,1 @@
-export { extractObjectOrInterfaceType } from '../coach-util/extractObjectOrInterfaceType'
+export { extractObjectOrInterfaceType } from '../util/extractObjectOrInterfaceType'

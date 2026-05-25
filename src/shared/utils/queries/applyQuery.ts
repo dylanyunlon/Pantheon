@@ -1,1 +1,1 @@
-export { applyQuery } from '../coach-queries/applyQuery'
+export { applyQuery } from '../queries/applyQuery'

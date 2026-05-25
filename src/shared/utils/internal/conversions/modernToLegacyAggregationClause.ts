@@ -1,1 +1,1 @@
-export { modernToLegacyAggregationClause } from '../../coach-internal/conversions/modernToLegacyAggregationClause'
+export { modernToLegacyAggregationClause } from '../../internal/conversions/modernToLegacyAggregationClause'

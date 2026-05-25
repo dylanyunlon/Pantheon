@@ -1,1 +1,1 @@
-export { fetchSingle, fetchSingleWithErrors } from '../coach-object/fetchSingle'
+export { fetchSingle, fetchSingleWithErrors } from '../object/fetchSingle'

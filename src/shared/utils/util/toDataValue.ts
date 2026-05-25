@@ -1,1 +1,1 @@
-export { toDataValue } from '../coach-util/toDataValue'
+export { toDataValue } from '../util/toDataValue'

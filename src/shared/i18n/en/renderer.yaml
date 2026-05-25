@@ -2268,8 +2268,8 @@ self-update-renderer:
     waiting-for-restart: Updated applied. Restart the application to apply the update
     cancelButton: Cancel
 
-CoachPanel:
-  title: Coach Advisor
+AdvisorPanel:
+  title: Advisor
   analyzing: Analyzing match data...
   teamAdvantage: Team Ahead
   teamDisadvantage: Team Behind
@@ -2284,15 +2284,15 @@ CoachPanel:
   phaseMid: Mid Game
   phaseLate: Late Game
 
-CoachAdvisorSettings:
-  title: Coach Advisor
+AdvisorSettings:
+  title: Advisor
   titleCommon: General
   titleCategories: Advice Categories
   titleAdvanced: Advanced
 
   enabled:
-    label: Enable Coach Advisor
-    description: Automatically generate coaching advice during match analysis
+    label: Enable Advisor
+    description: Automatically generate tactical advice during match analysis
 
   maxAdviceCount:
     label: Maximum Advice Count
@@ -2361,7 +2361,7 @@ CoachAdvisorSettings:
 
   captureShowStatsInPanel:
     label: Show capture stats in panel
-    description: Display real-time capture statistics in the coach panel footer
+    description: Display real-time capture statistics in the advisor panel footer
 
   captureAutoFlushInterval:
     label: Auto-flush interval (ms)

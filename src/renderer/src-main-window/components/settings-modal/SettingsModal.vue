@@ -48,10 +48,10 @@
         <template #tab>
           <div class="tab-icon-title">
             <NIcon class="icon"><AiStatusIcon /> </NIcon>
-            <span>{{ t('CoachAdvisorSettings.title') }}</span>
+            <span>{{ t('AdvisorSettings.title') }}</span>
           </div>
         </template>
-        <CoachAdvisorSettings />
+        <AdvisorSettings />
       </NTabPane>
       <NTabPane name="multi-window">
         <template #tab>
@@ -118,7 +118,7 @@ import { useCssModule, useTemplateRef, watch } from 'vue'
 
 import AboutPane from './AboutPane.vue'
 import AppSettings from './AppSettings.vue'
-import CoachAdvisorSettings from './CoachAdvisorSettings.vue'
+import AdvisorSettings from './AdvisorSettings.vue'
 import DebugSettings from './DebugSettings.vue'
 import MatchHistorySettings from './MatchHistorySettings.vue'
 import MiscSettings from './MiscSettings.vue'

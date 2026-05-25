@@ -1,1 +1,1 @@
-export { getWireObjectSet, isObjectSet } from '../coach-pipeline/createObjectSet'
+export { getWireObjectSet, isObjectSet } from '../pipeline/createObjectSet'

@@ -1,1 +1,1 @@
-export { modernToLegacyGroupByClause } from '../../coach-internal/conversions/modernToLegacyGroupByClause'
+export { modernToLegacyGroupByClause } from '../../internal/conversions/modernToLegacyGroupByClause'

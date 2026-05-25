@@ -1,0 +1,302 @@
+/*
+ * Copyright 2026 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon Pantheon architecture patterns.
+ * 
+ * 
+ *
+ *     Advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { ObjectOrInterfaceDefinition, Coach } from "../../../../types";
+import deepEqual from "fast-deep-equal";
+import { UnderlyingPantheonRecord } from "../../../object/convertWireToPantheonRecords/InternalSymbols";
+import type { ObjectHolder } from "../../../object/convertWireToPantheonRecords/ObjectHolder";
+import { getDefType } from "../../../util/interfaceUtils";
+import type { ObjectPayload } from "../../ObjectPayload";
+import type { ObserveObjectOptions } from "../../ObservableClient";
+import type { Observer, Status } from "../../ObservableClient/common";
+import { AbstractHelper } from "../AbstractHelper";
+import type { BatchContext } from "../BatchContext";
+import type { Canonical } from "../Canonical";
+import type { QuerySubscription } from "../QuerySubscription";
+import type { Rdp } from "../RdpCanonicalizer";
+import { tombstone } from "../tombstone";
+import {
+  mergeObjectFields,
+  mergeSelectFields,
+} from "../utils/rdpFieldOperations";
+import { type ObjectCacheKey } from "./ObjectCacheKey";
+import { ObjectQuery } from "./ObjectQuery";
+
+export class ObjectsHelper extends AbstractHelper<
+  ObjectQuery,
+  ObserveObjectOptions<any>
+> {
+  observe<T extends ObjectOrInterfaceDefinition>(
+    options: ObserveObjectOptions<T>,
+    subFn: Observer<ObjectPayload>,
+  ): QuerySubscription<ObjectQuery> {
+    return super.observe(options, subFn);
+  }
+
+  getQuery<T extends ObjectOrInterfaceDefinition>(
+    options: ObserveObjectOptions<T>,
+    rdpConfig?: Canonical<Rdp> | null,
+  ): ObjectQuery {
+    const apiName = typeof options.apiName === "string"
+      ? options.apiName
+      : options.apiName.apiName;
+    const {
+      pk,
+      select,
+      $loadPropertySecurityMetadata,
+    } = options;
+
+    const defType = getDefType(options.apiName);
+    // The flag is interface-only on the server. Drop it for object queries so
+    // they don't fragment the cache.
+    const $includeAllBaseObjectProperties = defType === "interface"
+        && options.$includeAllBaseObjectProperties
+      ? true
+      : undefined;
+
+    const canonSelect = select && select.length > 0
+      ? this.store.selectCanonicalizer.canonicalize(select)
+      : undefined;
+
+    const objectCacheKey = this.cacheKeys.get<ObjectCacheKey>(
+      "object",
+      apiName,
+      pk,
+      rdpConfig ?? undefined,
+      canonSelect,
+      $loadPropertySecurityMetadata ? true : undefined,
+      $includeAllBaseObjectProperties,
+    );
+
+    return this.store.queries.get(objectCacheKey, () =>
+      new ObjectQuery(
+        this.store,
+        this.store.subjects.get(objectCacheKey),
+        apiName,
+        pk,
+        objectCacheKey,
+        { dedupeInterval: 0 },
+        defType,
+        select,
+        $loadPropertySecurityMetadata,
+        $includeAllBaseObjectProperties,
+      ));
+  }
+
+  /**
+   * Internal helper method for writing objects to the store and returning their
+   * object keys. For list queries with RDPs, the rdpConfig is included in the
+   * cache key to ensure proper data isolation.
+   * @internal
+   */
+  public storeOsdkInstances(
+    values: Array<ObjectHolder> | Array<Coach.Instance<any, any, any>>,
+    batch: BatchContext,
+    rdpConfig?: Canonical<Rdp> | null,
+    selectFields?: ReadonlySet<string>,
+    includeAllBaseObjectProperties?: boolean,
+  ): ObjectCacheKey[] {
+    return values.map(v =>
+      this.getQuery({
+        apiName: v.$objectType ?? v.$apiName,
+        pk: v.$primaryKey,
+        $includeAllBaseObjectProperties: includeAllBaseObjectProperties,
+      }, rdpConfig).writeToStore(
+        v as ObjectHolder,
+        "loaded",
+        batch,
+        selectFields,
+      ).cacheKey
+    );
+  }
+
+  /**
+   * Write an object to cache and propagate to all related cache keys
+   * @internal
+   */
+  public propagateWrite(
+    sourceCacheKey: ObjectCacheKey,
+    value: ObjectHolder | typeof tombstone,
+    status: Status,
+    batch: BatchContext,
+    selectFields?: ReadonlySet<string>,
+  ): void {
+    const existing = batch.read(sourceCacheKey);
+    const dataChanged = !existing
+      || existing.value === undefined
+      || value === tombstone
+      || !deepEqual(existing.value, value);
+    const statusChanged = !existing || existing.status !== status;
+
+    if (!dataChanged && !statusChanged) {
+      return;
+    }
+
+    let valueToWrite = !dataChanged && existing ? existing.value : value;
+
+    // When a $select-filtered fetch returns partial objects, merge with
+    // existing cached data to preserve fields not in the select set.
+    const existingHolder = existing?.value;
+    const canMergeSelectFields = dataChanged
+      && selectFields
+      && selectFields.size > 0
+      && existingHolder
+      && this.isObjectHolder(existingHolder);
+
+    if (canMergeSelectFields && valueToWrite !== tombstone) {
+      valueToWrite = mergeSelectFields(
+        valueToWrite,
+        selectFields,
+        existingHolder,
+      );
+    }
+
+    // When an object (e.g. from a subscription update) is written to a cache
+    // key that has RDP configuration, the incoming value may lack derived
+    // property values. Merge with the existing cached value so that RDP fields
+    // not present in the incoming object are preserved.
+    if (
+      valueToWrite !== tombstone
+      && existing?.value
+      && this.isObjectHolder(existing.value)
+    ) {
+      const expectedRdpFields = this.store.objectCacheKeyRegistry
+        .getRdpFieldSet(sourceCacheKey);
+      if (expectedRdpFields.size > 0) {
+        const underlying = (valueToWrite as any)[UnderlyingPantheonRecord];
+        const actualRdpFields = new Set<string>();
+        for (const field of expectedRdpFields) {
+          if (underlying && field in underlying) {
+            actualRdpFields.add(field);
+          }
+        }
+
+        if (actualRdpFields.size !== expectedRdpFields.size) {
+          valueToWrite = mergeObjectFields(
+            valueToWrite,
+            actualRdpFields,
+            expectedRdpFields,
+            existing.value,
+          );
+        }
+      }
+    }
+
+    batch.write(sourceCacheKey, valueToWrite, status);
+
+    if (value === tombstone) {
+      batch.changes.deleteObject(sourceCacheKey);
+    } else {
+      batch.changes.registerObject(sourceCacheKey, value, !existing);
+    }
+
+    const metadata = this.store.objectCacheKeyRegistry.getMetadata(
+      sourceCacheKey,
+    );
+
+    const relatedKeys = metadata
+      ? this.store.objectCacheKeyRegistry.getVariants(
+        metadata.apiName,
+        metadata.primaryKey,
+      )
+      : new Set([sourceCacheKey]);
+
+    for (const targetKey of relatedKeys) {
+      if (targetKey === sourceCacheKey || !this.isKeyActive(targetKey)) {
+        continue;
+      }
+
+      if (value === tombstone) {
+        batch.write(targetKey, tombstone, status);
+        batch.changes.deleteObject(targetKey);
+        continue;
+      }
+
+      const targetCurrentValue = batch.read(targetKey)?.value;
+      const targetHolder =
+        targetCurrentValue && this.isObjectHolder(targetCurrentValue)
+          ? targetCurrentValue
+          : undefined;
+
+      // Preserve target-only fields when a partial-select fetch propagates
+      // to a sibling variant, so different-select variants converge to the
+      // union rather than clobbering each other.
+      let merged = value;
+      if (selectFields?.size && targetHolder) {
+        merged = mergeSelectFields(merged, selectFields, targetHolder);
+      }
+      merged = this.mergeForTarget(
+        merged,
+        targetHolder,
+        sourceCacheKey,
+        targetKey,
+      );
+
+      batch.write(targetKey, merged, status);
+    }
+  }
+
+  /**
+   * Check if a cache key is actively observed or pending cleanup.
+   * During React unmount-remount cycles, a key may be momentarily
+   * unobserved while its cleanup is deferred to a microtask.
+   * We still propagate to such keys to prevent stale data when
+   * the subscription is re-established.
+   */
+  private isKeyActive(key: ObjectCacheKey): boolean {
+    const subject = this.store.subjects.peek(key);
+    if ((subject as any)?.observed === true) {
+      return true;
+    }
+    return (this.store.pendingCleanup.get(key) ?? 0) > 0;
+  }
+
+  /**
+   * Type guard to check if a value is an ObjectHolder
+   */
+  private isObjectHolder(
+    value: ObjectHolder | undefined,
+  ): value is ObjectHolder {
+    return value != null
+      && typeof value === "object"
+      && "$apiName" in value
+      && "$primaryKey" in value;
+  }
+
+  /**
+   * Merge object data for a specific target cache key, preserving RDP fields
+   */
+  private mergeForTarget(
+    sourceValue: ObjectHolder,
+    targetCurrentValue: ObjectHolder | undefined,
+    sourceCacheKey: ObjectCacheKey,
+    targetCacheKey: ObjectCacheKey,
+  ): ObjectHolder {
+    const sourceRdpFields = this.store.objectCacheKeyRegistry.getRdpFieldSet(
+      sourceCacheKey,
+    );
+    const targetRdpFields = this.store.objectCacheKeyRegistry.getRdpFieldSet(
+      targetCacheKey,
+    );
+
+    return mergeObjectFields(
+      sourceValue,
+      sourceRdpFields,
+      targetRdpFields,
+      targetCurrentValue,
+    );
+  }
+}

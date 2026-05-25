@@ -1,1 +1,1 @@
-export type { DerivedStatRuntimeMetadata as DerivedPropertyRuntimeMetadata } from '../coach-derived/derivedStatRuntimeMetadata'
+export type { DerivedStatRuntimeMetadata as DerivedPropertyRuntimeMetadata } from '../derived/derivedStatRuntimeMetadata'

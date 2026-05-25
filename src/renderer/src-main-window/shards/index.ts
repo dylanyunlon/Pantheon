@@ -1,7 +1,7 @@
 import { createManager } from '@renderer-shared/shards'
 import { AppCommonRenderer } from '@renderer-shared/shards/app-common'
 import { AutoChampConfigRenderer } from '@renderer-shared/shards/auto-champ-config'
-import { CoachAdvisorRenderer } from '@renderer-shared/shards/coach-advisor'
+import { CoachAdvisorRenderer } from '@renderer-shared/shards/advisor'
 import { AutoGameflowRenderer } from '@renderer-shared/shards/auto-gameflow'
 import { AutoReplyRenderer } from '@renderer-shared/shards/auto-reply'
 import { AutoSelectRenderer } from '@renderer-shared/shards/auto-select'
