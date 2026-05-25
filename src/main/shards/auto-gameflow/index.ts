@@ -800,7 +800,7 @@ export class AutoGameflowMain implements IAkariShardInitDispose {
         this._lc.api.chat
           .chatSend(
             this._lc.data.chat.conversations.customGame.id,
-            `[League Akari] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled')}`,
+            `[Pantheon] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled')}`,
             'celebration'
           )
           .catch(() => {})
@@ -809,7 +809,7 @@ export class AutoGameflowMain implements IAkariShardInitDispose {
         this._lc.api.chat
           .chatSend(
             this._lc.data.chat.conversations.customGame.id,
-            `[League Akari] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled-wait-for-invitees')}`,
+            `[Pantheon] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled-wait-for-invitees')}`,
             'celebration'
           )
           .catch(() => {})
@@ -818,7 +818,7 @@ export class AutoGameflowMain implements IAkariShardInitDispose {
         this._lc.api.chat
           .chatSend(
             this._lc.data.chat.conversations.customGame.id,
-            `[League Akari] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled-not-leader')}`,
+            `[Pantheon] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled-not-leader')}`,
             'celebration'
           )
           .catch(() => {})
@@ -827,7 +827,7 @@ export class AutoGameflowMain implements IAkariShardInitDispose {
         this._lc.api.chat
           .chatSend(
             this._lc.data.chat.conversations.customGame.id,
-            `[League Akari] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled-wait-for-penalty')}`,
+            `[Pantheon] ${i18next.t('auto-gameflow-main.auto-matchmaking-canceled-wait-for-penalty')}`,
             'celebration'
           )
           .catch(() => {})
@@ -838,7 +838,7 @@ export class AutoGameflowMain implements IAkariShardInitDispose {
       this._lc.api.chat
         .chatSend(
           this._lc.data.chat.conversations.customGame.id,
-          `[League Akari] ${i18next.t('auto-gameflow-main.auto-matchmaking-in', { seconds: Math.abs(time).toFixed() })}`,
+          `[Pantheon] ${i18next.t('auto-gameflow-main.auto-matchmaking-in', { seconds: Math.abs(time).toFixed() })}`,
           'celebration'
         )
         .catch(() => {})

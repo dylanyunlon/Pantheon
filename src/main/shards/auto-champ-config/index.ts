@@ -408,7 +408,7 @@ export class AutoChampionConfigMain implements IAkariShardInitDispose {
     try {
       await this._lc.api.chat.chatSend(
         this._lc.data.chat.conversations.championSelect.id,
-        `[League Akari] ${message}`,
+        `[Pantheon] ${message}`,
         'celebration'
       )
     } catch (error) {

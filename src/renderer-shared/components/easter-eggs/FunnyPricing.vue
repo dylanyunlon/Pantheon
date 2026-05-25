@@ -210,7 +210,7 @@ let clickCount = 0
 let is棒triggered = false
 let is牛triggered = false
 
-// 拼多多 —— implemented by League Akari
+// 拼多多 —— implemented by Pantheon
 const handleTopUp = () => {
   const now = Date.now()
 

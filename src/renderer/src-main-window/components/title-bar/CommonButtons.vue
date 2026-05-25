@@ -74,7 +74,7 @@ import {
   useMainWindowStore,
   useOpggWindowStore
 } from '@renderer-shared/shards/window-manager/store'
-import { LEAGUE_AKARI_GITHUB } from '@shared/constants/common'
+import { PANTHEON_GITHUB } from '@shared/constants/common'
 import { Notification as NotificationIcon } from '@vicons/carbon'
 import { Window24Filled as Window24FilledIcon } from '@vicons/fluent'
 import { LogoGithub } from '@vicons/ionicons5'
@@ -133,7 +133,7 @@ const handleShowOpggWindow = () => {
 }
 
 const handleToGithub = () => {
-  window.open(LEAGUE_AKARI_GITHUB, '_blank')
+  window.open(PANTHEON_GITHUB, '_blank')
 }
 
 const shouldShowAnnouncementBadge = computed(() => {

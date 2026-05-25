@@ -13,7 +13,7 @@
     </template>
     <div v-else class="tabs-placeholder">
       <div class="centered">
-        <LeagueAkariSpan bold class="akari-text" />
+        <PantheonSpan bold class="akari-text" />
         <template v-if="lcs.connectionState !== 'connected'">
           <span class="disconnected">{{ t('MatchHistoryTabs.disconnected') }}</span>
           <EasyToLaunch />
@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import EasyToLaunch from '@renderer-shared/components/EasyToLaunch.vue'
 import LcuImage from '@renderer-shared/components/LcuImage.vue'
-import LeagueAkariSpan from '@renderer-shared/components/LeagueAkariSpan.vue'
+import PantheonSpan from '@renderer-shared/components/PantheonSpan.vue'
 import StreamerModeMaskedText from '@renderer-shared/components/StreamerModeMaskedText.vue'
 import { useKeyboardCombo } from '@renderer-shared/compositions/useKeyboardCombo'
 import { useInstance } from '@renderer-shared/shards'

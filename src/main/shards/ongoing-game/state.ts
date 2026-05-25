@@ -288,7 +288,7 @@ export class OngoingGameState {
   }
 
   /**
-   * 当前游戏的进行状态简化，用于区分 League Akari 的几个主要阶段
+   * 当前游戏的进行状态简化，用于区分 Pantheon 的几个主要阶段
    *
    * unavailable - 不需要介入的状态
    *
@@ -340,7 +340,7 @@ export class OngoingGameState {
   }
 
   /**
-   * 在游戏结算时，League Akari 会额外进行一些操作
+   * 在游戏结算时，Pantheon 会额外进行一些操作
    */
   get isInEog() {
     return (

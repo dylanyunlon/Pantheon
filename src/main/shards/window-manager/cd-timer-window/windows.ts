@@ -1,4 +1,4 @@
-import { input } from '@leagueakari/league-akari-addons'
+import { input } from '@dylanyunlon/pantheon-addons'
 import { GameClientMain } from '@main/shards/game-client'
 import { AkariIpcError } from '@main/shards/ipc'
 import icon from '@resources/LA_ICON.ico?asset'

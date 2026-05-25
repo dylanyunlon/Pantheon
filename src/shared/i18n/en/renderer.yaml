@@ -8,7 +8,7 @@ AnnouncementModal:
   noAnnouncementMd: |
     ***No announcement***
 
-    or check [GitHub](https://github.com/LeagueAkari/LeagueAkari-Config/tree/main/announcement)
+    or check [GitHub](https://github.com/dylanyunlon/Pantheon-Config/tree/main/announcement)
 
 DeclarationModal:
   title: Declaration
@@ -49,7 +49,7 @@ DeclarationModal:
     ---
 
     ## I. Nature of the Software & Acquisition
-    - **League Akari** is entirely open-source and free; all features are provided “as-is.”
+    - **Pantheon** is entirely open-source and free; all features are provided “as-is.”
     - This software may not be released, distributed, or obtained in any paid, bundled, or profit-making form. Always download it through the official public repository or its mirrors to avoid financial loss and security risks.
 
     ## II. Risk Notice & Limitation of Liability
@@ -57,10 +57,10 @@ DeclarationModal:
       1. Your game account being suspended or permanently banned;
       2. Loss, corruption, or inconsistency of game data with server data;
       3. Client crashes, performance degradation, or other poor game experiences.
-    - For any direct, indirect, incidental, special, or consequential damages arising from using or being unable to use this software, the **League Akari** development team and all contributors assume no liability; all related risks are borne by the user.
+    - For any direct, indirect, incidental, special, or consequential damages arising from using or being unable to use this software, the **Pantheon** development team and all contributors assume no liability; all related risks are borne by the user.
 
     ## III. Server Compatibility Statement
-    - **Effective from the release of this statement, League Akari will no longer provide any form of support for Tencent Game servers.**
+    - **Effective from the release of this statement, Pantheon will no longer provide any form of support for Tencent Game servers.**
     - Using this software in Tencent server environments is highly likely to violate Tencent Games’ user agreements, management regulations, or technical protection measures; any account bans, data loss, or other adverse consequences are solely the user’s responsibility.
 
     ## IV. Information Collection & Privacy Protection
@@ -70,7 +70,7 @@ DeclarationModal:
     ---
 
     > **If you have any questions about this guide and disclaimer, or need further information about the software, please visit**
-    > <https://github.com/LeagueAkari/LeagueAkari> .
+    > <https://github.com/dylanyunlon/Pantheon> .
 
     </div>
 
@@ -88,7 +88,7 @@ TrafficButtons:
   close: Close
 
   modal:
-    title: Quit League Akari
+    title: Quit Pantheon
     options:
       minimize-to-tray: Minimize to tray
       quit: Quit
@@ -187,7 +187,7 @@ AppSettings:
     title: Main Window UI
     useProfileSkinAsBackground:
       label: Use Profile Skin as Background
-      description: League Akari will use the current player's profile background skin as the background. If the background texture is set, this option will not take effect
+      description: Pantheon will use the current player's profile background skin as the background. If the background texture is set, this option will not take effect
 
   lcConnection:
     title: LCU Connection
@@ -486,7 +486,7 @@ DebugSettings:
 
     reload:
       label: Reload Page
-      description: Refresh the League Akari user interface.
+      description: Refresh the Pantheon user interface.
       button: Reload Page
 
   files:
@@ -502,7 +502,7 @@ DebugSettings:
       popoverTrigger: Details
       button: Open Directory
       description:
-        part1: Open the League Akari application data storage directory. This directory is created when the application is first launched. Deleting it will result in the loss of all stored content.
+        part1: Open the Pantheon application data storage directory. This directory is created when the application is first launched. Deleting it will result in the loss of all stored content.
         part2: Contains user settings, marked players, and other information.
         part3: Temporary files for upcoming automatic updates.
         part4: Configurable setting files.
@@ -551,7 +551,7 @@ DebugSettings:
     TerminatedInError: 'Terminated in Error'
 
   inAdministrator:
-    description: League Akari is currently running with administrator privileges. Now, it is League Akari X.
+    description: Pantheon is currently running with administrator privileges. Now, it is Pantheon X.
 
   kyokoMode:
     label: Kyoko Mode
@@ -896,7 +896,7 @@ SpectateStatus:
 
   tokenSpectate:
     label: Copy Token
-    description: Can be used to start the spectate process in another instance of League Akari.
+    description: Can be used to start the spectate process in another instance of Pantheon.
     button: Copy
     copied: Spectate token copied
     copyFailed: Failed to copy spectate token
@@ -977,7 +977,7 @@ Client:
 
     disconnect:
       label: Disconnect
-      description: Disconnect League Akari from the League Client.
+      description: Disconnect Pantheon from the League Client.
       button: Disconnect
 
     quitClient:
@@ -1726,7 +1726,7 @@ AuxWindowTitleBar:
   close: Close
   minimize: Minimize
   indicator: Aux Win.
-  indicatorTitle: Auxiliary Window of League Akari
+  indicatorTitle: Auxiliary Window of Pantheon
   pin: Pin
   unpin: Unpin
   repositionToAlignLeagueClientUx: Align with League Client UX
@@ -1907,8 +1907,8 @@ Opgg:
   loadChampionFailedMessage: 'Failed to fetch champion data: {{reason}}'
   setSpellsFailedMessage: 'Failed to set summoner spells: {{reason}}'
   setRunesFailedMessage: 'Failed to set rune builds: {{reason}}'
-  spellsSet: '[League Akari] Summoner spells set: [OP.GG] {{spell1}} | {{spell2}}'
-  runesSet: '[League Akari] {{action}} rune build: {{name}}'
+  spellsSet: '[Pantheon] Summoner spells set: [OP.GG] {{spell1}} | {{spell2}}'
+  runesSet: '[Pantheon] {{action}} rune build: {{name}}'
 
   modes:
     ranked: 'Ranked'
@@ -2000,7 +2000,7 @@ OpggChampion:
   augmentPrism: Prism
   synergies: Synergies
 
-  writeToDisk: '[League Akari] Written to item build: {{name}}'
+  writeToDisk: '[Pantheon] Written to item build: {{name}}'
   writtenToDisk: Successfully written to file
   writeFileFailedMessage: Failed to write file {{reason}}
   bootsDesc: Boots (sorted by pick rate)
@@ -2232,8 +2232,8 @@ simple-notifications-renderer:
 
     detected:
       title: Are you live streaming?
-      liveTools: League Akari has detected one or more live streaming tools running. You can enable Streamer Mode to hide sensitive information
-      bySettings: League Akari has detected that the league client live streaming mode is enabled. You can enable live streaming mode to hide sensitive information
+      liveTools: Pantheon has detected one or more live streaming tools running. You can enable Streamer Mode to hide sensitive information
+      bySettings: Pantheon has detected that the league client live streaming mode is enabled. You can enable live streaming mode to hide sensitive information
 
   login-queue-task:
     name: Login Queue
@@ -2260,7 +2260,7 @@ league-client-renderer:
 
 self-update-renderer:
   self-update-task:
-    name: League Akari Update
+    name: Pantheon Update
     downloading: Downloading archive {{progress}}% ({{avgSpeed}}/s, eta {{eta}})
     download-failed: Failed to download archive
     unpacking: Unpacking archive {{progress}}%

@@ -6,10 +6,10 @@ export function greeting(version: string) {
     instance?.appContext.config.globalProperties.$akariManager.getInstance('logger-renderer')
 
   if (logger) {
-    logger.infoRenderer('greeting', `League Akari v${version}`)
+    logger.infoRenderer('greeting', `Pantheon v${version}`)
   } else {
     console.log(
-      `%cLeague Akari v${version}`,
+      `%cPantheon v${version}`,
       'border-radius: 4px; background: #f9ceeb; color: #ff59cb; font-size: 16px; font-weight: bold; padding: 4px;'
     )
   }

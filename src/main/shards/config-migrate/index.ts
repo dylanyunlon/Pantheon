@@ -40,7 +40,7 @@ export class ConfigMigrateMain implements IAkariShardInitDispose {
     await manager.remove(s)
   }
 
-  // NOTE: drop support before League Akari 1.1.x
+  // NOTE: drop support before Pantheon 1.1.x
   private async _migrateFrom126(manager: EntityManager) {
     const hasMigratedSymbol = await manager.findOneBy(Setting, {
       key: Equal(ConfigMigrateMain.MIGRATION_FROM_126)

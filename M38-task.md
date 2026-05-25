@@ -43,7 +43,7 @@ Specific changes:
 - Created `src/shared/utils/coach-types/TimeSeriesPropertyV2.ts`
 - Created `src/shared/utils/coach-client/type-fest-shim.d.ts` (GreaterThan/LessThan for type-fest 0.13)
 - Created `src/shared/utils/coach-privacy/internal/object/convertWireToCoachRecords/InternalSymbols.ts`
-- Fixed `@leagueakari/league-akari-addons` stub with tools/input type declarations
+- Fixed `@dylanyunlon/pantheon-addons` stub with tools/input type declarations
 
 ### 3. Barrel Export Fixes
 

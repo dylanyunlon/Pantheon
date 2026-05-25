@@ -20,8 +20,8 @@ import { v15_LA1_2_2Upgrade } from './upgrades/version-15'
 export class StorageMain implements IAkariShardInitDispose {
   static id = 'storage-main'
 
-  static LEAGUE_AKARI_DB_CURRENT_VERSION = 15
-  static LEAGUE_AKARI_DB_FILENAME = 'LeagueAkari.db'
+  static PANTHEON_DB_CURRENT_VERSION = 15
+  static PANTHEON_DB_FILENAME = 'Pantheon.db'
 
   private readonly _log: AkariLogger
 
@@ -41,7 +41,7 @@ export class StorageMain implements IAkariShardInitDispose {
 
     this._dataSource = new DataSource({
       type: 'sqlite',
-      database: join(app.getPath('userData'), StorageMain.LEAGUE_AKARI_DB_FILENAME),
+      database: join(app.getPath('userData'), StorageMain.PANTHEON_DB_FILENAME),
       synchronize: false,
       entities: [Metadata, SavedPlayer, Setting, EncounteredGame]
     })
@@ -100,7 +100,7 @@ export class StorageMain implements IAkariShardInitDispose {
   }
 
   /**
-   * 处理 League Akari 的数据库的升级
+   * 处理 Pantheon 的数据库的升级
    */
   private async _performUpgrades(r: QueryRunner, currentVersion: number) {
     const pendingUpgrades = Object.entries(this._upgrades)
@@ -152,11 +152,11 @@ export class StorageMain implements IAkariShardInitDispose {
         )
         if (versionResult.length) {
           currentVersion = parseInt(versionResult[0].value, 10)
-          if (currentVersion > StorageMain.LEAGUE_AKARI_DB_CURRENT_VERSION) {
+          if (currentVersion > StorageMain.PANTHEON_DB_CURRENT_VERSION) {
             // version is too high and needs recreation
             needToRecreateDatabase = true
             needToPerformUpgrade = true
-          } else if (currentVersion < StorageMain.LEAGUE_AKARI_DB_CURRENT_VERSION) {
+          } else if (currentVersion < StorageMain.PANTHEON_DB_CURRENT_VERSION) {
             // low version, need to upgrade
             needToPerformUpgrade = true
           }

@@ -1,4 +1,4 @@
-import { tools } from '@leagueakari/league-akari-addons'
+import { tools } from '@dylanyunlon/pantheon-addons'
 import { SpawnOptionsWithoutStdio, spawn } from 'node:child_process'
 import fs from 'node:fs'
 
@@ -48,7 +48,7 @@ export function checkWmicAvailability() {
   const isExists = fs.existsSync(WMIC_PATH)
   if (!isExists) {
     throw new Error(
-      'WMIC unavailable, League Akari relies on this tool to obtain process information'
+      'WMIC unavailable, Pantheon relies on this tool to obtain process information'
     )
   }
 }

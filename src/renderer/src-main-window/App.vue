@@ -22,12 +22,12 @@
     </Transition>
     <MainWindowTitleBar />
     <div id="app-content"><RouterView /></div>
-    <div v-if="as.isRabiVersion" id="version-watermark">League Akari {{ as.version }}</div>
+    <div v-if="as.isRabiVersion" id="version-watermark">Pantheon {{ as.version }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import LeagueAkariSpan from '@renderer-shared/components/LeagueAkariSpan.vue'
+import PantheonSpan from '@renderer-shared/components/PantheonSpan.vue'
 import { useKeyboardCombo } from '@renderer-shared/compositions/useKeyboardCombo'
 import { useInstance } from '@renderer-shared/shards'
 import { AppCommonRenderer } from '@renderer-shared/shards/app-common'
@@ -71,7 +71,7 @@ const settingModelTab = ref('basic')
 
 app.onSecondInstance(() => {
   notification.info({
-    title: 'League Akari',
+    title: 'Pantheon',
     content: () => t('app.singleton'),
     duration: 10000
   })
@@ -81,7 +81,7 @@ const message = useMessage()
 
 useKeyboardCombo('AKARI', {
   onFinish: () => {
-    message.info(() => h(LeagueAkariSpan))
+    message.info(() => h(PantheonSpan))
   },
   requireSameEl: true,
   caseSensitive: false,

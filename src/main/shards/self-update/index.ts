@@ -35,7 +35,7 @@ export class SelfUpdateMain implements IAkariShardInitDispose {
   static DOWNLOAD_DIR_NAME = 'NewUpdates'
   static UPDATE_EXECUTABLE_NAME = 'akari-updater.exe'
   static NEW_VERSION_FLAG = 'NEW_VERSION_FLAG'
-  static EXECUTABLE_NAME = 'LeagueAkari.exe'
+  static EXECUTABLE_NAME = 'Pantheon.exe'
   static UPDATE_PROGRESS_UPDATE_INTERVAL = 200
 
   public readonly settings = new SelfUpdateSettings()
@@ -46,7 +46,7 @@ export class SelfUpdateMain implements IAkariShardInitDispose {
 
   private readonly _http = axios.create({
     headers: {
-      'User-Agent': `LeagueAkari/${app.getVersion()} `
+      'User-Agent': `Pantheon/${app.getVersion()} `
     }
   })
 
@@ -552,7 +552,7 @@ export class SelfUpdateMain implements IAkariShardInitDispose {
     }
   }
 
-  private _createNotification(title = 'League Akari', text: string) {
+  private _createNotification(title = 'Pantheon', text: string) {
     const notification = new Notification({
       title,
       body: text,

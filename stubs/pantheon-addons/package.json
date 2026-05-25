@@ -1,5 +1,5 @@
 {
-  "name": "@leagueakari/league-akari-addons",
+  "name": "@dylanyunlon/pantheon-addons",
   "version": "1.0.0",
   "description": "Stub for native addons - replaced by real binary on Windows build",
   "main": "index.js",

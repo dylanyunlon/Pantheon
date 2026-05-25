@@ -1,6 +1,6 @@
 import { is } from '@electron-toolkit/utils'
 import { i18next } from '@main/i18n'
-import { LEAGUE_AKARI_GITHUB } from '@shared/constants/common'
+import { PANTHEON_GITHUB } from '@shared/constants/common'
 import { Paths } from '@shared/utils/types'
 import {
   BrowserWindow,
@@ -351,7 +351,7 @@ export abstract class BaseAkariWindow<
           buttons: [i18next.t('yes', { ns: 'common' }), i18next.t('no', { ns: 'common' })],
           defaultId: 0,
           title: i18next.t('confirm', { ns: 'common' }),
-          message: details.url.startsWith(LEAGUE_AKARI_GITHUB)
+          message: details.url.startsWith(PANTHEON_GITHUB)
             ? i18next.t('windowOpenHandler.toAkari')
             : i18next.t('windowOpenHandler.toExternalLink', {
                 target: new URL(details.url).origin

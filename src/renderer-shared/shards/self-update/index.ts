@@ -121,10 +121,10 @@ export class SelfUpdateRenderer implements IAkariShardInitDispose {
     // hardcoded for now
     const releasePageUrl = computed(() => {
       if (rcs.settings.preferredSource === 'gitee') {
-        return 'https://gitee.com/LeagueAkari/LeagueAkari/releases/latest'
+        return 'https://gitee.com/dylanyunlon/Pantheon/releases/latest'
       }
 
-      return 'https://github.com/LeagueAkari/LeagueAkari/releases/latest'
+      return 'https://github.com/dylanyunlon/Pantheon/releases/latest'
     })
 
     watchEffect(() => {

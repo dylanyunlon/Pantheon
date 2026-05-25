@@ -58,7 +58,7 @@
               </colgroup>
               <tbody style="font-size: 12px">
                 <tr>
-                  <td>LeagueAkari.db</td>
+                  <td>Pantheon.db</td>
                   <td>{{ t('DebugSettings.files.appData.description.part2') }}</td>
                 </tr>
                 <tr>
@@ -170,7 +170,7 @@
     </NCard>
     <NCard v-if="as.isAdministrator" size="small" style="margin-top: 8px">
       <template #header>
-        <LeagueAkariSpan class="card-header-title" text="League Akari X" />
+        <PantheonSpan class="card-header-title" text="Pantheon X" />
       </template>
       <span class="text">{{ t('DebugSettings.inAdministrator.description') }}</span>
     </NCard>
@@ -186,7 +186,7 @@
         label-placement="top"
         style="user-select: text"
       >
-        <NDescriptionsItem label="League Akari Version">{{
+        <NDescriptionsItem label="Pantheon Version">{{
           runtimeInfo.version
         }}</NDescriptionsItem>
         <NDescriptionsItem label="PID">{{ runtimeInfo.pid }}</NDescriptionsItem>
@@ -249,7 +249,7 @@
 <script setup lang="ts">
 import ControlItem from '@renderer-shared/components/ControlItem.vue'
 import CopyableText from '@renderer-shared/components/CopyableText.vue'
-import LeagueAkariSpan from '@renderer-shared/components/LeagueAkariSpan.vue'
+import PantheonSpan from '@renderer-shared/components/PantheonSpan.vue'
 import { useInstance } from '@renderer-shared/shards'
 import { AppCommonRenderer } from '@renderer-shared/shards/app-common'
 import { useAppCommonStore } from '@renderer-shared/shards/app-common/store'

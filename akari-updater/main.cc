@@ -43,7 +43,7 @@ static void wait_for_process_stop(const std::string& processName) {
 }
 
 int main(int argc, char* argv[]) {
-  std::cout << "This is a simple update script for League Akari.\n\n";
+  std::cout << "This is a simple update script for Pantheon.\n\n";
 
   if (argc < 4) {
     std::cerr << "Usage: updater <source_dir> <target_dir> <process_name>\n";
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
   }
 
   // 启动新的进程
-  // 注意：这里的 processName 应该与之前等待停止的进程同名，正常来说都是 LeagueAkari.exe
+  // 注意：这里的 processName 应该与之前等待停止的进程同名，正常来说都是 Pantheon.exe
   std::cout << "Starting new process \"" << processName << "\"..." << std::endl;
   {
     // 假设进程在 targetDir 下，构建其完整路径

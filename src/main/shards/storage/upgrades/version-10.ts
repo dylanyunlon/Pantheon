@@ -1,7 +1,7 @@
 import { QueryRunner, Table, TableIndex } from 'typeorm'
 
 /**
- * 来自 League Akari 1.2.0 的第一次新建数据库, 这是伟大的开始
+ * 来自 Pantheon 1.2.0 的第一次新建数据库, 这是伟大的开始
  */
 export async function v10_LA1_2_0initializationUpgrade(queryRunner: QueryRunner) {
   await queryRunner.createTable(
@@ -192,7 +192,7 @@ export async function v10_LA1_2_0initializationUpgrade(queryRunner: QueryRunner)
 
   await queryRunner.query(`INSERT INTO Metadata (key, value) VALUES ('version', json('10'))`)
   await queryRunner.query(
-    `INSERT INTO Metadata (key, value) VALUES ('debugging-text-0', json('"League Akari, Hanxven@2024"'))`
+    `INSERT INTO Metadata (key, value) VALUES ('debugging-text-0', json('"Pantheon, Hanxven@2024"'))`
   )
   await queryRunner.query(
     `INSERT INTO Metadata (key, value) VALUES ('debugging-text-1', json('"Ayano"'))`

@@ -1,5 +1,5 @@
 <template>
-  <span class="beautiful-akari" :class="{ 'akari-bold': bold }">{{ text ?? 'League Akari' }}</span>
+  <span class="beautiful-akari" :class="{ 'akari-bold': bold }">{{ text ?? 'Pantheon' }}</span>
 </template>
 
 <script setup lang="ts">

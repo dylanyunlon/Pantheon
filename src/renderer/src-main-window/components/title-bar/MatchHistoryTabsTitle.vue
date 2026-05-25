@@ -234,7 +234,7 @@ const alignTabToVisibleArea = (tabId: string) => {
   }
 }
 
-const AKARI_MIME_TYPE = 'x-league-akari-tab-drag'
+const AKARI_MIME_TYPE = 'x-pantheon-tab-drag'
 const currentDragHoverTabId = ref<string | null>(null)
 
 const handleTabDragStart = (event: DragEvent, id: string) => {

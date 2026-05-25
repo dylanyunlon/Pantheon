@@ -21,7 +21,7 @@ export interface InGameSendTemplateCatalog {
 }
 
 /**
- * 连接到 LeagueAkari/LeagueAkari-Config 或 LeagueAkari/LeagueAkari 仓库
+ * 连接到 dylanyunlon/Pantheon-Config 或 dylanyunlon/Pantheon 仓库
  */
 export class RemoteGitRepository {
   private _config = {
@@ -48,13 +48,13 @@ export class RemoteGitRepository {
       uri = uri.slice(1)
     }
 
-    const r = repo === 'akari-config' ? 'LeagueAkari-Config' : 'LeagueAkari'
+    const r = repo === 'akari-config' ? 'Pantheon-Config' : 'Pantheon'
 
     if (this._config.source === 'github') {
-      return `https://api.github.com/repos/LeagueAkari/${r}/${uri}`
+      return `https://api.github.com/repos/Pantheon/${r}/${uri}`
     }
 
-    return `https://gitee.com/api/v5/repos/LeagueAkari/${r}/${uri}`
+    return `https://gitee.com/api/v5/repos/Pantheon/${r}/${uri}`
   }
 
   private _rawContentUrl(
@@ -66,13 +66,13 @@ export class RemoteGitRepository {
       uri = uri.slice(1)
     }
 
-    const r = repo === 'akari-config' ? 'LeagueAkari-Config' : 'LeagueAkari'
+    const r = repo === 'akari-config' ? 'Pantheon-Config' : 'Pantheon'
 
     if (this._config.source === 'github') {
-      return `https://raw.githubusercontent.com/LeagueAkari/${r}/refs/heads/${branch}/${uri}`
+      return `https://raw.githubusercontent.com/Pantheon/${r}/refs/heads/${branch}/${uri}`
     }
 
-    return `https://gitee.com/LeagueAkari/${r}/raw/${branch}/${uri}`
+    return `https://gitee.com/Pantheon/${r}/raw/${branch}/${uri}`
   }
 
   setConfig(config: Partial<RemoteConfigRepositoryConfig>) {

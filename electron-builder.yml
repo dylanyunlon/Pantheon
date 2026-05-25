@@ -1,5 +1,5 @@
-appId: sugar.cocoa.league-akari
-productName: League Akari
+appId: dev.dylanyunlon.pantheon
+productName: Pantheon
 directories:
   buildResources: build
 files:
@@ -20,7 +20,7 @@ asarUnpack:
 win:
   target:
     - 7z
-  executableName: LeagueAkari
+  executableName: Pantheon
   icon: resources/LA_ICON.ico
 nsis:
   oneClick: false
@@ -32,4 +32,4 @@ nsis:
 npmRebuild: false
 publish:
 #   provider: generic
-#   url: https://league-akari.cocoa.sugar/releases
+#   url: https://pantheon.cocoa.sugar/releases

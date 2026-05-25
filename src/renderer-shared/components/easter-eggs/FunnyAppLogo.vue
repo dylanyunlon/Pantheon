@@ -7,7 +7,7 @@
       @not-enough="handleNotEnough"
       :current="as.tempAkariSubscriptionInfo.current"
     />
-    <span class="in-front-of-you">League Akari</span>
+    <span class="in-front-of-you">Pantheon</span>
     <span class="behind-you"
       >({{ rabiSuffix }} · {{ subscriptionText[as.tempAkariSubscriptionInfo.current] }})</span
     >

@@ -1,11 +1,11 @@
 {
-  "name": "league-akari",
-  "version": "1.3.7",
+  "name": "pantheon",
+  "version": "0.1.0",
   "author": {
     "name": "dylanyunlon",
     "email": "dylanyunlong@gmail.com"
   },
-  "description": "League Akari",
+  "description": "Pantheon",
   "main": "./out/main/main.js",
   "scripts": {
     "format": "prettier --write .",
@@ -24,7 +24,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "@leagueakari/league-akari-addons": "file:stubs/league-akari-addons",
+    "@dylanyunlon/pantheon-addons": "file:stubs/pantheon-addons",
     "@types/luaparse": "^0.2.12",
     "@wry/trie": "^0.5.0",
     "ajv": "^8.17.1",

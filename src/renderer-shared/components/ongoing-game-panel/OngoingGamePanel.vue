@@ -56,7 +56,7 @@
     </NScrollbar>
     <div v-else class="no-ongoing-game">
       <div class="centered">
-        <LeagueAkariSpan bold class="akari-text" />
+        <PantheonSpan bold class="akari-text" />
         <template v-if="ogs.settings.enabled">
           <template v-if="lcs.connectionState !== 'connected'">
             <span class="no-ongoing-game-text">{{ t('OngoingGame.disconnected') }}</span>
@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import EasyToLaunch from '@renderer-shared/components/EasyToLaunch.vue'
-import LeagueAkariSpan from '@renderer-shared/components/LeagueAkariSpan.vue'
+import PantheonSpan from '@renderer-shared/components/PantheonSpan.vue'
 import { useLeagueClientStore } from '@renderer-shared/shards/league-client/store'
 import { useOngoingGameStore } from '@renderer-shared/shards/ongoing-game/store'
 import { Game } from '@shared/types/league-client/match-history'

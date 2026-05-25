@@ -1,6 +1,6 @@
 <template>
   <div class="la-placeholder">
-    <LeagueAkariSpan />
+    <PantheonSpan />
     <span class="sub" v-if="lcs.gameflow.phase === 'InProgress'">{{
       t('Placeholder.inProgress')
     }}</span>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import LeagueAkariSpan from '@renderer-shared/components/LeagueAkariSpan.vue'
+import PantheonSpan from '@renderer-shared/components/PantheonSpan.vue'
 import { useLeagueClientStore } from '@renderer-shared/shards/league-client/store'
 import { useTranslation } from 'i18next-vue'
 

@@ -1,7 +1,7 @@
 <template>
   <div class="title-bar" :class="{ blurred: ws.focus === 'blurred' }">
     <div class="title-area">
-      <span class="title">League Akari - OP.GG</span>
+      <span class="title">Pantheon - OP.GG</span>
     </div>
     <div class="traffic">
       <div

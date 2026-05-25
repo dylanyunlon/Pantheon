@@ -283,7 +283,7 @@ export class SettingFactoryMain implements IAkariShardInitDispose {
       }
 
       const result = await dialog.showSaveDialog(w.mainWindow.window, {
-        defaultPath: 'league-akari-settings.json',
+        defaultPath: 'pantheon-settings.json',
         filters: [{ name: 'JSON', extensions: ['json'] }]
       })
 
@@ -303,7 +303,7 @@ export class SettingFactoryMain implements IAkariShardInitDispose {
       }
 
       const result = await dialog.showOpenDialog(w.mainWindow.window, {
-        defaultPath: 'league-akari-settings.json',
+        defaultPath: 'pantheon-settings.json',
         filters: [{ name: 'JSON', extensions: ['json'] }]
       })
 
@@ -320,8 +320,8 @@ export class SettingFactoryMain implements IAkariShardInitDispose {
     const all = await this._storage.dataSource.manager.find(Setting)
 
     const jsonContent = {
-      databaseVersion: StorageMain.LEAGUE_AKARI_DB_CURRENT_VERSION,
-      type: 'league-akari-settings',
+      databaseVersion: StorageMain.PANTHEON_DB_CURRENT_VERSION,
+      type: 'pantheon-settings',
       data: all
     }
 
@@ -336,12 +336,12 @@ export class SettingFactoryMain implements IAkariShardInitDispose {
     const content = JSON.parse(await fs.promises.readFile(path, 'utf-8'))
 
     // 检查文件类型
-    if (content.type !== 'league-akari-settings') {
+    if (content.type !== 'pantheon-settings') {
       throw new AkariIpcError(`The file is not a valid settings file`, 'InvalidSettingsFile')
     }
 
     // 检查数据库版本
-    if (content.databaseVersion > StorageMain.LEAGUE_AKARI_DB_CURRENT_VERSION) {
+    if (content.databaseVersion > StorageMain.PANTHEON_DB_CURRENT_VERSION) {
       throw new AkariIpcError(
         `The file is from a newer version of the application, please update the application first`,
         'InvalidDatabaseVersion'

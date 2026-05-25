@@ -1,4 +1,4 @@
-import { input } from '@leagueakari/league-akari-addons'
+import { input } from '@dylanyunlon/pantheon-addons'
 import { IAkariShardInitDispose, Shard } from '@shared/akari-shard'
 import EventEmitter from 'node:events'
 

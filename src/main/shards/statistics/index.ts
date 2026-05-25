@@ -16,7 +16,7 @@ export class StatisticsMain implements IAkariShardInitDispose {
   private _http = axios.create({
     baseURL: 'https://akari-api.hanxven.cc',
     headers: {
-      'User-Agent': `LeagueAkari/${app.getVersion()}`,
+      'User-Agent': `Pantheon/${app.getVersion()}`,
       'X-Akari-Version': app.getVersion()
     }
   })
@@ -30,7 +30,7 @@ export class StatisticsMain implements IAkariShardInitDispose {
   }
 
   /**
-   * 统计 LeagueAkari 的版本使用量
+   * 统计 Pantheon 的版本使用量
    * @returns
    */
   private async _recordVersionUsageOnce() {

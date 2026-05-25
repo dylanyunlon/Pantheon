@@ -17,7 +17,7 @@ export class EncounteredGame {
   puuid: string
 
   /**
-   * 记录游戏时，使用 League Akari 的玩家是谁
+   * 记录游戏时，使用 Pantheon 的玩家是谁
    */
   @Column({ type: 'varchar', nullable: false })
   @Index('encountered_games_self_puuid_index')

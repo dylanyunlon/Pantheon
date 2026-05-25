@@ -102,7 +102,7 @@ export class AutoSelectMain implements IAkariShardInitDispose {
     } catch (error) {
       this._ipc.sendEvent(AutoSelectMain.id, 'error-pick', championId)
       this._sendInChat(
-        `[League Akari] ${i18next.t('auto-select-main.error-pick', {
+        `[Pantheon] ${i18next.t('auto-select-main.error-pick', {
           champion: this._lc.data.gameData.champions[championId]?.name || championId,
           reason: formatErrorMessage(error)
         })}`
@@ -118,7 +118,7 @@ export class AutoSelectMain implements IAkariShardInitDispose {
     } catch (error) {
       this._ipc.sendEvent(AutoSelectMain.id, 'error-ban', championId)
       this._sendInChat(
-        `[League Akari] ${i18next.t('auto-select-main.error-ban', {
+        `[Pantheon] ${i18next.t('auto-select-main.error-ban', {
           champion: this._lc.data.gameData.champions[championId]?.name || championId,
           reason: formatErrorMessage(error)
         })}`
@@ -136,7 +136,7 @@ export class AutoSelectMain implements IAkariShardInitDispose {
     } catch (error) {
       this._ipc.sendEvent(AutoSelectMain.id, 'error-pre-pick', championId)
       this._sendInChat(
-        `[League Akari] ${i18next.t('auto-select-main.error-pre-pick', {
+        `[Pantheon] ${i18next.t('auto-select-main.error-pre-pick', {
           champion: this._lc.data.gameData.champions[championId]?.name || championId,
           reason: formatErrorMessage(error)
         })}`
@@ -430,7 +430,7 @@ export class AutoSelectMain implements IAkariShardInitDispose {
 
           if (texts.length) {
             this._sendInChat(
-              `[League Akari] ${i18next.t('auto-select-main.enabled')} ${texts.join(' | ')}`
+              `[Pantheon] ${i18next.t('auto-select-main.enabled')} ${texts.join(' | ')}`
             )
           }
         }
@@ -724,7 +724,7 @@ export class AutoSelectMain implements IAkariShardInitDispose {
             this._acceptOrDeclineTrade(id, true)
           } else {
             this._sendInChat(
-              `[League Akari] ${i18next.t('auto-select-main.ignore-trade', {
+              `[Pantheon] ${i18next.t('auto-select-main.ignore-trade', {
                 from: this._lc.data.gameData.champions[from.championId]?.name || from.championId,
                 to: this._lc.data.gameData.champions[self.championId]?.name || self.championId
               })}`
@@ -772,11 +772,11 @@ export class AutoSelectMain implements IAkariShardInitDispose {
       await this._lc.api.chat.chatSend(
         this._lc.data.chat.conversations.championSelect.id,
         type === 'select'
-          ? `[League Akari] - ${i18next.t('auto-select-main.grab-soon', {
+          ? `[Pantheon] - ${i18next.t('auto-select-main.grab-soon', {
               seconds: (time / 1000).toFixed(1),
               champion: this._lc.data.gameData.champions[championId]?.name || championId
             })}`
-          : `[League Akari] - ${i18next.t('auto-select-main.cancel-grab', {
+          : `[Pantheon] - ${i18next.t('auto-select-main.cancel-grab', {
               champion: this._lc.data.gameData.champions[championId]?.name || championId
             })}`,
         'celebration'
@@ -800,7 +800,7 @@ export class AutoSelectMain implements IAkariShardInitDispose {
     } catch (error) {
       this._ipc.sendEvent(AutoSelectMain.id, 'error-bench-swap', championId)
       this._sendInChat(
-        `[League Akari] ${i18next.t('auto-select-main.error-bench-swap', {
+        `[Pantheon] ${i18next.t('auto-select-main.error-bench-swap', {
           champion: this._lc.data.gameData.champions[championId]?.name || championId,
           reason: formatErrorMessage(error)
         })}`

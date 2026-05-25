@@ -15,11 +15,11 @@
         <img
           style="height: 160px; width: 160px"
           src="@renderer-shared/assets/logo/logo-hollow.svg"
-          alt="Logo of League Akari"
+          alt="Logo of Pantheon"
         />
       </div>
       <div class="about-para">
-        <LeagueAkariSpan bold @click="() => handleClickEasterEgg()" />{{
+        <PantheonSpan bold @click="() => handleClickEasterEgg()" />{{
           t('AboutPane.line1', { version: as.version })
         }}
         <a target="_blank" href="https://riot-api-libraries.readthedocs.io/en/latest/lcu.html"
@@ -27,19 +27,19 @@
         >.
         <a
           target="_blank"
-          :href="`${LEAGUE_AKARI_GITHUB}?tab=readme-ov-file#4-%E5%8F%82%E8%80%83`"
+          :href="`${PANTHEON_GITHUB}?tab=readme-ov-file#4-%E5%8F%82%E8%80%83`"
           >{{ t('AboutPane.line2') }}</a
         >.
       </div>
       <div class="about-para-2">
         <span style="margin-right: 4px">GitHub: </span>
-        <a target="_blank" :href="LEAGUE_AKARI_GITHUB" style="text-indent: 0; margin-right: 8px"
-          >League Akari</a
+        <a target="_blank" :href="PANTHEON_GITHUB" style="text-indent: 0; margin-right: 8px"
+          >Pantheon</a
         >
-        <a target="_blank" :href="LEAGUE_AKARI_GITHUB">
+        <a target="_blank" :href="PANTHEON_GITHUB">
           <img
             alt="GitHub Repo stars"
-            src="https://img.shields.io/github/stars/LeagueAkari/LeagueAkari"
+            src="https://img.shields.io/github/stars/dylanyunlon/Pantheon"
         /></a>
       </div>
     </NScrollbar>
@@ -50,9 +50,9 @@
 </template>
 
 <script setup lang="ts">
-import LeagueAkariSpan from '@renderer-shared/components/LeagueAkariSpan.vue'
+import PantheonSpan from '@renderer-shared/components/PantheonSpan.vue'
 import { useAppCommonStore } from '@renderer-shared/shards/app-common/store'
-import { LEAGUE_AKARI_GITHUB } from '@shared/constants/common'
+import { PANTHEON_GITHUB } from '@shared/constants/common'
 import { useTranslation } from 'i18next-vue'
 import { NScrollbar, useMessage } from 'naive-ui'
 import { h } from 'vue'
@@ -64,7 +64,7 @@ const as = useAppCommonStore()
 const message = useMessage()
 
 const handleClickEasterEgg = () => {
-  message.create(() => h(LeagueAkariSpan, { bold: true }), {
+  message.create(() => h(PantheonSpan, { bold: true }), {
     type: 'success',
     keepAliveOnHover: true
   })

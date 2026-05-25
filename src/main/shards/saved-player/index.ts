@@ -300,8 +300,8 @@ export class SavedPlayerMain implements IAkariShardInitDispose {
     })
 
     const jsonContent = {
-      databaseVersion: StorageMain.LEAGUE_AKARI_DB_CURRENT_VERSION,
-      type: 'league-akari-tagged-players',
+      databaseVersion: StorageMain.PANTHEON_DB_CURRENT_VERSION,
+      type: 'pantheon-tagged-players',
       data: all.map((record) => ({
         puuid: record.puuid,
         selfPuuid: record.selfPuuid,
@@ -321,14 +321,14 @@ export class SavedPlayerMain implements IAkariShardInitDispose {
 
     const content = JSON.parse(await fs.promises.readFile(path, 'utf-8'))
 
-    if (content.type !== 'league-akari-tagged-players') {
+    if (content.type !== 'pantheon-tagged-players') {
       throw new AkariIpcError(
         `The file is not a valid tagged players file`,
         'InvalidTaggedPlayersFile'
       )
     }
 
-    if (content.databaseVersion > StorageMain.LEAGUE_AKARI_DB_CURRENT_VERSION) {
+    if (content.databaseVersion > StorageMain.PANTHEON_DB_CURRENT_VERSION) {
       throw new AkariIpcError(
         `The file is from a newer version of the application, please update the application first`,
         'InvalidDatabaseVersion'
@@ -444,7 +444,7 @@ export class SavedPlayerMain implements IAkariShardInitDispose {
       }
 
       const result = await dialog.showSaveDialog(w.mainWindow.window, {
-        defaultPath: 'league-akari-tagged-players.json',
+        defaultPath: 'pantheon-tagged-players.json',
         filters: [{ name: 'JSON', extensions: ['json'] }]
       })
 
@@ -464,7 +464,7 @@ export class SavedPlayerMain implements IAkariShardInitDispose {
       }
 
       const result = await dialog.showOpenDialog(w.mainWindow.window, {
-        defaultPath: 'league-akari-tagged-players.json',
+        defaultPath: 'pantheon-tagged-players.json',
         filters: [{ name: 'JSON', extensions: ['json'] }]
       })
 

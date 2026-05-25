@@ -1,4 +1,4 @@
-declare module '@leagueakari/league-akari-addons' {
+declare module '@dylanyunlon/pantheon-addons' {
   export const tools: {
     getPidsByName(name: string): number[]
     getCommandLine1(pid: number): string
@@ -30,7 +30,7 @@ declare module '@leagueakari/league-akari-addons' {
   }
 
   export namespace input {
-    export type KeyEvent = import('@leagueakari/league-akari-addons').KeyEvent
+    export type KeyEvent = import('@dylanyunlon/pantheon-addons').KeyEvent
   }
 
   export const input: {

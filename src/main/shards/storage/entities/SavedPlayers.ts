@@ -9,7 +9,7 @@ export class SavedPlayer {
   puuid: string
 
   /**
-   * 记录游戏时，使用 League Akari 的玩家是谁
+   * 记录游戏时，使用 Pantheon 的玩家是谁
    */
   @PrimaryColumn({ type: 'varchar' })
   selfPuuid: string

@@ -388,7 +388,7 @@
                   <span class="stat-item-label">{{ t('MatchHistoryTab.stats.akariScore') }}</span>
                   <span class="stat-item-content" :class="{ 'n-a': analysis.akariScore === null }">
                     <template v-if="analysis.akariScore !== null">
-                      <LeagueAkariSpan bold :text="analysis.akariScore.total.toFixed(2)" />
+                      <PantheonSpan bold :text="analysis.akariScore.total.toFixed(2)" />
                     </template>
                     <template v-else>{{ t('MatchHistoryTab.stats.na') }}</template>
                   </span>
@@ -644,7 +644,7 @@
 import CopyableText from '@renderer-shared/components/CopyableText.vue'
 import GamePreviewer from '@renderer-shared/components/GamePreviewer.vue'
 import LcuImage from '@renderer-shared/components/LcuImage.vue'
-import LeagueAkariSpan from '@renderer-shared/components/LeagueAkariSpan.vue'
+import PantheonSpan from '@renderer-shared/components/PantheonSpan.vue'
 import RankedTable from '@renderer-shared/components/RankedTable.vue'
 import StreamerModeMaskedText from '@renderer-shared/components/StreamerModeMaskedText.vue'
 import MatchHistoryCard from '@renderer-shared/components/match-history-card/MatchHistoryCard.vue'

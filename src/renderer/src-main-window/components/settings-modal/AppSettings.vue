@@ -21,7 +21,7 @@
       <ControlItem
         class="control-item-margin"
         label="语言 / Language"
-        label-description="设置应用的主语言 / Set primary language for League Akari"
+        label-description="设置应用的主语言 / Set primary language for Pantheon"
         :label-width="400"
       >
         <NSelect
@@ -36,7 +36,7 @@
         v-if="as.settings.isInKyokoMode"
         class="control-item-margin"
         label="Theme Color (experimental)"
-        label-description="Theme color for League Akari (!!DEBUG ONLY!!)"
+        label-description="Theme color for Pantheon (!!DEBUG ONLY!!)"
         :label-width="400"
       >
         <NSelect

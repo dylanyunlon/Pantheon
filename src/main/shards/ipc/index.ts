@@ -26,7 +26,7 @@ export interface IpcMainErrorDataType {
 export type IpcMainDataType<T = any> = IpcMainSuccessDataType<T> | IpcMainErrorDataType
 
 /**
- * League Akari 的 IPC 主进程实现
+ * Pantheon 的 IPC 主进程实现
  */
 @Shard(AkariIpcMain.id)
 export class AkariIpcMain implements IAkariShardInitDispose {

@@ -1,5 +1,5 @@
 import { optimizer } from '@electron-toolkit/utils'
-import { tools } from '@leagueakari/league-akari-addons'
+import { tools } from '@dylanyunlon/pantheon-addons'
 import '@main/i18n'
 import { initAppLogger } from '@main/logger'
 import { AkariProtocolMain } from '@main/shards/akari-protocol'
@@ -179,7 +179,7 @@ export function bootstrap() {
   AkariProtocolMain.register()
 
   logger.info({
-    message: `League Akari ${app.getVersion()}`,
+    message: `Pantheon ${app.getVersion()}`,
     namespace: 'app'
   })
 

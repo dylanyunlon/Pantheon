@@ -8,14 +8,14 @@
 
 请在客户端启动时的短时间内立即将生涯背景设置成随便一个正常的皮肤即可，要快！
 
-### League Akari
+### Pantheon
 
 QQ Group：[301157623](https://qm.qq.com/q/F1Xv85etlm) (Passcode：akari)
 
-Telegram: [@LeagueAkari](https://t.me/leagueakari)
+Telegram: [@Pantheon](https://t.me/leagueakari)
 
-League Akari 是基于 GPL-3.0 许可证的开源软件。
+Pantheon 是基于 GPL-3.0 许可证的开源软件。
 
-League Akari 完全免费，没有任何付费功能。如果您通过任何渠道购买了本软件，请立即要求退款。
+Pantheon 完全免费，没有任何付费功能。如果您通过任何渠道购买了本软件，请立即要求退款。
 
 如果您支持本项目，请在 GitHub 上给它一个 Star ❤️。
