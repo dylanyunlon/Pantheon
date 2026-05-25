@@ -47,17 +47,17 @@ export async function extractObjectOrInterfaceType(
         : await clientCtx.gameStateProvider.getInterfaceDefinition(
           def.apiName,
         );
-      const linkDef = objOrInterfaceDef.links[_os(objectSet).link];
+      const linkDef = objOrInterfaceDef.links![_os(objectSet).link];
       invariant(linkDef, `Missing link definition for '${_os(objectSet).link}'`);
 
       return objOrInterfaceDef.type === "object"
         ? {
-          apiName: objOrInterfaceDef.links[_os(objectSet).link].targetType,
+          apiName: objOrInterfaceDef.links![_os(objectSet).link].targetType,
           type: "object",
         }
         : {
-          apiName: (objOrInterfaceDef.links[_os(objectSet).link] as any).targetTypeApiName,
-          type: objOrInterfaceDef.links[_os(objectSet).link].targetType,
+          apiName: (objOrInterfaceDef.links![_os(objectSet).link] as any).targetTypeApiName,
+          type: objOrInterfaceDef.links![_os(objectSet).link].targetType,
         };
     }
     case "withProperties": {
@@ -149,20 +149,20 @@ export async function extractObjectOrInterfaceType(
         : await clientCtx.gameStateProvider.getInterfaceDefinition(
           def.apiName,
         );
-      const linkDef = objOrInterfaceDef.links[_os(objectSet).interfaceLink];
+      const linkDef = objOrInterfaceDef.links![_os(objectSet).interfaceLink];
       invariant(
         linkDef,
         `Missing link definition for '${_os(objectSet).interfaceLink}'`,
       );
       return objOrInterfaceDef.type === "object"
         ? {
-          apiName: objOrInterfaceDef.links[_os(objectSet).interfaceLink].targetType,
+          apiName: objOrInterfaceDef.links![_os(objectSet).interfaceLink].targetType,
           type: "object",
         }
         : {
           apiName:
-            (objOrInterfaceDef.links[_os(objectSet).interfaceLink] as any).targetTypeApiName,
-          type: objOrInterfaceDef.links[_os(objectSet).interfaceLink].targetType,
+            (objOrInterfaceDef.links![_os(objectSet).interfaceLink] as any).targetTypeApiName,
+          type: objOrInterfaceDef.links![_os(objectSet).interfaceLink].targetType,
         };
     // We don't have to worry about new object sets being added and doing a runtime break and breaking people since the COACH is always constructing these.
     default:

@@ -159,7 +159,7 @@ export class FunctionQuery extends Query<
         query: QueryDefinition<unknown>,
         params?: Record<string, unknown>,
       ) => Promise<unknown>)(
-        this.store.client[additionalContext],
+        this.store.client[additionalContext] as any,
         this.#queryDef,
         this.#params,
       );

@@ -239,7 +239,7 @@ export abstract class ListQuery extends BaseListQuery<
       const wirePipelineSet = getWirePipelineSet(this.#pipelineSet);
       const { resultType, invalidationSet } =
         await getObjectTypesThatInvalidate(
-          this.store.client[additionalContext],
+          this.store.client[additionalContext] as any,
           wirePipelineSet,
         );
 
@@ -302,7 +302,7 @@ export abstract class ListQuery extends BaseListQuery<
         const wirePipelineSet = getWirePipelineSet(this.#pipelineSet);
         const { resultType, invalidationSet } =
           await getObjectTypesThatInvalidate(
-            this.store.client[additionalContext],
+            this.store.client[additionalContext] as any,
             wirePipelineSet,
           );
         this.#updateFetchedObjectType(resultType.apiName);

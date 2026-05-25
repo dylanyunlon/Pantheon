@@ -644,8 +644,8 @@ export class PipelineListenerWebsocket {
   }
 
   #handleMessage_refreshPipelineSet = (payload: RefreshPipelineSet) => {
-    const sub = this.#subscriptions.get(payload.id);
-    invariant(sub, `Expected subscription id ${payload.id}`);
+    const sub = this.#subscriptions.get(payload.id as any);
+    invariant(sub, `Expected subscription id ${payload.id as any}`);
     try {
       sub.listener.onOutOfDate();
     } catch (error) {

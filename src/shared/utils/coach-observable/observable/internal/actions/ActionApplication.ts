@@ -51,7 +51,7 @@ export class ActionApplication {
           logger?.debug("applying action to multiple args", args);
         }
 
-        actionResults = await this.store.client(action as any).batchApplyAction(
+        actionResults = await ((this.store as any).client(action as any)).batchApplyAction(
           args,
           { $returnEdits: true },
         );

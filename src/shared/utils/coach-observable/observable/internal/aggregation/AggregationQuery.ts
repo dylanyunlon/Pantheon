@@ -140,7 +140,7 @@ export abstract class AggregationQuery extends Query<
   ): Promise<Set<string>> {
     try {
       const { invalidationSet } = await getObjectTypesThatInvalidate(
-        this.store.client[additionalContext],
+        this.store.client[additionalContext] as any,
         wirePipelineSet,
       );
       return new Set([this.apiName, ...invalidationSet]);

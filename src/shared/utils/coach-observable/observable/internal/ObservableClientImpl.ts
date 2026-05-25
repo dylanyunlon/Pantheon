@@ -198,7 +198,7 @@ export class ObservableClientImpl implements ObservableClient {
       ? Promise.all(
         objectSetWires.map(wire =>
           extractObjectOrInterfaceType(
-            this.__experimentalStore.client[additionalContext],
+            this.__experimentalStore.client[additionalContext] as any,
             wire,
           )
         ),

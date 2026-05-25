@@ -490,7 +490,7 @@ export async function fetchPage<
   client: MinimalClient,
   objectType: Q,
   args: FetchPageArgs<Q, L, R, any, S, T, never, {}, PROPERTY_SECURITIES>,
-  pipelineSet: PipelineSet = resolveBaseObjectSetType(objectType),
+  pipelineSet = resolveBaseObjectSetType(objectType) as any,
 ): Promise<FetchPageResult<Q, L, R, S, T, {}, PROPERTY_SECURITIES>> {
   return fetchPageInternal(client, objectType, pipelineSet, args);
 }
@@ -506,7 +506,7 @@ export async function fetchPageWithErrors<
   client: MinimalClient,
   objectType: Q,
   args: FetchPageArgs<Q, L, R, any, S, T>,
-  pipelineSet: PipelineSet = resolveBaseObjectSetType(objectType),
+  pipelineSet = resolveBaseObjectSetType(objectType) as any,
 ): Promise<Result<FetchPageResult<Q, L, R, S, T>>> {
   return fetchPageWithErrorsInternal(client, objectType, pipelineSet, args);
 }

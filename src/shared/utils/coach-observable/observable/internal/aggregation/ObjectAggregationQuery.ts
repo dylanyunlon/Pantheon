@@ -39,7 +39,7 @@ export class ObjectAggregationQuery extends AggregationQuery {
     if (this.parsedWirePipelineSet) {
       pipelineSet = createPipeline(
         objectTypeDef,
-        this.store.client[additionalContext],
+        this.store.client[additionalContext] as any,
         this.parsedWirePipelineSet,
       );
     } else {

@@ -129,6 +129,7 @@ export interface CompileTimeMetadata<T = unknown> {
   strictProps?: Record<string, unknown>
   linksType?: unknown
   signature?: unknown
+  signatures?: { applyAction?: unknown; batchApplyAction?: unknown; [key: string]: unknown }
   parameters: Record<string, ParameterDefinition>
   output?: QueryDataTypeDefinition
 }
@@ -159,8 +160,11 @@ export type PossibleWhereClauseFilters =
   | '$intersects' | '$within'
 
 export interface AggregationClause<_T = unknown> {
-  field: string
-  operation: 'sum' | 'avg' | 'min' | 'max' | 'count'
+  field?: string
+  operation: 'sum' | 'avg' | 'min' | 'max' | 'count' | string
+  type?: string
+  name?: string
+  direction?: string
 }
 
 export interface GroupByClause<_T = any> {
@@ -182,9 +186,10 @@ export interface AggregateObjectsResponseV2 {
 export type AggregationV2 = AggregationClause
 
 export interface IntervalRule {
-  field: string
-  interval: number
-  unit: string
+  [key: string]: unknown
+  field?: string
+  interval?: number
+  unit?: string
   $match?: unknown
   $prefixOnLastTerm?: boolean
   $fuzzy?: boolean
@@ -192,7 +197,6 @@ export interface IntervalRule {
   $phrase?: string
   $wildcardMatch?: string
   $regex?: string
-  [key: string]: unknown
 }
 
 export type SearchJsonQueryV2 = WhereClause
@@ -200,7 +204,7 @@ export type SearchJsonQueryV2 = WhereClause
 export interface ObjectSet<_T = any> {
   type: string
   objectType?: string
-  where?: WhereClause
+  where?: WhereClause | ((...args: unknown[]) => unknown)
   objectSets?: ObjectSet[]
   objectSet?: ObjectSet
   link?: string
@@ -459,8 +463,9 @@ export interface QueryDataTypeDefinition<_T = any> {
 }
 
 export interface TimeRange {
-  startTime: string
-  endTime: string
+  startTime: string | { when: string; value: unknown; unit: string }
+  endTime: string | { when: string; value: unknown; unit: string }
+  type?: string
 }
 
 export interface TimeSeriesQuery {
@@ -946,6 +951,7 @@ export type ScrubRecord<_T = unknown> = {
 export type NormalizedProcedure<_C = unknown> = (def: ObjectOrInterfaceDefinition | string) => PipelineSet
 
 export type MinimalCoachClient = import('./coach-client/MinimalCoachClientContext').MinimalCoachClient
+export type ClientContext = { baseUrl: string; tokenProvider: () => Promise<string>; fetch: typeof globalThis.fetch; logger?: Logger; branch?: string; objectFactory: (...args: unknown[]) => unknown; objectSetFactory: (...args: unknown[]) => unknown; narrowTypeMapping: Record<string, string>; narrowTypeInterfaceOrObjectMapping: Record<string, string>; [key: string]: unknown }
 
 export type AggregationResultsWithoutGroups<_Q = any, _AC = any> = { data: unknown[]; excludedItems?: number }
 export type AggregationResultsWithGroups<_Q = any, _AC = any, _R = any> = { data: Array<{ group: Record<string, unknown>; metrics: Record<string, number> }> }
@@ -1089,7 +1095,7 @@ export class BlobMemoryManager {
   releaseBlobUrl(_key: string): void {}
 }
 
-export type ObjectHolder<_T = unknown> = Coach.Instance & { $primaryKey: string | number; [key: symbol]: unknown }
+export type ObjectHolder<_T = unknown> = Coach.Instance & { $primaryKey: string | number; [key: symbol]: unknown; $link?: unknown; $title?: string }
 
 export type Chalk = { red(s: string): string; green(s: string): string; blue(s: string): string; yellow(s: string): string; gray(s: string): string; cyan(s: string): string; magenta(s: string): string; redBright(s: string): string; bgRed(s: string): string; bgGreen(s: string): string; bgCyan(s: string): string; bgGray(s: string): string; bgYellow(s: string): string; bgRedBright(s: string): string }
 

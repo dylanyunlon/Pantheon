@@ -34,17 +34,17 @@ export function makeGeoFilterIntersects(
       propertyIdentifier,
       field,
     );
-  } else if ("$bbox" in intersectsBody && intersectsBody.$bbox != null) {
+  } else if ("$bbox" in intersectsBody && intersectsBody?.$bbox != null) {
     return makeGeoFilterBbox(
-      intersectsBody.$bbox,
+      intersectsBody?.$bbox,
       "$intersects",
       propertyIdentifier,
       field,
     );
   } else {
     const coordinates = ("$polygon" in intersectsBody)
-      ? intersectsBody.$polygon
-      : intersectsBody.coordinates;
+      ? intersectsBody?.$polygon
+      : intersectsBody?.coordinates;
     return makeGeoFilterPolygon(
       coordinates,
       "intersectsPolygon",

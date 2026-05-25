@@ -155,7 +155,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
       | ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
     subFn: Observer<ObserveAggregationArgs<T, A>>,
   ): ScrubDisposable | Promise<ScrubDisposable> {
-    if (options.pipelineSet) {
+    if ((options as any).pipelineSet) {
       return this.__experimentalStore.aggregations.observeAsync(
         options as ObserveAggregationOptionsWithPipelineSet<T, A, RDPs>,
         subFn as Observer<AggregationPayloadBase>,
@@ -335,18 +335,18 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
     const store = this.__experimentalStore;
     const result = { ...options };
 
-    (result as any).where = store.whereScrubNormalizer.scrubNormalize(result.where);
+    (result as any).where = store.whereScrubNormalizer.scrubNormalize((result as any).where);
     (result as any).withProperties = store.rdpScrubNormalizer.scrubNormalize(
       (result as any).withProperties as Rdp | undefined,
     );
-    (result as any).orderBy = store.orderByScrubNormalizer.scrubNormalize(result.orderBy);
+    (result as any).orderBy = store.orderByScrubNormalizer.scrubNormalize((result as any).orderBy);
     (result as any).aggregate = store.genericScrubNormalizer.scrubNormalize(
       (result as any).aggregate,
     );
     (result as any).intersectWith = store.genericScrubNormalizer.scrubNormalize(
       (result as any).intersectWith,
     );
-    result.$select = store.selectScrubNormalizer.scrubNormalize(result.$select);
+    (result as any).$select = store.selectScrubNormalizer.scrubNormalize((result as any).$select);
 
     (result as any).union = this.#canonObjectSetArray(
       (result as any).union,

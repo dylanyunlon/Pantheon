@@ -88,8 +88,8 @@ export class OptimisticJob {
         return this;
       },
       createObject(type, pk, properties) {
-        const create = store.client[additionalContext].objectFactory(
-          store.client[additionalContext],
+        const create = (store.client[additionalContext] as any).objectFactory(
+          (store.client[additionalContext] as any),
           [{
             $primaryKey: pk,
             $apiName: type.apiName,

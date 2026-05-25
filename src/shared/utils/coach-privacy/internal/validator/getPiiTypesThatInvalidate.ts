@@ -97,16 +97,16 @@ async function calcPipelineSet(
 
   switch (os.type) {
     case "base":
-      return await bumpObject(os.piiFieldType);
+      return await bumpObject(os.piiFieldType!);
 
     case "interfaceBase":
-      return await bumpInterface(os.interfaceType);
+      return await bumpInterface(os.interfaceType!);
 
     case "interfaceLinkSearchAround": {
-      const srcDef = await calcPipelineSet(os.pipelineSet, ctx);
+      const srcDef = await calcPipelineSet(os.pipelineSet!, ctx);
       invariant(srcDef.type === "interface");
 
-      for (const [k, v] of Object.entries(srcDef.links)) {
+      for (const [k, v] of Object.entries(srcDef.links || {})) {
         if (k === os.interfaceLink) {
           if (v.targetType === "object") {
             return await bumpObject((v as any).targetTypeApiName);
@@ -124,10 +124,10 @@ async function calcPipelineSet(
     }
 
     case "searchAround": {
-      const contextDef = await calcPipelineSet(os.pipelineSet, ctx);
+      const contextDef = await calcPipelineSet(os.pipelineSet!, ctx);
       invariant(contextDef.type === "object");
 
-      for (const [k, v] of Object.entries(contextDef.links)) {
+      for (const [k, v] of Object.entries(contextDef.links || {})) {
         if (k === os.link) {
           return await bumpObject(v.targetType);
         }
@@ -144,7 +144,7 @@ async function calcPipelineSet(
     case "filter":
       // for the simple version of this, we can ignore the filter being based on any RDPs because
       // our RDP handling will ensure we invalidate based on those.
-      return calcPipelineSet(os.pipelineSet, ctx);
+      return calcPipelineSet(os.pipelineSet!, ctx);
 
     case "union":
     case "subtract":
@@ -163,7 +163,7 @@ async function calcPipelineSet(
       // Filter out object set types that cannot be resolved to a concrete type
       // (e.g., reference, static). In set operations, we can determine the
       // result type from the remaining resolvable operands.
-      const resolvableSets = os.objectSets.filter(s =>
+      const resolvableSets = os.objectSets!.filter(s =>
         s.type !== "reference" && s.type !== "static"
       );
 
@@ -201,10 +201,10 @@ async function calcPipelineSet(
 
     case "withProperties":
       // Everything in an RDP chain needs to invalidate us for now
-      for (const [, v] of Object.entries(os.derivedProperties)) {
+      for (const [, v] of Object.entries(os.derivedProperties || {})) {
         await calcRdp(v as any, { ...ctx, methodInput: os.pipelineSet });
       }
-      return calcPipelineSet(os.pipelineSet, { ...ctx, methodInput: os.pipelineSet });
+      return calcPipelineSet(os.pipelineSet!, { ...ctx, methodInput: os.pipelineSet });
 
     // used by rdps
     case "methodInput":
@@ -227,7 +227,7 @@ async function calcPipelineSet(
       throw new Error(`Unsupported PipelineSet type ${os.type}`);
 
     case "nearestNeighbors":
-      return calcPipelineSet(os.pipelineSet, ctx);
+      return calcPipelineSet(os.pipelineSet!, ctx);
 
     default:
       throw new Error(
@@ -249,7 +249,7 @@ async function calcRdp(
     case "negate":
     case "extract":
     case "absoluteValue":
-      return await calcRdp(dpd.property, ctx);
+      return await calcRdp(dpd.property!, ctx);
 
     // Operates on many (unordered) properties
     case "least":
@@ -257,15 +257,15 @@ async function calcRdp(
     case "add":
     case "multiply":
       return await Promise.all(
-        dpd.properties.map(innerDpd => calcRdp(innerDpd, ctx)),
+        dpd.properties!.map(innerDpd => calcRdp(innerDpd, ctx)),
       );
 
     // Operates on 2 ordered properties
     case "subtract":
     case "divide":
       return await Promise.all([
-        calcRdp(dpd.left, ctx),
-        calcRdp(dpd.right, ctx),
+        calcRdp(dpd.left!, ctx),
+        calcRdp(dpd.right!, ctx),
       ]);
 
     // Operates on a single property name

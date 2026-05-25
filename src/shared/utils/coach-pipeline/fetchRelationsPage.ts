@@ -66,7 +66,7 @@ export const remapLinksPage = <
 >(
   wireLinksPage: LoadObjectSetLinksResponseV2,
 ): FetchLinksPageResult<Q, LINK_TYPES> => {
-  return {
+  return { sourceApiName: '' as any,
     ...wireLinksPage,
     data: wireLinksPage.data.flatMap(({ sourceObject, linkedObjects }) =>
       linkedObjects.map(({ targetObject, linkType }) => ({

@@ -214,7 +214,7 @@ export function createClientMockHelper(): MockClientHelper {
       getScrubDefinition: vitest.fn(),
     },
     tokenProvider: vitest.fn(),
-    objectSetFactory: vitest.fn(),
+    objectSetFactory: vitest.fn() as any,
     fetch: vitest.fn(),
     clientPiiFieldKey: {} as any,
     requestContext: {},
@@ -690,7 +690,7 @@ export function updateScrubField<T extends ObjectOrInterfaceDefinition>(
     orderBy: orderBy ?? {},
   });
 
-  store.batch({ deferredId }, (batch) => {
+  store.batch({ deferredId } as any, (batch) => {
     const rdpConfig = query.rdpConfig;
     const objectPiiFieldKeys = store.objects.storeOsdkInstances(
       objects,
@@ -723,7 +723,7 @@ export function updateObject<T extends ObjectOrInterfaceDefinition>(
     pk: value.$piiKey,
   }, undefined);
 
-  store.batch({ deferredId }, (batch) => {
+  store.batch({ deferredId } as any, (batch) => {
     return query.writeToStore(
       value as unknown as ScrubRecord<typeof value>,
       "loaded",

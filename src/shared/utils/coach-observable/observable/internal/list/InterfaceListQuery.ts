@@ -87,7 +87,7 @@ export class InterfaceListQuery extends ListQuery {
     const clientCtx = store.client[additionalContext];
     let pipelineSet: PipelineSet<ObjectTypeDefinition>;
     if (rids != null) {
-      pipelineSet = clientCtx.objectSetFactory(
+      pipelineSet = (clientCtx as any).objectSetFactory(
         objectTypeDef,
         clientCtx,
         { type: "static", objects: [...rids] },
@@ -178,7 +178,7 @@ function createSourceSetForPivot(
   const clientCtx = store.client[additionalContext];
 
   if (rids != null) {
-    return clientCtx.objectSetFactory(
+    return (clientCtx as any).objectSetFactory(
       {
         type: "object",
         apiName: pivotInfo.sourceType,

@@ -30,39 +30,39 @@ export function makeGeoFilterWithin(
 ): SearchJsonQueryV2 {
   if (Array.isArray(withinBody)) {
     return makeGeoFilterBbox(withinBody as any, "$within", propertyIdentifier, field);
-  } else if ("$bbox" in withinBody && withinBody.$bbox != null) {
+  } else if ("$bbox" in withinBody && withinBody?.$bbox != null) {
     return makeGeoFilterBbox(
-      withinBody.$bbox,
+      withinBody?.$bbox,
       "$within",
       propertyIdentifier,
       field,
     );
   } else if (
     ("$distance" in withinBody && "$of" in withinBody)
-    && withinBody.$distance != null
-    && withinBody.$of != null
+    && withinBody?.$distance != null
+    && withinBody?.$of != null
   ) {
     return {
       type: "withinDistanceOf",
       ...(propertyIdentifier != null && { propertyIdentifier }),
       field,
       value: {
-        center: Array.isArray(withinBody.$of)
+        center: Array.isArray(withinBody?.$of)
           ? {
             type: "Point",
-            coordinates: withinBody.$of,
+            coordinates: withinBody?.$of,
           }
-          : withinBody.$of,
+          : withinBody?.$of,
         distance: {
-          value: withinBody.$distance[0],
+          value: withinBody?.$distance[0],
           unit: DistanceUnitMapping[(withinBody as any).$distance[1]],
         },
       },
     };
   } else {
     const coordinates = ("$polygon" in withinBody)
-      ? withinBody.$polygon
-      : withinBody.coordinates;
+      ? withinBody?.$polygon
+      : withinBody?.coordinates;
     return makeGeoFilterPolygon(
       coordinates,
       "withinPolygon",

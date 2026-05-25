@@ -1792,6 +1792,7 @@ export interface Client {
     logger?: import('./coach-types').Logger
     branch?: string
     objectFactory: (...args: unknown[]) => unknown
+    objectSetFactory: (...args: unknown[]) => unknown
     narrowTypeInterfaceOrObjectMapping: Record<string, 'pipeline' | 'interface'>
   }
 

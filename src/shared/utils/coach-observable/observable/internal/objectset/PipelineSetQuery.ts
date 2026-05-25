@@ -222,7 +222,7 @@ export class ObjectSetQuery extends BaseListQuery<
       const wirePipelineSet = getWirePipelineSet(this.#composedPipelineSet);
       const { resultType, invalidationSet } =
         await getObjectTypesThatInvalidate(
-          this.store.client[additionalContext],
+          this.store.client[additionalContext] as any,
           wirePipelineSet,
         );
       this.sortingStrategy = new OrderBySortingStrategy(
@@ -466,7 +466,7 @@ export class ObjectSetQuery extends BaseListQuery<
   ): Promise<Set<string>> {
     try {
       const { invalidationSet } = await getObjectTypesThatInvalidate(
-        this.store.client[additionalContext],
+        this.store.client[additionalContext] as any,
         wirePipelineSet,
       );
       return invalidationSet;

@@ -58,7 +58,7 @@ export class ObjectListQuery extends ListQuery {
     if (pivotInfo != null) {
       let sourceSet: PipelineSet<ObjectTypeDefinition>;
       if (rids != null) {
-        sourceSet = clientCtx.objectSetFactory(
+        sourceSet = (clientCtx as any).objectSetFactory(
           {
             type: "object",
             apiName: pivotInfo.sourceType,
@@ -96,7 +96,7 @@ export class ObjectListQuery extends ListQuery {
     // Start with either a static objectset (for RIDs) or a base objectset
     let pipelineSet: PipelineSet<ObjectTypeDefinition>;
     if (rids != null) {
-      pipelineSet = clientCtx.objectSetFactory(
+      pipelineSet = (clientCtx as any).objectSetFactory(
         typeDefinition,
         clientCtx,
         { type: "static", objects: [...rids] },

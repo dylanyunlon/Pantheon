@@ -103,19 +103,19 @@ export const objectSetDefinitions = new WeakMap<
 export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
   objectType: Q,
   clientCtx: MinimalClient,
-  pipelineSet: WirePipelineSet = resolveBaseObjectSetType(objectType),
+  pipelineSet: WirePipelineSet = resolveBaseObjectSetType(objectType) as any,
 ): PipelineSet<Q> {
   const base: PipelineSet<Q> = {
     aggregate: (aggregate<Q, any>).bind(
       globalThis,
-      augmentRequestContext(clientCtx, _ => ({ finalMethodCall: "aggregate" })),
+      augmentRequestContext(clientCtx as any as any, _ => ({ finalMethodCall: "aggregate" })),
       objectType,
       pipelineSet,
     ) as PipelineSet<Q>["aggregate"],
 
     fetchPage: fetchPageInternal.bind(
       globalThis,
-      augmentRequestContext(clientCtx, _ => ({ finalMethodCall: "fetchPage" })),
+      augmentRequestContext(clientCtx as any as any, _ => ({ finalMethodCall: "fetchPage" })),
       objectType,
       pipelineSet,
     ) as PipelineSet<Q>["fetchPage"],
@@ -198,7 +198,7 @@ export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
       L extends PropertyKeys<Q>,
       R extends boolean,
       const A extends Augments,
-      S extends NullabilityAdherence = NullabilityAdherence.Default,
+      S extends NullabilityAdherence = typeof NullabilityAdherence.Default,
       T extends boolean = false,
       ORDER_BY_OPTIONS extends ObjectSetArgs.OrderByOptions<L> = never,
     >(
@@ -329,12 +329,12 @@ export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
       objectTypeDef: ObjectTypeDefinition | InterfaceDefinition,
     ) => {
       const existingMapping =
-        clientCtx.narrowTypeInterfaceOrObjectMapping[objectTypeDef.apiName];
+        ((clientCtx as any).narrowTypeInterfaceOrObjectMapping)[objectTypeDef.apiName];
       invariant(
         !existingMapping || existingMapping === objectTypeDef.type,
         `${objectTypeDef.apiName} was previously used as an ${existingMapping}, but now used as a ${objectTypeDef.type}.`,
       );
-      clientCtx.narrowTypeInterfaceOrObjectMapping[objectTypeDef.apiName] =
+      ((clientCtx as any).narrowTypeInterfaceOrObjectMapping)[objectTypeDef.apiName] =
         objectTypeDef.type;
 
       return clientCtx.objectSetFactory(

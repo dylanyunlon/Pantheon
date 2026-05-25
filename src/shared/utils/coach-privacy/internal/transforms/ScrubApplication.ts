@@ -112,7 +112,7 @@ export class ActionApplication {
     }
 
     // Use the registry to find all RDP variant cache keys for each deleted object.
-    this.store.batch({}, (batch) => {
+    this.store.batch({} as any, (batch) => {
       for (const { piiFieldType, piiKey } of deletedObjects ?? []) {
         for (
           const piiFieldKey of this.store.objectPiiFieldKeyRegistry.getVariants(
@@ -147,7 +147,7 @@ export class ActionApplication {
         }
       }
     } else {
-      for (const apiName of actionEditResponse.editedPiiFieldTypes) {
+      for (const apiName of actionEditResponse.editedPiiFieldTypes!) {
         editedPiiFieldTypeSet.add(apiName as string);
       }
     }

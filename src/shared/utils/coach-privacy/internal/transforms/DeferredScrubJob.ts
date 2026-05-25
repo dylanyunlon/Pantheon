@@ -50,7 +50,7 @@ export class DeferredJob {
           addedObjectPromises,
         );
 
-        const { batchResult } = store.batch({ deferredId }, (batch) => {
+        const { batchResult } = store.batch({ deferredId } as any, (batch) => {
           for (const obj of addedObjects) {
             if (obj.status === "fulfilled") {
               store.objects.getQuery({
