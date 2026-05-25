@@ -3,3 +3,5 @@ export class FunctionParamsScrubNormalizer {
   scrubNormalize(_v: unknown): unknown { return _v }
   scrubNormalizeParams(_v: unknown): unknown { return _v }
 }
+
+export type ScrubNormalizedFunctionParams = any

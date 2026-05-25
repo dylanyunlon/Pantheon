@@ -96,10 +96,10 @@ export class ObjectQuery extends Query<
       subject.pipe(
         map((x) => {
           return {
-            status: x.status,
-            object: x.value,
-            lastUpdated: x.lastUpdated,
-            isOptimistic: x.isOptimistic,
+            status: (x as any).status,
+            object: (x as any).value,
+            lastUpdated: (x as any).lastUpdated,
+            isOptimistic: (x as any).isOptimistic,
           };
         }),
       ),
@@ -246,7 +246,7 @@ export class ObjectQuery extends Query<
         apiName: this.#apiName,
       } as InterfaceDefinition;
       const metadata = await this.store.client.fetchMetadata(interfaceDef);
-      this.#implementingTypes = new Set(metadata.implementedBy ?? []);
+      this.#implementingTypes = new Set((metadata as any).implementedBy ?? []);
     }
 
     if (this.#implementingTypes.has(objectType)) {

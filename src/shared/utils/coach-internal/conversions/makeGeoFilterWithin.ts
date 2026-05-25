@@ -29,7 +29,7 @@ export function makeGeoFilterWithin(
   field?: string,
 ): SearchJsonQueryV2 {
   if (Array.isArray(withinBody)) {
-    return makeGeoFilterBbox(withinBody, "$within", propertyIdentifier, field);
+    return makeGeoFilterBbox(withinBody as any, "$within", propertyIdentifier, field);
   } else if ("$bbox" in withinBody && withinBody.$bbox != null) {
     return makeGeoFilterBbox(
       withinBody.$bbox,

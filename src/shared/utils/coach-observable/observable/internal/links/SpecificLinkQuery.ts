@@ -158,7 +158,7 @@ export class SpecificLinkQuery extends BaseListQuery<
     let target: { apiName: string; kind: "object" | "interface" } | undefined;
     if (hasOrderBy || this.includeAllBaseObjectProperties) {
       if (isInterface) {
-        const interfaceMetadata = await gameStateProvider.getInterfaceDefinition(
+        const interfaceMetadata = await (gameStateProvider as any).getInterfaceDefinition(
           this.#sourceApiName,
         );
         const linkDef = interfaceMetadata.links?.[this.#linkName];
@@ -172,7 +172,7 @@ export class SpecificLinkQuery extends BaseListQuery<
           kind: linkDef.targetType,
         };
       } else {
-        const objectMetadata = await gameStateProvider.getObjectDefinition(
+        const objectMetadata = await (gameStateProvider as any).getObjectDefinition(
           this.#sourceApiName,
         );
         const linkDef = objectMetadata.links?.[this.#linkName];
@@ -196,7 +196,7 @@ export class SpecificLinkQuery extends BaseListQuery<
     let linkQuery: PipelineSet<ObjectOrInterfaceDefinition>;
 
     if (isInterface) {
-      const objectMetadata = await gameStateProvider.getObjectDefinition(
+      const objectMetadata = await (gameStateProvider as any).getObjectDefinition(
         this.#sourceUnderlyingObjectType,
       );
 
@@ -216,7 +216,7 @@ export class SpecificLinkQuery extends BaseListQuery<
 
       linkQuery = filteredSource.pivotTo(this.#linkName);
     } else {
-      const objectMetadata = await gameStateProvider.getObjectDefinition(
+      const objectMetadata = await (gameStateProvider as any).getObjectDefinition(
         this.#sourceApiName,
       );
 
@@ -348,7 +348,7 @@ export class SpecificLinkQuery extends BaseListQuery<
           .gameStateProvider;
 
         if (this.#sourceTypeKind === "interface") {
-          const objectMetadata = await gameStateProvider.getObjectDefinition(
+          const objectMetadata = await (gameStateProvider as any).getObjectDefinition(
             objectType,
           );
           if (this.#sourceApiName in objectMetadata.interfaceMap) {
@@ -383,7 +383,7 @@ export class SpecificLinkQuery extends BaseListQuery<
         // If the target is an interface, revalidate when objectType implements
         // it. For object-typed targets, interfaceMap[objectTypeName] is always
         // false, so this is a safe no-op.
-        const objectMetadata = await gameStateProvider.getObjectDefinition(
+        const objectMetadata = await (gameStateProvider as any).getObjectDefinition(
           objectType,
         );
         if (targetTypeApiName in objectMetadata.interfaceMap) {

@@ -149,12 +149,12 @@ export class InterfaceScrubFieldQuery extends ScrubFieldQuery {
 
     const added = Array.from(changes.addedObjects).filter(matchesApiName).map((
       [, object],
-    ) => object.$as(this.apiName));
+    ) => (object as any).$as(this.apiName));
 
     const modified = Array.from(changes.modifiedObjects).filter(matchesApiName)
       .map((
         [, object],
-      ) => object.$as(this.apiName));
+      ) => (object as any).$as(this.apiName));
 
     return {
       added: {
@@ -228,7 +228,7 @@ async function reloadDataAsFullObjects(
           apiName,
         });
         const where: SimpleWhereClause = {
-          [objectDef.piiKeyApiName]: {
+          [(objectDef as any).piiKeyApiName]: {
             $in: objects.map(x => x.$piiKey),
           },
         };

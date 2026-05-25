@@ -171,7 +171,7 @@ export async function convertWireToCoachRecords(
 
     let conforming = true;
     if (interfaceApiName && ifaceSelected) {
-      invariantInterfacesAsViews(objectDef, interfaceApiName, client);
+      invariantInterfacesAsViews(objectDef as any, interfaceApiName, client);
 
       objProps = ifaceSelected;
     } else {
@@ -190,7 +190,7 @@ export async function convertWireToCoachRecords(
 
     let coachRecord: ObjectHolder | InterfaceHolder = createCoachRecord(
       client,
-      objectDef,
+      objectDef as any,
       rawObj,
       derivedPropertyTypeByName,
       propertySecurities,
@@ -199,7 +199,7 @@ export async function convertWireToCoachRecords(
       interfaceApiName && isInterfaceScoped
     ) coachRecord = coachRecord.$as(interfaceApiName);
 
-    ret.push(coachRecord);
+    ret.push(coachRecord as any);
   }
 
   return ret;
@@ -311,7 +311,7 @@ function convertInterfaceToObjectTypeMappingsV2ToV1(
           objectTypeName,
           Object.fromEntries(
             Object.entries(propertyMappings)
-              .filter(([, impl]) => impl.type === "localPropertyImplementation")
+              .filter(([, impl]) => (impl as any).type === "localPropertyImplementation")
               .map((
                 [interfaceProp, impl],
               ) => [

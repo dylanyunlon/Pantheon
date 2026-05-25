@@ -52,14 +52,14 @@ export function createCollectionConnectable<
   return connectable<P>(
     subject.pipe(
       switchMap(scrubFieldEntry => {
-        const resolvedData = scrubFieldEntry?.value?.data == null
+        const resolvedData = (scrubFieldEntry? as any).value?.data == null
           ? of(undefined)
-          : scrubFieldEntry.value.data.length === 0
+          : (scrubFieldEntry as any).value.data.length === 0
           ? of([])
           : combineLatest(
-            scrubFieldEntry.value.data.map((piiFieldKey: ObjectPiiFieldKey) =>
+            (scrubFieldEntry as any).value.data.map((piiFieldKey: ObjectPiiFieldKey) =>
               subjects.get(piiFieldKey).pipe(
-                map(objectEntry => objectEntry?.value!),
+                map(objectEntry => (objectEntry? as any).value!),
                 distinctUntilChanged(),
               )
             ),
@@ -68,22 +68,22 @@ export function createCollectionConnectable<
         return scheduled(
           combineLatest({
             resolvedData,
-            isDeferred: of(scrubFieldEntry.isDeferred),
-            status: of(scrubFieldEntry.status),
-            lastUpdated: of(scrubFieldEntry.lastUpdated),
-            totalCount: of(scrubFieldEntry?.value?.totalCount),
+            isDeferred: of((scrubFieldEntry as any).isDeferred),
+            status: of((scrubFieldEntry as any).status),
+            lastUpdated: of((scrubFieldEntry as any).lastUpdated),
+            totalCount: of((scrubFieldEntry? as any).value?.totalCount),
           }).pipe(
             map(params =>
               createPayload({
-                resolvedData: params.resolvedData === undefined
+                resolvedData: (params as any).resolvedData === undefined
                   ? undefined
-                  : Array.isArray(params.resolvedData)
-                  ? params.resolvedData
+                  : Array.isArray((params as any).resolvedData)
+                  ? (params as any).resolvedData
                   : [],
-                isDeferred: params.isDeferred,
-                status: params.status,
-                lastUpdated: params.lastUpdated,
-                totalCount: params.totalCount,
+                isDeferred: (params as any).isDeferred,
+                status: (params as any).status,
+                lastUpdated: (params as any).lastUpdated,
+                totalCount: (params as any).totalCount,
               })
             ),
           ),

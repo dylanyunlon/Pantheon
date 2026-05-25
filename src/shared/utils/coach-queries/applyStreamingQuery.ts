@@ -90,10 +90,10 @@ export async function* applyStreamingQuery<
   for await (
     const line of parseNdjsonStream(iterateReadableStream(reader))
   ) {
-    if (line.type === "error") {
+    if ((line as any).type === "error") {
       const err = new Error(
-        `${line.errorName} (${line.errorCode}) [${line.errorInstanceId}]: ${
-          line.errorDescription ?? ""
+        `${(line as any).errorName} (${line.errorCode}) [${line.errorInstanceId}]: ${
+          (line as any).errorDescription ?? ""
         }`,
       );
       Object.assign(err, line);
@@ -102,7 +102,7 @@ export async function* applyStreamingQuery<
     const remapped = await remapQueryResponse(
       client,
       qd.output,
-      line.value,
+      (line as any).value,
       definitions,
     );
     if (qd.output.type === "array" && Array.isArray(remapped)) {

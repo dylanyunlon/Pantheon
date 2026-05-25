@@ -84,3 +84,5 @@ export class TimeSeriesPropertyImpl<T extends number | string>
     }
   }
 }
+
+export const createTimeseriesProperty: any = undefined

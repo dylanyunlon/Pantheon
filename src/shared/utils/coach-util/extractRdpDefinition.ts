@@ -101,7 +101,7 @@ async function extractRdpDefinitionInternal(
       for (
         const [name, definition] of Object.entries(_os(objectSet).derivedProperties)
       ) {
-        if (definition.type !== "selection") {
+        if ((definition as any).type !== "selection") {
           definitions[name] = {
             selectedOrCollectedPropertyType: undefined,
             definition,
@@ -109,7 +109,7 @@ async function extractRdpDefinitionInternal(
           continue;
         }
 
-        switch (definition.operation.type) {
+        switch ((definition as any).operation.type) {
           case "collectList":
           case "collectSet":
           case "get":
@@ -117,7 +117,7 @@ async function extractRdpDefinitionInternal(
             const { childObjectType: operationLevelObjectType } =
               await extractRdpDefinitionInternal(
                 clientCtx,
-                definition.objectSet,
+                (definition as any).objectSet,
                 childObjectType,
               );
             if (
@@ -132,7 +132,7 @@ async function extractRdpDefinitionInternal(
 
             definitions[name] = {
               selectedOrCollectedPropertyType:
-                objDef.properties[definition.operation.selectedPropertyApiName],
+                objDef.properties[(definition as any).operation.selectedPropertyApiName],
               definition,
             };
             break;

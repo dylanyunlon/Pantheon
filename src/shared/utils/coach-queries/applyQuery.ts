@@ -140,7 +140,7 @@ export async function remapQueryResponse<
     }
 
     case "array": {
-      for (let i = 0; i < responseValue.length; i++) {
+      for (let i = 0; i < (responseValue as any).length; i++) {
         responseValue[i] = await remapQueryResponse(
           client,
           responseDataType.array,
@@ -153,7 +153,7 @@ export async function remapQueryResponse<
     }
 
     case "set": {
-      for (let i = 0; i < responseValue.length; i++) {
+      for (let i = 0; i < (responseValue as any).length; i++) {
         responseValue[i] = await remapQueryResponse(
           client,
           responseDataType.set,
@@ -191,7 +191,7 @@ export async function remapQueryResponse<
         );
       }
       return createQueryObjectResponse(
-        responseValue,
+        responseValue as any,
         def,
       ) as QueryReturnType<
         typeof responseDataType
@@ -207,7 +207,7 @@ export async function remapQueryResponse<
       }
 
       return createQueryInterfaceResponse(
-        responseValue,
+        responseValue as any,
         def,
       ) as QueryReturnType<
         typeof responseDataType
@@ -234,7 +234,7 @@ export async function remapQueryResponse<
       return createPipeline(
         def,
         client,
-        responseValue,
+        responseValue as any,
       ) as QueryReturnType<
         typeof responseDataType
       >;
@@ -243,7 +243,7 @@ export async function remapQueryResponse<
     case "struct": {
       // figure out what keys need to be fixed up
       for (const [key, subtype] of Object.entries(responseDataType.struct)) {
-        if (requiresConversion(subtype) || responseValue[key] == null) {
+        if (requiresConversion(subtype as any) || responseValue[key] == null) {
           responseValue[key] = await remapQueryResponse(
             client,
             subtype,
@@ -261,18 +261,18 @@ export async function remapQueryResponse<
 
       invariant(Array.isArray(responseValue), "Expected array entry");
       for (const entry of responseValue) {
-        invariant(entry.key != null, "Expected key");
+        invariant((entry as any).key != null, "Expected key");
         invariant(
           responseDataType.valueType.nullable || entry.value != null,
           "Expected value",
         );
         const key = responseDataType.keyType.type === "object"
           ? getObjectSpecifier(
-            entry.key,
+            (entry as any).key,
             responseDataType.keyType.object,
             definitions,
           )
-          : entry.key;
+          : (entry as any).key;
         const value = await remapQueryResponse(
           client,
           responseDataType.valueType,
@@ -289,7 +289,7 @@ export async function remapQueryResponse<
         key: AllowedBucketKeyTypes;
         value: AllowedBucketTypes;
       }[] = [];
-      for (const { key, value } of responseValue.groups) {
+      for (const { key, value } of (responseValue as any).groups) {
         result.push({ key, value });
       }
       return result as QueryReturnType<typeof responseDataType>;
@@ -300,7 +300,7 @@ export async function remapQueryResponse<
         key: AllowedBucketKeyTypes;
         groups: { key: AllowedBucketKeyTypes; value: AllowedBucketTypes }[];
       }[] = [];
-      for (const { key, groups } of responseValue.groups) {
+      for (const { key, groups } of (responseValue as any).groups) {
         const subResult: { key: any; value: any }[] = [];
         for (const { key: subKey, value } of groups) {
           subResult.push({ key: subKey, value });
@@ -361,7 +361,7 @@ export async function getRequiredDefinitions(
       const types = [dataType.keyType, dataType.valueType];
 
       const allDefs = await Promise.all(
-        types.map(value => getRequiredDefinitions(value, client)),
+        types.map(value => getRequiredDefinitions(value as any, client)),
       );
 
       for (const defs of allDefs) {

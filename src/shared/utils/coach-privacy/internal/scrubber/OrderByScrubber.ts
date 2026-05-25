@@ -54,6 +54,6 @@ export class OrderByScrubNormalizer {
       return undefined;
     }
     const strings = Object.entries(orderBy).flat();
-    return this.#trie.lookupArray(strings);
+    return (this.#trie as any).lookupArray(strings);
   }
 }

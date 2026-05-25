@@ -48,7 +48,7 @@ export class RdpCanonicalizer extends CachingCanonicalizer<Rdp, Rdp> {
 
     for (const [key, rdpFunction] of Object.entries(rdp)) {
       const builder = createWithPropertiesPipelineSet(
-        objectTypeHolder,
+        objectTypeHolder as any,
         { type: "methodInput" },
         definitionMap,
         /* fromBasePipelineSet */ true,

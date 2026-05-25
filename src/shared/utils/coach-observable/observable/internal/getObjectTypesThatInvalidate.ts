@@ -110,9 +110,9 @@ async function calcPipelineSet(
       for (const [k, v] of Object.entries(srcDef.links)) {
         if (k === os.interfaceLink) {
           if (v.targetType === "object") {
-            return await bumpObject(v.targetTypeApiName);
+            return await bumpObject((v as any).targetTypeApiName);
           }
-          return await bumpInterface(v.targetTypeApiName);
+          return await bumpInterface((v as any).targetTypeApiName);
         }
       }
 
@@ -171,7 +171,7 @@ async function calcPipelineSet(
       const returnTypes = await Promise.all(
         resolvableSets.map(async (os) => {
           const counts: Record<string, number> = {};
-          const r = await calcPipelineSet(os, { ...ctx, counts });
+          const r = await calcPipelineSet(os as any, { ...ctx, counts });
           return { r, counts };
         }),
       );
@@ -203,7 +203,7 @@ async function calcPipelineSet(
     case "withProperties":
       // Everything in an RDP chain needs to invalidate us for now
       for (const [, v] of Object.entries(os.derivedProperties)) {
-        await calcRdp(v, { ...ctx, methodInput: os.pipelineSet });
+        await calcRdp(v as any, { ...ctx, methodInput: os.pipelineSet });
       }
       return calcPipelineSet(os.pipelineSet, { ...ctx, methodInput: os.pipelineSet });
 
@@ -244,7 +244,7 @@ async function calcRdp(
   switch (dpd.type) {
     // Operates on object sets
     case "selection":
-      return await calcPipelineSet(dpd.pipelineSet, ctx);
+      return await calcPipelineSet((dpd as any).pipelineSet, ctx);
 
     // Operates on single property
     case "negate":

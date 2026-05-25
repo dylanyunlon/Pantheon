@@ -96,10 +96,10 @@ export class ObjectQuery extends Query<
       subject.pipe(
         map((x) => {
           return {
-            status: x.status,
-            object: x.value,
-            lastUpdated: x.lastUpdated,
-            isDeferred: x.isDeferred,
+            status: (x as any).status,
+            object: (x as any).value,
+            lastUpdated: (x as any).lastUpdated,
+            isDeferred: (x as any).isDeferred,
           };
         }),
       ),

@@ -24,3 +24,5 @@ export const coachClientContext: unique symbol = Symbol('coachClientContext')
 
 const MaxCoachVersion = '1.0.0'
 export type MaxCoachVersion = typeof MaxCoachVersion
+
+export type Client = any

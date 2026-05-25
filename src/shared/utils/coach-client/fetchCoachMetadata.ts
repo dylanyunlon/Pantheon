@@ -22,7 +22,7 @@ export const fetchCoachMetadataInternal = async <
   const apiName = (definition as any).apiName
 
   const resp = await client.fetchFn(
-    `${client.baseUrl}/api/v1/coach/metadata/${definition.type || 'object'}/${apiName}`,
+    `${client.baseUrl}/api/v1/coach/metadata/${(definition as any).type || 'object'}/${apiName}`,
     { headers: { Authorization: `Bearer ${token}` } }
   )
   if (!resp.ok) throw new Error(`Metadata fetch failed for ${apiName}: ${resp.status}`)

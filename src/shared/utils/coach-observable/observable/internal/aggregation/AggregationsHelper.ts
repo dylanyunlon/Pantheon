@@ -147,7 +147,7 @@ export class AggregationsHelper extends AbstractHelper<
 
     const aggregationCacheKey = this.cacheKeys.get<AggregationCacheKey>(
       "aggregation",
-      typeKind,
+      typeKind as any,
       apiName,
       serializedPipelineSet,
       canonWhere,

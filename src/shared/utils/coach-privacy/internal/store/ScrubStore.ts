@@ -305,7 +305,7 @@ export class Store {
       for (const key of variants) {
         const query = this.queries.peek(key);
         if (query) {
-          promises.push(query.revalidate(/* force */ true));
+          promises.push((query as any).revalidate(/* force */ true));
         }
       }
     }
@@ -340,14 +340,14 @@ export class Store {
 
     const promises: Array<Promise<void>> = [];
     for (const piiFieldKey of this.queries.keys()) {
-      if (piiFieldKey.type !== "specificLink") {
+      if ((piiFieldKey as any).type !== "specificLink") {
         continue;
       }
       const query = this.queries.peek(piiFieldKey);
       if (!query) {
         continue;
       }
-      promises.push(query.invalidatePiiFieldType(apiName, undefined));
+      promises.push((query as any).invalidatePiiFieldType(apiName, undefined));
     }
     return Promise.allSettled(promises).then(() => void 0);
   }
@@ -360,7 +360,7 @@ export class Store {
       ? this.logger?.child({ methodName: "maybeRevalidateQueries" })
       : undefined;
 
-    if (changes.isEmpty()) {
+    if ((changes as any).isEmpty()) {
       if (process.env.NODE_ENV !== "production") {
         logger?.debug("No changes, aborting");
       }
@@ -375,7 +375,7 @@ export class Store {
       const promises: Array<Promise<unknown>> = [];
       for (const piiFieldKey of this.queries.keys()) {
         const query = this.queries.peek(piiFieldKey);
-        if (!query?.maybeUpdateAndRevalidate) {
+        if ((!query? as any).maybeUpdateAndRevalidate) {
           continue;
         }
 
@@ -384,7 +384,7 @@ export class Store {
           !this.#shouldPropagateToQuery(
             {
               piiFieldKey,
-              maybeUpdateAndRevalidate: query.maybeUpdateAndRevalidate,
+              maybeUpdateAndRevalidate: (query as any).maybeUpdateAndRevalidate,
             },
             changes,
             deferredId,
@@ -393,7 +393,7 @@ export class Store {
           continue;
         }
 
-        const promise = query.maybeUpdateAndRevalidate(changes, deferredId);
+        const promise = (query as any).maybeUpdateAndRevalidate(changes, deferredId);
         if (promise) promises.push(promise);
       }
       await Promise.all(promises);
@@ -488,8 +488,8 @@ export class Store {
         `Query type: ${queryPiiFieldType}, affected: ${affected}`,
         {
           queryKey: DEBUG_ONLY__piiFieldKeyToString(piiFieldKey),
-          addedCount: changes.addedObjects.get(queryPiiFieldType)?.length ?? 0,
-          modifiedCount: changes.modifiedObjects.get(queryPiiFieldType)?.length
+          addedCount: (changes.addedObjects.get(queryPiiFieldType)? as any).length ?? 0,
+          modifiedCount: (changes.modifiedObjects.get(queryPiiFieldType)? as any).length
             ?? 0,
         },
       );
@@ -517,7 +517,7 @@ export class Store {
       } else if (piiFieldKey.type === "pipelineSet") {
         const query = this.queries.peek(piiFieldKey);
         if (query) {
-          return query.rdpConfig;
+          return (query as any).rdpConfig;
         }
       } else if (piiFieldKey.type === "mediaMetadata") {
         return undefined;
@@ -559,20 +559,20 @@ export class Store {
   #changesAffectPiiFieldType(changes: Changes, piiFieldType: string): boolean {
     // Check added objects (MultiMap.get returns an array)
     const addedForType = changes.addedObjects.get(piiFieldType);
-    if (addedForType && addedForType.length > 0) {
+    if (addedForType && (addedForType as any).length > 0) {
       return true;
     }
 
     // Check modified objects (MultiMap.get returns an array)
     const modifiedForType = changes.modifiedObjects.get(piiFieldType);
-    if (modifiedForType && modifiedForType.length > 0) {
+    if (modifiedForType && (modifiedForType as any).length > 0) {
       return true;
     }
 
     for (const deletedKey of changes.deleted) {
       if (
-        deletedKey.type === "object"
-        && deletedKey.otherKeys[OBJECT_API_NAME_IDX] === piiFieldType
+        (deletedKey as any).type === "object"
+        && (deletedKey as any).otherKeys[OBJECT_API_NAME_IDX] === piiFieldType
       ) {
         return true;
       }
@@ -618,7 +618,7 @@ export class Store {
       const query = this.queries.peek(piiFieldKey);
       if (!query) continue;
 
-      promises.push(query.invalidatePiiFieldType(apiName, changes));
+      promises.push((query as any).invalidatePiiFieldType(apiName, changes));
     }
 
     // we use allSettled here because we don't care if it succeeds or fails, just that they all complete.
@@ -630,7 +630,7 @@ export class Store {
     for (const piiFieldKey of this.queries.keys()) {
       const query = this.queries.peek(piiFieldKey);
       if (query) {
-        promises.push(query.revalidate(true));
+        promises.push((query as any).revalidate(true));
       }
     }
     // we use allSettled here because we don't care if it succeeds or fails, just that they all complete.

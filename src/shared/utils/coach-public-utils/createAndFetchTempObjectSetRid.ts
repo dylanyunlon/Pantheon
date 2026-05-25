@@ -23,5 +23,5 @@ export async function createAndFetchTempObjectSetRid(
   )
   if (!resp.ok) throw new Error(`createAndFetchTempObjectSetRid failed: ${resp.status}`)
   const data = await resp.json()
-  return data.objectSetRid
+  return (data as any).objectSetRid
 }

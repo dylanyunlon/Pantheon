@@ -26,7 +26,7 @@ export function getMediaPiiFieldKey(
   } else if ("rid" in mediaOrLocation) {
     return `attachment:${mediaOrLocation.rid}`;
   } else {
-    const ref = mediaOrLocation.getMediaReference();
+    const ref = (mediaOrLocation as any).getMediaReference();
     const viewItem = ref.reference.mediaSetViewItem;
     return `media:ref:${viewItem.mediaSetRid}:${viewItem.mediaSetViewRid}:${viewItem.mediaItemRid}`;
   }

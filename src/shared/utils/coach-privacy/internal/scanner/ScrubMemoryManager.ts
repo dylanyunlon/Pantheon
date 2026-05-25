@@ -54,11 +54,11 @@ export function createBlobMemoryManager(): BlobMemoryManager {
   function startGcInterval(): void {
     if (gcIntervalId === undefined) {
       gcIntervalId = setInterval(() => {
-        urlRefCounts.gc();
+        (urlRefCounts as any).gc();
 
         const now = Date.now();
         for (const [key, entry] of cache.entries()) {
-          if (urlRefCounts.has(key)) {
+          if ((urlRefCounts as any).has(key)) {
             continue;
           }
 
@@ -78,13 +78,13 @@ export function createBlobMemoryManager(): BlobMemoryManager {
   function add(key: string, blob: Blob): void {
     const existingEntry = cache.get(key);
 
-    if (existingEntry?.blobUrl && !urlRefCounts.has(key)) {
+    if (existingEntry?.blobUrl && (!urlRefCounts as any).has(key)) {
       URL.revokeObjectURL(existingEntry.blobUrl);
     }
 
     cache.set(key, {
       blob,
-      blobUrl: urlRefCounts.has(key) ? existingEntry?.blobUrl : undefined,
+      blobUrl: (urlRefCounts as any).has(key) ? existingEntry?.blobUrl : undefined,
       lastAccessed: Date.now(),
     });
 
@@ -108,7 +108,7 @@ export function createBlobMemoryManager(): BlobMemoryManager {
 
     if (!entry.blobUrl) {
       entry.blobUrl = URL.createObjectURL(entry.blob);
-      urlRefCounts.register(key);
+      (urlRefCounts as any).register(key);
     }
 
     urlRefCounts.retain(key);

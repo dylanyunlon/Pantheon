@@ -167,10 +167,10 @@ export abstract class AggregationQuery extends Query<
       subject.pipe(
         map((x) => {
           return {
-            status: x.status,
-            result: x.value,
-            lastUpdated: x.lastUpdated,
-            error: x.status === "error"
+            status: (x as any).status,
+            result: (x as any).value,
+            lastUpdated: (x as any).lastUpdated,
+            error: (x as any).status === "error"
               ? new Error("Aggregation failed")
               : undefined,
           };

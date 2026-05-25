@@ -23,5 +23,5 @@ export function formatBoolean(
   value: boolean,
   rule: PropertyBooleanFormattingRule,
 ): string {
-  return value ? rule.valueIfTrue : rule.valueIfFalse;
+  return value ? (rule as any).valueIfTrue : rule.valueIfFalse;
 }

@@ -29,8 +29,8 @@ export function createMediaFromReferenceInternal(
   mediaReference: MediaReference,
 ): Media {
   const { mediaSetRid, mediaItemRid } =
-    mediaReference.reference.mediaSetViewItem;
-  const token = mediaReference.reference.mediaSetViewItem.token;
+    (mediaReference as any).reference.mediaSetViewItem;
+  const token = (mediaReference as any).reference.mediaSetViewItem.token;
   return {
     async fetchContents(): Promise<Response> {
       return MediaSets.read(

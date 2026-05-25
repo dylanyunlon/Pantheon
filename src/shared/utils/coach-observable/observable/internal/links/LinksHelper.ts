@@ -88,7 +88,7 @@ export class LinksHelper extends AbstractHelper<
     const linkCacheKey = this.cacheKeys.get<SpecificLinkCacheKey>(
       "specificLink",
       apiName,
-      sourceTypeKind,
+      sourceTypeKind as any,
       options.sourceUnderlyingObjectType,
       options.pk,
       options.linkName,

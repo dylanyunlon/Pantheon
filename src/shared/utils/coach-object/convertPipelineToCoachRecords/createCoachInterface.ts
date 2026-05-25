@@ -123,7 +123,7 @@ export function createCoachInterface<
   );
   function clone(update: Record<string, any> | undefined) {
     if (update == null) {
-      return underlying.$clone().$as(interfaceDef);
+      return underlying.$clone().$as(interfaceDef as any);
     }
 
     for (const key of Object.keys(update)) {
@@ -140,7 +140,7 @@ export function createCoachInterface<
       ),
     );
 
-    return underlying.$clone(remappedProps).$as(interfaceDef);
+    return underlying.$clone(remappedProps).$as(interfaceDef as any);
   }
   function mapProperty(propertyName: string, value: any) {
     const objDef = underlying[ObjectDefRef];
@@ -164,7 +164,7 @@ function remapPropertySecuritiesForInterface(
 ): PropertySecuritiesMap | undefined {
   if (underlyingSecurities == null) return undefined;
 
-  const inverseMap = objDef.inverseInterfaceMap?.[interfaceDef.apiName] ?? {};
+  const inverseMap = (objDef as any).inverseInterfaceMap?.[interfaceDef.apiName] ?? {};
   const remapped: PropertySecuritiesMap = {};
 
   for (const objPropName of Object.keys(underlyingSecurities)) {

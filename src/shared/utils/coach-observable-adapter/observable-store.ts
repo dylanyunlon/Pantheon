@@ -108,7 +108,7 @@ export class CoachObservableStore {
       changes.updated.add(key)
     }
 
-    this._notifySubjectListeners(subject)
+    this._notifySubjectListeners(subject as any)
     if (!changes.isEmpty()) {
       this._notifyChangeListeners(changes)
     }

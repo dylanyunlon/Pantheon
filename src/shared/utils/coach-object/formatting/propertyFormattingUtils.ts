@@ -25,10 +25,10 @@ export function resolvePropertyReference(
   ref: PropertyTypeReferenceOrStringConstant,
   objectData: SimpleCoachProperties,
 ): string | undefined {
-  if (ref.type === "constant") {
+  if ((ref as any).type === "constant") {
     return ref.value;
-  } else if (ref.type === "propertyType") {
-    const value = objectData[ref.propertyApiName];
+  } else if ((ref as any).type === "propertyType") {
+    const value = objectData[(ref as any).propertyApiName];
     return value != null ? String(value) : undefined;
   }
   return undefined;

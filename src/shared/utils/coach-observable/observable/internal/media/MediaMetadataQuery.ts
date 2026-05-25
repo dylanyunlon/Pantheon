@@ -92,10 +92,10 @@ export class MediaMetadataQuery extends Query<
     return connectable<MediaMetadataPayload>(
       subject.pipe(
         map((x) => ({
-          metadata: x.value,
-          status: x.status,
-          lastUpdated: x.lastUpdated,
-          isOptimistic: x.isOptimistic,
+          metadata: (x as any).value,
+          status: (x as any).status,
+          lastUpdated: (x as any).lastUpdated,
+          isOptimistic: (x as any).isOptimistic,
         })),
       ),
       {

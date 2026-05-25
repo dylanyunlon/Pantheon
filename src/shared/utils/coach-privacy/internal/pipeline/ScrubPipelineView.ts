@@ -90,13 +90,13 @@ export class ListQueryView<PAYLOAD extends BaseListPayloadShape> {
         this.#lastPayload = payload;
         this.#observer?.next?.(this.#transformPayload(payload));
 
-        const loadedCount = payload.resolvedList?.length ?? 0;
+        const loadedCount = (payload as any).resolvedList?.length ?? 0;
         const fetchThreshold = this.#autoFetchMinimum > 0
           ? this.#autoFetchMinimum
           : this.#viewLimit;
 
         if (
-          payload.status === "loaded"
+          (payload as any).status === "loaded"
           && this.#query.hasMorePages()
           && loadedCount < fetchThreshold
         ) {
@@ -124,10 +124,10 @@ export class ListQueryView<PAYLOAD extends BaseListPayloadShape> {
   }
 
   #transformPayload(payload: PAYLOAD): PAYLOAD {
-    const resolvedList = payload.resolvedList;
+    const resolvedList = (payload as any).resolvedList;
     const loadedCount = resolvedList?.length ?? 0;
 
-    let status: Status = payload.status;
+    let status: Status = (payload as any).status;
 
     // When auto-fetching and below threshold with more pages available,
     // report "loading" to prevent status oscillation
@@ -148,7 +148,7 @@ export class ListQueryView<PAYLOAD extends BaseListPayloadShape> {
     return {
       ...payload,
       resolvedList: resolvedList?.slice(0, this.#viewLimit),
-      hasMore: this.#viewLimit < loadedCount || payload.hasMore,
+      hasMore: this.#viewLimit < loadedCount || (payload as any).hasMore,
       fetchMore: this.#fetchMore,
       status,
     };

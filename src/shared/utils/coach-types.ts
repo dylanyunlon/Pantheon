@@ -3,6 +3,16 @@ import type { GamePhase } from './coach-scheduler'
 import type { MatchHistoryGamesAnalysisAll } from './analysis'
 import type { RankedStats } from '@shared/types/league-client/ranked'
 
+
+export type Status = 'init' | 'loading' | 'loaded' | 'error'
+export type Observer<T = unknown> = { next(value: T): void; error?(err: unknown): void; complete?(): void }
+export type CommonObserveOptions = { dedupe?: boolean; invalidationMode?: string }
+export interface CacheSnapshot { entries: Array<{ key: unknown; value: unknown; status: string }> }
+export type CacheEntry = { key: unknown; value: unknown; status: string; timestamp?: number }
+export type ScrubDisposable = { unsubscribe(): void; dispose?(): void; closed?: boolean }
+export type InvalidationMode = 'auto' | 'manual'
+export type ObserveOptions = { invalidationMode?: InvalidationMode }
+
 export namespace Logger {
   export type LogFn = (...args: unknown[]) => void
 }
@@ -366,8 +376,15 @@ export type ValidateActionResponseV2 = ActionValidationResponse
 
 export type ActionMetadata = ActionDefinition & { displayName?: string }
 export namespace ActionMetadata {
-  export type Parameters = Record<string, { dataType: DataType; required?: boolean }>
-  export type DataType = { type: string }
+  export type Parameters = Record<string, Parameter>
+  export type Parameter = { dataType: DataType; required?: boolean; description?: string }
+  export namespace DataType {
+    export type Object = { type: 'object'; objectApiName: string; objectTypeApiName?: string }
+    export type PipelineSet = { type: 'objectSet'; objectApiName?: string; objectTypeApiName?: string; subType?: string }
+    export type Struct = { type: 'struct'; fields: Record<string, { dataType: DataType }> }
+    export type Array = { type: 'array'; subType: DataType }
+  }
+  export type DataType = { type: string; objectApiName?: string; objectTypeApiName?: string; subType?: string | DataType; fields?: Record<string, unknown>; [key: string]: unknown }
 }
 
 export const Actions: Record<string, any> = {
@@ -516,11 +533,8 @@ export type ObjectSetArgs<Q extends ObjectOrInterfaceDefinition = ObjectOrInterf
   $where?: WhereClause
 }
 
-export type ObjectSetSubscription = {
-  unsubscribe(): void
-}
-
 export interface ObjectSetSubscription {
+  unsubscribe?(): void
   id: string
   updates?: unknown[]
   responses?: unknown[]
@@ -1097,3 +1111,9 @@ export type CoachEngine = {
   streaming?: boolean
   [key: string]: unknown
 }
+
+export type ObserveLinks = any
+export type Observer = any
+export type CacheEntry = any
+export type Status = any
+export type CacheSnapshot = any

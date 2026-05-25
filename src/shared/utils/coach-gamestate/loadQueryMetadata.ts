@@ -18,3 +18,5 @@ export async function loadQueryMetadata(
   if (!resp.ok) throw new Error(`Failed to load query metadata for ${apiName}: ${resp.status}`)
   return resp.json()
 }
+
+export const loadGameStateQueryMetadata: any = undefined

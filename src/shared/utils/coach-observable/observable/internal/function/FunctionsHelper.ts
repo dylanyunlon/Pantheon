@@ -65,7 +65,7 @@ export class FunctionsHelper extends AbstractHelper<
     const functionCacheKey = this.cacheKeys.get<FunctionCacheKey>(
       "function",
       apiName,
-      version,
+      version as any,
       canonicalParams,
     );
 

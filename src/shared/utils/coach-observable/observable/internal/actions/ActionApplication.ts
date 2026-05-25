@@ -51,7 +51,7 @@ export class ActionApplication {
           logger?.debug("applying action to multiple args", args);
         }
 
-        actionResults = await this.store.client(action).batchApplyAction(
+        actionResults = await this.store.client(action as any).batchApplyAction(
           args,
           { $returnEdits: true },
         );
@@ -147,7 +147,7 @@ export class ActionApplication {
         }
       }
     } else {
-      for (const apiName of actionEditResponse.editedObjectTypes) {
+      for (const apiName of (actionEditResponse as any).editedObjectTypes) {
         editedObjectTypeSet.add(apiName as string);
       }
     }

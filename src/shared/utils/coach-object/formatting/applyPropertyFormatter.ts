@@ -74,14 +74,14 @@ function formatPropertyValue(
       if (typeof value !== "boolean") {
         return undefined;
       }
-      return formatBoolean(value, rule);
+      return formatBoolean(value, rule as any);
     case "number":
       if (typeof value !== "number") {
         return undefined;
       }
       return formatNumber(
         value,
-        rule.numberType,
+        (rule as any).numberType,
         objectData,
         options.locale ?? getBrowserLocale(),
       );
@@ -93,7 +93,7 @@ function formatPropertyValue(
       return formatDateTime(
         new Date(value),
         rule.format,
-        rule.type === "timestamp" ? rule.displayTimezone : undefined,
+        rule.type === "timestamp" ? (rule as any).displayTimezone : undefined,
         objectData,
         options.locale ?? getBrowserLocale(),
         options.timezoneId,

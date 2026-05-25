@@ -56,7 +56,7 @@ class TsServerImpl extends EventEmitter<{
       serialization: "json",
     })`${this.#tsServerPath} --useNodeIpc`;
 
-    if (this.#logger.isLevelEnabled("trace")) {
+    if ((this.#logger as any).isLevelEnabled("trace")) {
       this.#subprocess.on("message", (req) => {
         this.#logger.trace({ req }, "message received");
       });
@@ -168,7 +168,7 @@ async function getTsServerPath() {
   });
   const possibleTsServerPaths = await pMap(
     nodeModuleDirs,
-    (dir) => path.join(dir, "typescript", "lib", "tsserver"),
+    (dir) => path.join(dir as any, "typescript", "lib", "tsserver"),
   );
 
   const tsServerPath = await pLocate(

@@ -16,3 +16,5 @@ export async function loadFullObjectMetadata(
   if (!resp.ok) throw new Error(`Failed to load object metadata for ${apiName}: ${resp.status}`)
   return resp.json()
 }
+
+export const loadFullGameStateMetadata: any = undefined

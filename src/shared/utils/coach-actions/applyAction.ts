@@ -268,9 +268,9 @@ export function remapActionResponse(
         };
         edit.type === "addLink"
           ? remappedActionResponse.addedLinks.push(
-            coachEdit,
+            coachEdit as any,
           )
-          : remappedActionResponse.deletedLinks?.push(coachEdit);
+          : remappedActionResponse.deletedLinks?.push(coachEdit as any);
         editedObjectTypesSet.add(edit.aSideObject.objectType);
         editedObjectTypesSet.add(edit.bSideObject.objectType);
       } else if (
@@ -298,7 +298,7 @@ export function remapActionResponse(
         }
       }
     }
-    remappedActionResponse.editedObjectTypes = [...editedObjectTypesSet];
+    (remappedActionResponse as any).editedObjectTypes = [...editedObjectTypesSet];
     return remappedActionResponse;
   }
 }

@@ -73,7 +73,7 @@ export class ScrubFieldsHelper extends AbstractHelper<
     options: ObserveScrubFieldOptions<T, {}>,
     subFn: Observer<ScrubFieldPayload>,
   ): QuerySubscription<ScrubFieldQuery> {
-    const ret = super.observe(options, subFn);
+    const ret = (super as any).observe(options, subFn);
 
     if (options.streamUpdates) {
       if (options.pivotTo) {

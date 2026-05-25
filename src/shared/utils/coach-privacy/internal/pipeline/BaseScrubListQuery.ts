@@ -336,7 +336,7 @@ export abstract class BaseScrubFieldQuery<
    */
   protected _preFetch(): void {
     this.nextPageToken = undefined;
-    super._preFetch();
+    (super as any)._preFetch();
   }
 
   /**
@@ -707,7 +707,7 @@ export abstract class BaseScrubFieldQuery<
         if (process.env.NODE_ENV !== "production") {
           logger?.child({ methodName }).info("Unsubscribing from websocket");
         }
-        websocketSubscription.unsubscribe();
+        (websocketSubscription as any).unsubscribe();
       });
     } catch (error) {
       if (this.logger) {

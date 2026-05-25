@@ -224,7 +224,7 @@ export class ObjectSetQuery extends BaseScrubFieldQuery<
       const { resultType, invalidationSet } =
         await getPiiFieldTypesThatInvalidate(
           this.store.client[additionalContext],
-          wirePipelineSet,
+          wirePipelineSet as any,
         );
       this.sortingStrategy = new OrderBySortingStrategy(
         resultType.apiName,
@@ -329,15 +329,15 @@ export class ObjectSetQuery extends BaseScrubFieldQuery<
     for (const piiFieldType of this.#piiFieldTypes) {
       const added = changes.addedObjects.get(piiFieldType);
       const modified = changes.modifiedObjects.get(piiFieldType);
-      if ((added && added.length > 0) || (modified && modified.length > 0)) {
+      if ((added && (added as any).length > 0) || (modified && modified.length > 0)) {
         return this.revalidate(true);
       }
     }
 
     for (const deletedKey of changes.deleted) {
       if (
-        deletedKey.type === "object"
-        && this.#piiFieldTypes.has(deletedKey.otherKeys[OBJECT_API_NAME_IDX])
+        (deletedKey as any).type === "object"
+        && this.#piiFieldTypes.has((deletedKey as any).otherKeys[OBJECT_API_NAME_IDX])
       ) {
         return this.revalidate(true);
       }
@@ -359,8 +359,8 @@ export class ObjectSetQuery extends BaseScrubFieldQuery<
     let hasRelevantDeletions = false;
     for (const key of changes.deleted) {
       if (
-        key.type === "object"
-        && key.otherKeys[OBJECT_API_NAME_IDX] === resultApiName
+        (key as any).type === "object"
+        && (key as any).otherKeys[OBJECT_API_NAME_IDX] === resultApiName
       ) {
         hasRelevantDeletions = true;
         break;
@@ -368,7 +368,7 @@ export class ObjectSetQuery extends BaseScrubFieldQuery<
     }
 
     if (
-      addedObjects.length === 0 && modifiedObjects.length === 0
+      (addedObjects as any).length === 0 && modifiedObjects.length === 0
       && !hasRelevantDeletions
     ) {
       return undefined;
@@ -415,13 +415,13 @@ export class ObjectSetQuery extends BaseScrubFieldQuery<
         );
 
         const { newScrubField, needsRevalidation } = reconcileScrubFieldChanges(
-          existingKeys,
+          existingKeys as any,
           addedMatches.definite,
           relevant.modifiedObjects,
           modifiedMatches,
           changes.deleted,
           batch.deferredWrite,
-          (obj) => this.#getObjectPiiFieldKey(obj),
+          (obj) => this.#getObjectPiiFieldKey(obj as any),
         );
 
         const existingTotalCount = batch.read(this.piiFieldKey)?.value?.totalCount;
@@ -468,7 +468,7 @@ export class ObjectSetQuery extends BaseScrubFieldQuery<
     try {
       const { invalidationSet } = await getPiiFieldTypesThatInvalidate(
         this.store.client[additionalContext],
-        wirePipelineSet,
+        wirePipelineSet as any,
       );
       return invalidationSet;
     } catch (error) {

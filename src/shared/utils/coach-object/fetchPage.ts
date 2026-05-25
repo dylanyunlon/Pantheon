@@ -246,7 +246,7 @@ export async function fetchStaticRidPage<
       loadPropertySecurities: shouldLoadPropertySecurities,
     } as LoadObjectSetV2MultipleObjectTypesRequest,
     client,
-    { type: "object", apiName: "" },
+    { type: "object", apiName: "" } as any,
   );
 
   if (client.flushEdits != null) {
@@ -412,7 +412,7 @@ export async function fetchPageInternal<
   if (objectType.type === "interface") {
     return await fetchInterfacePage(
       client,
-      objectType,
+      objectType as any,
       args as FetchPageArgs<
         InterfaceDefinition,
         L,
@@ -429,7 +429,7 @@ export async function fetchPageInternal<
   } else {
     return await fetchObjectPage(
       client,
-      objectType,
+      objectType as any,
       args as FetchPageArgs<
         ObjectTypeDefinition,
         L,

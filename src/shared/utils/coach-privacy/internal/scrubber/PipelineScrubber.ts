@@ -24,15 +24,15 @@ export class ObjectSetArrayScrubNormalizer {
 
   scrubNormalizeUnion(items: string[]): ScrubNormalized<string[]> {
     const sorted = [...items].sort();
-    return this.#unionTrie.lookupArray(sorted) as ScrubNormalized<string[]>;
+    return (this.#unionTrie as any).lookupArray(sorted) as ScrubNormalized<string[]>;
   }
 
   scrubNormalizeIntersect(items: string[]): ScrubNormalized<string[]> {
     const sorted = [...items].sort();
-    return this.#intersectTrie.lookupArray(sorted) as ScrubNormalized<string[]>;
+    return (this.#intersectTrie as any).lookupArray(sorted) as ScrubNormalized<string[]>;
   }
 
   scrubNormalizeSubtract(items: string[]): ScrubNormalized<string[]> {
-    return this.#subtractTrie.lookupArray(items) as ScrubNormalized<string[]>;
+    return (this.#subtractTrie as any).lookupArray(items) as ScrubNormalized<string[]>;
   }
 }

@@ -95,8 +95,8 @@ const basePropDefs = {
         );
       }
 
-      if (def.titleProperty in update && !("$title" in update)) {
-        update.$title = update[def.titleProperty];
+      if ((def as any).titleProperty in update && !("$title" in update)) {
+        update.$title = update[(def as any).titleProperty];
       }
 
       const newObject = { ...this[UnderlyingCoachRecord], ...update };

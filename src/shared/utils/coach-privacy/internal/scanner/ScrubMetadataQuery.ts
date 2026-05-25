@@ -91,10 +91,10 @@ export class MediaMetadataQuery extends Query<
     return connectable<MediaMetadataPayload>(
       subject.pipe(
         map((x) => ({
-          metadata: x.value,
-          status: x.status,
-          lastUpdated: x.lastUpdated,
-          isDeferred: x.isDeferred,
+          metadata: (x as any).value,
+          status: (x as any).status,
+          lastUpdated: (x as any).lastUpdated,
+          isDeferred: (x as any).isDeferred,
         })),
       ),
       {
@@ -221,9 +221,9 @@ export class MediaMetadataQuery extends Query<
 
     for (const piiFieldKey of changes.deleted) {
       if (
-        piiFieldKey.type === "object"
-        && piiFieldKey.otherKeys[0] === this.#piiFieldType
-        && piiFieldKey.otherKeys[1] === this.#piiKey
+        (piiFieldKey as any).type === "object"
+        && (piiFieldKey as any).otherKeys[0] === this.#piiFieldType
+        && (piiFieldKey as any).otherKeys[1] === this.#piiKey
       ) {
         if (process.env.NODE_ENV !== "production") {
           this.logger?.child({ methodName: "maybeUpdateAndRevalidate" }).debug(
@@ -249,6 +249,6 @@ export class MediaMetadataQuery extends Query<
       this.logger?.child({ methodName: "dispose" }).debug("Disposing query");
     }
 
-    super.dispose();
+    (super as any).dispose();
   }
 }

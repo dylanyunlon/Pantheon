@@ -706,7 +706,7 @@ export abstract class BaseListQuery<
         if (process.env.NODE_ENV !== "production") {
           logger?.child({ methodName }).info("Unsubscribing from websocket");
         }
-        websocketSubscription.unsubscribe();
+        (websocketSubscription as any).unsubscribe();
       });
     } catch (error) {
       if (this.logger) {

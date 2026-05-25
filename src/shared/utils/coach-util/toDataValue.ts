@@ -80,7 +80,7 @@ export async function toDataValue(
       client,
       value.data,
       {
-        filename: value.name,
+        filename: (value as any).name,
       },
     );
     return await toDataValue(attachment.rid, client, actionMetadata);
@@ -91,7 +91,7 @@ export async function toDataValue(
       client,
       value,
       {
-        filename: value.name as string,
+        filename: (value as any).name as string,
       },
     );
     return await toDataValue(attachment.rid, client, actionMetadata);
@@ -100,9 +100,9 @@ export async function toDataValue(
   if (isMediaUpload(value)) {
     const mediaRef = await MediaSets.uploadMedia(
       client,
-      value.data,
+      (value as any).data,
       {
-        filename: value.fileName,
+        filename: (value as any).fileName,
         preview: true,
       },
     );
@@ -110,7 +110,7 @@ export async function toDataValue(
   }
 
   if (isMedia(value)) {
-    return value.getMediaReference();
+    return (value as any).getMediaReference();
   }
 
   if (isMediaReference(value)) {
@@ -128,7 +128,7 @@ export async function toDataValue(
 
   if (isPoint(value)) {
     return await toDataValue(
-      `${value.coordinates[1]},${value.coordinates[0]}`,
+      `${(value as any).coordinates[1]},${value.coordinates[0]}`,
       client,
       actionMetadata,
     );

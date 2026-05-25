@@ -54,7 +54,7 @@ function stripRdpFields(
   };
 
   for (const key of Object.keys(underlying)) {
-    if (key in objectDef.properties && !rdpFields.has(key)) {
+    if (key in (objectDef as any).properties && !rdpFields.has(key)) {
       newProps[key] = underlying[key];
     }
   }
@@ -91,7 +91,7 @@ function filterToRdpFields(
   };
 
   for (const key of Object.keys(underlying)) {
-    if (key in objectDef.properties) {
+    if (key in (objectDef as any).properties) {
       const isRdpField = sourceRdpFields.has(key);
       if (!isRdpField || rdpFieldsToKeep.has(key)) {
         newProps[key] = underlying[key];
@@ -122,13 +122,13 @@ export function mergeSelectFields(
   };
 
   for (const key of Object.keys(existingUnderlying)) {
-    if (key in objectDef.properties) {
+    if (key in (objectDef as any).properties) {
       newProps[key] = existingUnderlying[key];
     }
   }
 
   for (const key of Object.keys(sourceUnderlying)) {
-    if (key in objectDef.properties && selectFields.has(key)) {
+    if (key in (objectDef as any).properties && selectFields.has(key)) {
       newProps[key] = sourceUnderlying[key];
     }
   }
@@ -167,7 +167,7 @@ export function mergeObjectFields(
 
   for (const key of Object.keys(sourceUnderlying)) {
     if (
-      key in objectDef.properties
+      key in (objectDef as any).properties
       && (!sourceRdpFields.has(key) || targetRdpFields.has(key))
     ) {
       newProps[key] = sourceUnderlying[key];

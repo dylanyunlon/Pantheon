@@ -56,7 +56,7 @@ export async function extractObjectOrInterfaceType(
           type: "object",
         }
         : {
-          apiName: objOrInterfaceDef.links[_os(objectSet).link].targetTypeApiName,
+          apiName: (objOrInterfaceDef.links[_os(objectSet).link] as any).targetTypeApiName,
           type: objOrInterfaceDef.links[_os(objectSet).link].targetType,
         };
     }
@@ -161,7 +161,7 @@ export async function extractObjectOrInterfaceType(
         }
         : {
           apiName:
-            objOrInterfaceDef.links[_os(objectSet).interfaceLink].targetTypeApiName,
+            (objOrInterfaceDef.links[_os(objectSet).interfaceLink] as any).targetTypeApiName,
           type: objOrInterfaceDef.links[_os(objectSet).interfaceLink].targetType,
         };
     // We don't have to worry about new object sets being added and doing a runtime break and breaking people since the COACH is always constructing these.

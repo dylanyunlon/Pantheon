@@ -50,7 +50,7 @@ export function get$link(
             } as WhereClause<any>)
             .pivotTo(linkName);
 
-        const value = !linkDef.multiplicity
+        const value = (!linkDef as any).multiplicity
           ? {
             fetchOne: <A extends SelectArg<any, any, any, any>>(
               options?: A,
@@ -113,7 +113,7 @@ export function get$linkForInterface(
             ) =>
               fetchSingle(
                 client,
-                linkTargetDef,
+                linkTargetDef as any,
                 options ?? {},
                 getWirePipelineSet(pipelineSet),
               ),
@@ -122,7 +122,7 @@ export function get$linkForInterface(
             ) =>
               fetchSingleWithErrors(
                 client,
-                linkTargetDef,
+                linkTargetDef as any,
                 options ?? {},
                 getWirePipelineSet(pipelineSet),
               ),

@@ -14,3 +14,6 @@ export type ResultOrError<T extends object> =
 export function isOk(result: ResultOrError<any>): result is { type: "ok" } {
   return result.type === "ok";
 }
+
+export type CoachError = any
+export type CoachResult = any

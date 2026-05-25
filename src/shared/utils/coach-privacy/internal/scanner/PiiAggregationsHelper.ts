@@ -79,7 +79,7 @@ export class AggregationsHelper extends AbstractHelper<
     options: ObserveAggregationOptions<T, A, RDPs>,
     subFn: Observer<AggregationPayloadBase>,
   ): QuerySubscription<AggregationQuery> {
-    return super.observe(options, subFn);
+    return (super as any).observe(options, subFn);
   }
 
   async observeAsync<

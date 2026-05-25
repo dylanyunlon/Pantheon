@@ -134,7 +134,7 @@ export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
       return clientCtx.objectSetFactory(objectType, clientCtx, {
         type: "filter",
         pipelineSet,
-        where: modernToLegacyWhereClause(clause, objectType),
+        where: modernToLegacyWhereClause(clause as any, objectType),
       });
     },
 
@@ -304,7 +304,7 @@ export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
       for (const key of Object.keys(clause)) {
         const derivedPropertyDefinition = clause
           [key](createWithPropertiesPipelineSet(
-            objectType,
+            objectType as any,
             { type: "methodInput" },
             definitionMap,
             true,

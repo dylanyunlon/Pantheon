@@ -172,7 +172,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
     options: ObserveFunctionOptions,
     subFn: Observer<ObserveFunctionCallbackArgs>,
   ) => ScrubDisposable = (queryDef, params, options, subFn) => {
-    const dependsOn = options.dependsOn?.map(dep =>
+    const dependsOn = (options as any).dependsOn?.map(dep =>
       typeof dep === "string" ? dep : dep.apiName
     );
 
@@ -183,7 +183,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
       ReturnType<typeof getWirePipelineSet>
     > = [];
 
-    for (const item of options.dependsOnObjects ?? []) {
+    for (const item of (options as any).dependsOnObjects ?? []) {
       if (isPipelineSet(item)) {
         objectSetWires.push(getWirePipelineSet(item));
       } else {
@@ -334,35 +334,35 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
     const store = this.__experimentalStore;
     const result = { ...options };
 
-    result.where = store.whereScrubNormalizer.scrubNormalize(result.where);
-    result.withProperties = store.rdpScrubNormalizer.scrubNormalize(
-      result.withProperties as Rdp | undefined,
+    (result as any).where = store.whereScrubNormalizer.scrubNormalize(result.where);
+    (result as any).withProperties = store.rdpScrubNormalizer.scrubNormalize(
+      (result as any).withProperties as Rdp | undefined,
     );
-    result.orderBy = store.orderByScrubNormalizer.scrubNormalize(result.orderBy);
-    result.aggregate = store.genericScrubNormalizer.scrubNormalize(
-      result.aggregate,
+    (result as any).orderBy = store.orderByScrubNormalizer.scrubNormalize(result.orderBy);
+    (result as any).aggregate = store.genericScrubNormalizer.scrubNormalize(
+      (result as any).aggregate,
     );
-    result.intersectWith = store.genericScrubNormalizer.scrubNormalize(
-      result.intersectWith,
+    (result as any).intersectWith = store.genericScrubNormalizer.scrubNormalize(
+      (result as any).intersectWith,
     );
     result.$select = store.selectScrubNormalizer.scrubNormalize(result.$select);
 
-    result.union = this.#canonObjectSetArray(
-      result.union,
+    (result as any).union = this.#canonObjectSetArray(
+      (result as any).union,
       store.objectSetArrayScrubNormalizer.scrubNormalizeUnion.bind(
         store.objectSetArrayScrubNormalizer,
       ),
       this.#unionCache,
     );
-    result.intersect = this.#canonObjectSetArray(
-      result.intersect,
+    (result as any).intersect = this.#canonObjectSetArray(
+      (result as any).intersect,
       store.objectSetArrayScrubNormalizer.scrubNormalizeIntersect.bind(
         store.objectSetArrayScrubNormalizer,
       ),
       this.#intersectCache,
     );
-    result.subtract = this.#canonObjectSetArray(
-      result.subtract,
+    (result as any).subtract = this.#canonObjectSetArray(
+      (result as any).subtract,
       store.objectSetArrayScrubNormalizer.scrubNormalizeSubtract.bind(
         store.objectSetArrayScrubNormalizer,
       ),
@@ -492,26 +492,26 @@ function observeMultiLinks(
     let isDeferred = false;
 
     for (const { payload, pk } of perObjectData.values()) {
-      linkedObjectsBySourcePrimaryKey.set(pk, payload.resolvedList ?? []);
+      linkedObjectsBySourcePrimaryKey.set(pk, (payload as any).resolvedList ?? []);
 
-      for (const obj of payload.resolvedList ?? []) {
+      for (const obj of (payload as any).resolvedList ?? []) {
         seen.set(`${obj.$piiFieldType}:${obj.$piiKey}`, obj);
       }
-      if (payload.lastUpdated > latestUpdated) {
-        latestUpdated = payload.lastUpdated;
+      if ((payload as any).lastUpdated > latestUpdated) {
+        latestUpdated = (payload as any).lastUpdated;
       }
-      if (payload.isDeferred) {
+      if ((payload as any).isDeferred) {
         isDeferred = true;
       }
-      if (payload.hasMore) {
+      if ((payload as any).hasMore) {
         hasMore = true;
-        fetchMores.push(payload.fetchMore);
+        fetchMores.push((payload as any).fetchMore);
       }
     }
 
     const payloads = [...perObjectData.values()].map(d => d.payload);
     const loading = perObjectData.size < totalExpected
-      || payloads.some(p => p.status === "init" || p.status === "loading");
+      || payloads.some(p => (p as any).status === "init" || p.status === "loading");
 
     observer.next({
       resolvedList: Array.from(seen.values()),
@@ -524,7 +524,7 @@ function observeMultiLinks(
       hasMore,
       status: loading
         ? "loading"
-        : payloads.some(p => p.status === "error")
+        : payloads.some(p => (p as any).status === "error")
         ? "error"
         : "loaded",
       ...(!hasMore ? { totalCount: String(seen.size) } : {}),

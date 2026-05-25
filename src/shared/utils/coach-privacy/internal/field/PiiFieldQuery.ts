@@ -215,7 +215,7 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
     params: CollectionConnectableParams,
   ): ScrubFieldPayload {
     return {
-      ...super.createPayload(params),
+      (...super as any).createPayload(params),
       pipelineSet: this.#pipelineSet,
     } as ScrubFieldPayload;
   }
@@ -241,7 +241,7 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
       const { resultType, invalidationSet } =
         await getPiiFieldTypesThatInvalidate(
           this.store.client[additionalContext],
-          wirePipelineSet,
+          wirePipelineSet as any,
         );
 
       this.#updateFetchedPiiFieldType(resultType.apiName);
@@ -304,7 +304,7 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
         const { resultType, invalidationSet } =
           await getPiiFieldTypesThatInvalidate(
             this.store.client[additionalContext],
-            wirePipelineSet,
+            wirePipelineSet as any,
           );
         this.#updateFetchedPiiFieldType(resultType.apiName);
         this.#rdpInvalidationSet = invalidationSet;
@@ -436,15 +436,15 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
     ) {
       const fetchedType = this.#fetchedPiiFieldType;
       if (
-        (changes.addedObjects.get(fetchedType)?.length ?? 0) > 0
-        || (changes.modifiedObjects.get(fetchedType)?.length ?? 0) > 0
+        ((changes.addedObjects.get(fetchedType)? as any).length ?? 0) > 0
+        || ((changes.modifiedObjects.get(fetchedType)? as any).length ?? 0) > 0
       ) {
         return this.revalidate(true);
       }
       for (const key of changes.deleted) {
         if (
-          key.type === "object"
-          && key.otherKeys[OBJECT_API_NAME_IDX] === fetchedType
+          (key as any).type === "object"
+          && (key as any).otherKeys[OBJECT_API_NAME_IDX] === fetchedType
         ) {
           return this.revalidate(true);
         }
@@ -487,7 +487,7 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
         // deal with the modified objects
         for (const obj of relevantObjects.modified.all) {
           if (relevantObjects.modified.strictMatches.has(obj)) {
-            const objectPiiFieldKey = this.getObjectPiiFieldKey(obj);
+            const objectPiiFieldKey = this.getObjectPiiFieldKey(obj as any);
 
             if (!existingScrubField.has(objectPiiFieldKey)) {
               // object is new to the scrubField
@@ -501,7 +501,7 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
             continue;
           } else {
             // object is no longer a strict match
-            const existingObjectPiiFieldKey = this.getObjectPiiFieldKey(obj);
+            const existingObjectPiiFieldKey = this.getObjectPiiFieldKey(obj as any);
 
             toRemove.add(existingObjectPiiFieldKey);
 
@@ -513,11 +513,11 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
         }
 
         for (const key of existingScrubField) {
-          if (toRemove.has(key)) continue;
-          newScrubField.push(key);
+          if (toRemove.has(key as any)) continue;
+          newScrubField.push(key as any);
         }
         for (const obj of toAdd) {
-          newScrubField.push(this.getObjectPiiFieldKey(obj));
+          newScrubField.push(this.getObjectPiiFieldKey(obj as any));
         }
 
         const existingTotalCount = batch.read(this.piiFieldKey)?.value?.totalCount;
@@ -631,7 +631,7 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
         "the truth value for our scrubField should exist as we already subscribed",
       );
       if (existing.status === "loaded") {
-        const objectPiiFieldKey = this.getObjectPiiFieldKey(objOrIface);
+        const objectPiiFieldKey = this.getObjectPiiFieldKey(objOrIface as any);
         // remove the object from the scrubField
         const newObjects = existing.value?.data.filter(
           (o) => o !== objectPiiFieldKey,

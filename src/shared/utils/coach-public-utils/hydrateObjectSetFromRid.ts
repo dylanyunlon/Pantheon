@@ -25,7 +25,7 @@ export function hydrateObjectSetFromRid<T extends ObjectOrInterfaceDefinition>(
   rid: string,
 ): ObjectSet<T> {
   return createObjectSet(
-    definition,
+    definition as any,
     client[coachClientContext],
     {
       type: "intersect",

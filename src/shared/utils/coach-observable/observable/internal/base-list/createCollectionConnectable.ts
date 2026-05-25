@@ -52,14 +52,14 @@ export function createCollectionConnectable<
   return connectable<P>(
     subject.pipe(
       switchMap(listEntry => {
-        const resolvedData = listEntry?.value?.data == null
+        const resolvedData = (listEntry? as any).value?.data == null
           ? of(undefined)
-          : listEntry.value.data.length === 0
+          : (listEntry as any).value.data.length === 0
           ? of([])
           : combineLatest(
-            listEntry.value.data.map((cacheKey: ObjectCacheKey) =>
+            (listEntry as any).value.data.map((cacheKey: ObjectCacheKey) =>
               subjects.get(cacheKey).pipe(
-                map(objectEntry => objectEntry?.value!),
+                map(objectEntry => (objectEntry? as any).value!),
                 distinctUntilChanged(),
               )
             ),
@@ -68,22 +68,22 @@ export function createCollectionConnectable<
         return scheduled(
           combineLatest({
             resolvedData,
-            isOptimistic: of(listEntry.isOptimistic),
-            status: of(listEntry.status),
-            lastUpdated: of(listEntry.lastUpdated),
-            totalCount: of(listEntry?.value?.totalCount),
+            isOptimistic: of((listEntry as any).isOptimistic),
+            status: of((listEntry as any).status),
+            lastUpdated: of((listEntry as any).lastUpdated),
+            totalCount: of((listEntry? as any).value?.totalCount),
           }).pipe(
             map(params =>
               createPayload({
-                resolvedData: params.resolvedData === undefined
+                resolvedData: (params as any).resolvedData === undefined
                   ? undefined
-                  : Array.isArray(params.resolvedData)
-                  ? params.resolvedData
+                  : Array.isArray((params as any).resolvedData)
+                  ? (params as any).resolvedData
                   : [],
-                isOptimistic: params.isOptimistic,
-                status: params.status,
-                lastUpdated: params.lastUpdated,
-                totalCount: params.totalCount,
+                isOptimistic: (params as any).isOptimistic,
+                status: (params as any).status,
+                lastUpdated: (params as any).lastUpdated,
+                totalCount: (params as any).totalCount,
               })
             ),
           ),

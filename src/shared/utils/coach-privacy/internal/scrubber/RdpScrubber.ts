@@ -48,7 +48,7 @@ export class RdpScrubNormalizer extends CachingScrubNormalizer<Rdp, Rdp> {
 
     for (const [key, rdpFunction] of Object.entries(rdp)) {
       const builder = createWithPropertiesPipelineSet(
-        piiFieldTypeHolder,
+        piiFieldTypeHolder as any,
         { type: "methodInput" },
         definitionMap,
         /* fromBasePipelineSet */ true,

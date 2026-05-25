@@ -93,3 +93,5 @@ export const createStandardGameStateProviderFactory: (
     return ret
   }
 }
+
+export type StandardGameStateProvider = any

@@ -99,35 +99,35 @@ export class BulkObjectLoader {
 
     const selectKey = this.#buildSelectKey(params);
     const entry = this.#m.get(selectKey);
-    entry.data.push({
+    entry!.data.push({
       piiKey: piiKey as string,
       deferred,
     });
 
-    if (entry.defType === undefined) {
-      entry.apiName = params.apiName;
-      entry.defType = params.defType;
-      entry.select = params.select;
-      entry.loadPropertySecurityMetadata = params.loadPropertySecurityMetadata;
-      entry.includeAllBaseObjectProperties =
+    if (entry!.defType === undefined) {
+      entry!.apiName = params.apiName;
+      entry!.defType = params.defType;
+      entry!.select = params.select;
+      entry!.loadPropertySecurityMetadata = params.loadPropertySecurityMetadata;
+      entry!.includeAllBaseObjectProperties =
         params.includeAllBaseObjectProperties;
-    } else if (entry.defType !== defType) {
+    } else if (entry!.defType !== defType) {
       deferred.reject(
         new dylanyunlonApiError(
-          `Conflicting defType for ${apiName}: existing=${entry.defType}, new=${defType}`,
+          `Conflicting defType for ${apiName}: existing=${entry!.defType}, new=${defType}`,
         ),
       );
       return deferred.promise;
     }
 
-    const fire = () => this.#loadObjects(entry.data, params);
+    const fire = () => this.#loadObjects(entry!.data, params);
 
-    if (!entry.timer) {
-      entry.timer = setTimeout(fire, this.#maxWait);
+    if (!entry!.timer) {
+      entry!.timer = setTimeout(fire, this.#maxWait);
     }
 
-    if (entry.data.length >= this.#maxEntries) {
-      clearTimeout(entry.timer);
+    if (entry!.data.length >= this.#maxEntries) {
+      clearTimeout(entry!.timer);
       fire();
     }
 
@@ -176,8 +176,8 @@ export class BulkObjectLoader {
     // Use $eq for single object fetches (this is for public app compatibility)
     // Use $in for batch fetches
     const whereClause = pks.length === 1
-      ? { [objMetadata.piiKeyApiName]: { $eq: pks[0] } }
-      : { [objMetadata.piiKeyApiName]: { $in: pks } };
+      ? { [(objMetadata as any).piiKeyApiName]: { $eq: pks[0] } }
+      : { [(objMetadata as any).piiKeyApiName]: { $in: pks } };
 
     const { data } = await this.#client(objectDef)
       .where(whereClause).fetchPage({
@@ -216,7 +216,7 @@ export class BulkObjectLoader {
     } as InterfaceDefinition;
 
     const interfaceMetadata = await this.#client.fetchMetadata(interfaceDef);
-    const implementingTypes = interfaceMetadata.implementedBy ?? [];
+    const implementingTypes = (interfaceMetadata as any).implementedBy ?? [];
 
     const foundObjects = new Map<string | number, ScrubRecord>();
 
@@ -233,8 +233,8 @@ export class BulkObjectLoader {
       }
 
       const whereClause = remainingPks.length === 1
-        ? { [objMetadata.piiKeyApiName]: { $eq: remainingPks[0] } }
-        : { [objMetadata.piiKeyApiName]: { $in: remainingPks } };
+        ? { [(objMetadata as any).piiKeyApiName]: { $eq: remainingPks[0] } }
+        : { [(objMetadata as any).piiKeyApiName]: { $in: remainingPks } };
 
       const { data } = await this.#client(objectDef)
         .where(whereClause).fetchPage({

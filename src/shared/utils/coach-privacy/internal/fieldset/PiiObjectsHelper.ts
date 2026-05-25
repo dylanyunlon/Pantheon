@@ -42,7 +42,7 @@ export class ObjectsHelper extends AbstractHelper<
     options: ObserveObjectOptions<T>,
     subFn: Observer<ObjectPayload>,
   ): QuerySubscription<ObjectQuery> {
-    return super.observe(options, subFn);
+    return (super as any).observe(options, subFn);
   }
 
   getQuery<T extends ObjectOrInterfaceDefinition>(
@@ -51,7 +51,7 @@ export class ObjectsHelper extends AbstractHelper<
   ): ObjectQuery {
     const apiName = typeof options.apiName === "string"
       ? options.apiName
-      : options.apiName.apiName;
+      : (options.apiName as any).apiName;
     const {
       pk,
       select,
@@ -113,7 +113,7 @@ export class ObjectsHelper extends AbstractHelper<
         apiName: v.$piiFieldType ?? v.$apiName,
         pk: v.$piiKey,
         $includeAllBaseObjectProperties: includeAllBaseObjectProperties,
-      }, rdpConfig).writeToStore(
+(}, rdpConfig) as any).writeToStore(
         v as ScrubRecord,
         "loaded",
         batch,

@@ -52,13 +52,13 @@ export class FunctionsHelper extends AbstractHelper<
     options: ObserveFunctionOptions,
     subFn: Observer<FunctionPayload>,
   ): QuerySubscription<FunctionQuery> {
-    return super.observe(options, subFn);
+    return (super as any).observe(options, subFn);
   }
 
   getQuery(options: ObserveFunctionOptions): FunctionQuery {
     const { queryDef, params, objectSetTypesPromise, ...observeOpts } = options;
     const apiName = queryDef.apiName;
-    const version = queryDef.isFixedVersion ? queryDef.version : undefined;
+    const version = (queryDef as any).isFixedVersion ? queryDef.version : undefined;
 
     const scrubNormalizedParams = this.paramsScrubNormalizer.scrubNormalize(params);
 

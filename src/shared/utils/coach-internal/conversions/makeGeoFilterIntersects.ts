@@ -29,7 +29,7 @@ export function makeGeoFilterIntersects(
 ): SearchJsonQueryV2 {
   if (Array.isArray(intersectsBody)) {
     return makeGeoFilterBbox(
-      intersectsBody,
+      intersectsBody as any,
       "$intersects",
       propertyIdentifier,
       field,

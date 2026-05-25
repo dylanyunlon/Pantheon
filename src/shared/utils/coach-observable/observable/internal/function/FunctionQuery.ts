@@ -123,9 +123,9 @@ export class FunctionQuery extends Query<
     return connectable<FunctionPayload>(
       subject.pipe(
         map((x) => {
-          const value = x.value as FunctionCacheValue | undefined;
+          const value = (x as any).value as FunctionCacheValue | undefined;
           return {
-            status: x.status,
+            status: (x as any).status,
             result: value?.result,
             lastUpdated: value?.executedAt ?? 0,
             error: value?.error,

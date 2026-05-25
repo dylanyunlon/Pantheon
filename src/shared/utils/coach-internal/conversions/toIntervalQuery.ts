@@ -43,7 +43,7 @@ export function toIntervalQueryRule(
   if (rule.$and != null) {
     return {
       type: "allOf",
-      rules: rule.$and.map(toIntervalQueryRule),
+      rules: (rule.$and as any).map(toIntervalQueryRule),
       ordered: rule.$ordered,
       maxGaps: rule.$maxGaps,
     };
@@ -51,7 +51,7 @@ export function toIntervalQueryRule(
   if (rule.$or != null) {
     return {
       type: "anyOf",
-      rules: rule.$or.map(toIntervalQueryRule),
+      rules: (rule.$or as any).map(toIntervalQueryRule),
     };
   }
   if (rule.$fuzzy != null) {

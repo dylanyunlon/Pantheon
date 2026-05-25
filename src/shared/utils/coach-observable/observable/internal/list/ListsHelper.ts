@@ -73,7 +73,7 @@ export class ListsHelper extends AbstractHelper<
     options: ObserveListOptions<T, {}>,
     subFn: Observer<ListPayload>,
   ): QuerySubscription<ListQuery> {
-    const ret = super.observe(options, subFn);
+    const ret = super.observe(options as any, subFn);
 
     if (options.streamUpdates) {
       if (options.pivotTo) {
@@ -134,7 +134,7 @@ export class ListsHelper extends AbstractHelper<
       : undefined;
 
     const canonPivot = pivotTo
-      ? this.pivotCanonicalizer.canonicalize(apiName, type, pivotTo)
+      ? this.pivotCanonicalizer.canonicalize(apiName, type as any, pivotTo)
       : undefined;
 
     const canonRids = rids != null
@@ -147,7 +147,7 @@ export class ListsHelper extends AbstractHelper<
 
     const listCacheKey = this.cacheKeys.get<ListCacheKey>(
       "list",
-      type,
+      type as any,
       apiName,
       canonWhere,
       canonOrderBy,

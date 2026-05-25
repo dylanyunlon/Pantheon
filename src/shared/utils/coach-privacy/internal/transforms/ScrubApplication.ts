@@ -106,7 +106,7 @@ export class ActionApplication {
     for (const list of [deletedObjects, modifiedObjects, addedObjects]) {
       for (const obj of list ?? []) {
         promisesToWait.push(
-          this.store.invalidateObject(obj.piiFieldType, obj.piiKey),
+          this.store.invalidateObject((obj as any).piiFieldType, obj.piiKey),
         );
       }
     }
@@ -143,7 +143,7 @@ export class ActionApplication {
         actionEditResponse;
       for (const list of [deletedObjects, modifiedObjects, addedObjects]) {
         for (const obj of list ?? []) {
-          editedPiiFieldTypeSet.add(obj.piiFieldType);
+          editedPiiFieldTypeSet.add((obj as any).piiFieldType);
         }
       }
     } else {

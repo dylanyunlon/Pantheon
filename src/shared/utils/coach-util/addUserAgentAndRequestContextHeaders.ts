@@ -32,12 +32,12 @@ export const addUserAgentAndRequestContextHeaders = (
         JSON.stringify(client.requestContext),
       );
 
-      if (withMetadata.coachMetadata) {
+      if ((withMetadata as any).coachMetadata) {
         headers.set(
           USER_AGENT_HEADER,
           [
             headers.get(USER_AGENT_HEADER),
-            withMetadata.coachMetadata.extraUserAgent,
+            (withMetadata as any).coachMetadata.extraUserAgent,
           ].filter(x => x && x?.length > 0).join(" "),
         );
       }

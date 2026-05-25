@@ -441,7 +441,7 @@ export class PipelineListenerWebsocket {
           if (process.env.NODE_ENV !== "production") {
             this.#logger?.debug("Creating websocket");
           }
-          this.#ws = new WebSocket(url, [`Bearer-${token}`]);
+          this.#ws = new WebSocket(url as any, [`Bearer-${token}`]);
           this.#ws.addEventListener("close", this.#onClose);
           this.#ws.addEventListener("message", this.#onMessage);
           this.#ws.addEventListener("open", this.#onOpen);
@@ -507,11 +507,11 @@ export class PipelineListenerWebsocket {
         return;
 
       case "subscribeResponses":
-        this.#handleMessage_subscribeResponses(data);
+        this.#handleMessage_subscribeResponses(data as any);
         return;
 
       case "subscriptionClosed": {
-        this.#handleMessage_subscriptionClosed(data);
+        this.#handleMessage_subscriptionClosed(data as any);
         return;
       }
 
@@ -524,13 +524,13 @@ export class PipelineListenerWebsocket {
   #handleMessage_objectSetChanged = async (
     payload: ObjectSetUpdates,
   ) => {
-    const sub = this.#subscriptions.get(payload.id);
+    const sub = this.#subscriptions.get((payload as any).id);
     if (sub == null) return;
 
-    const objectUpdates = payload.updates.filter((update) =>
+    const objectUpdates = (payload as any).updates.filter((update) =>
       update.type === "object"
     );
-    const referenceUpdates = payload.updates.filter((update) =>
+    const referenceUpdates = (payload as any).updates.filter((update) =>
       update.type === "reference"
     );
     const coachRecordsWithReferenceUpdates = await Promise.all(
@@ -638,7 +638,7 @@ export class PipelineListenerWebsocket {
       .getObjectDefinition(objectTypeApiName)).interfaceMap;
     return {
       [interfaceApiName]: {
-        [objectTypeApiName]: interfaceMap[interfaceApiName],
+        [objectTypeApiName]: interfaceMap![interfaceApiName],
       },
     };
   }
@@ -711,10 +711,10 @@ export class PipelineListenerWebsocket {
   };
 
   #handleMessage_subscriptionClosed(payload: SubscriptionClosed) {
-    const sub = this.#subscriptions.get(payload.id);
-    if (sub == null && this.#endedSubscriptions.has(payload.id)) return;
-    invariant(sub, `Expected subscription id ${payload.id}`);
-    this.#tryCatchOnError(sub, true, payload.cause);
+    const sub = this.#subscriptions.get((payload as any).id);
+    if (sub == null && this.#endedSubscriptions.has((payload as any).id)) return;
+    invariant(sub, `Expected subscription id ${(payload as any).id}`);
+    this.#tryCatchOnError(sub, true, (payload as any).cause);
     this.#unsubscribe(sub, "error");
   }
 

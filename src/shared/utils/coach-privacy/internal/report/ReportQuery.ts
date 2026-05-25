@@ -79,7 +79,7 @@ export class FunctionQuery extends Query<
         : undefined,
     );
     this.#apiName = queryDef.apiName;
-    this.#version = queryDef.isFixedVersion ? queryDef.version : undefined;
+    this.#version = (queryDef as any).isFixedVersion ? queryDef.version : undefined;
     this.#params = params;
     this.#dependsOn = opts.dependsOn;
     this.#dependsOnObjects = opts.dependsOnObjects;
@@ -122,12 +122,12 @@ export class FunctionQuery extends Query<
     return connectable<FunctionPayload>(
       subject.pipe(
         map((x) => {
-          const value = x.value as FunctionCacheValue | undefined;
+          const value = (x as any).value as FunctionCacheValue | undefined;
           return {
-            status: x.status,
-            result: value?.result,
-            lastUpdated: value?.executedAt ?? 0,
-            error: value?.error,
+            status: (x as any).status,
+            result: (value? as any).result,
+            lastUpdated: (value? as any).executedAt ?? 0,
+            error: (value? as any).error,
           };
         }),
       ),
@@ -231,11 +231,11 @@ export class FunctionQuery extends Query<
 
     for (const dep of this.#dependsOnObjects) {
       const modifiedObjects = changes.modifiedObjects.get(dep.$apiName);
-      if (modifiedObjects?.some(obj => obj.$piiKey === dep.$piiKey)) {
+      if ((modifiedObjects? as any).some(obj => obj.$piiKey === dep.$piiKey)) {
         return this.revalidate(true);
       }
       const addedObjects = changes.addedObjects.get(dep.$apiName);
-      if (addedObjects?.some(obj => obj.$piiKey === dep.$piiKey)) {
+      if ((addedObjects? as any).some(obj => obj.$piiKey === dep.$piiKey)) {
         return this.revalidate(true);
       }
     }

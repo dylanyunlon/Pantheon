@@ -672,7 +672,7 @@ export function createObservableClient(
 
   // Then we use that client instead. Because the `client` does not hold
   // any real state, this whole thing works.
-  return new ObservableClientImpl(new Store(tweakedClient));
+  return new ObservableClientImpl(new Store(tweakedClient as any));
 }
 
 export interface Unsubscribable {

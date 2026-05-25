@@ -339,7 +339,7 @@ export function createDefer() {
 
   afterEach(() => {
     for (const s of subscriptions) {
-      s.unsubscribe();
+      (s as any).unsubscribe();
     }
     subscriptions = [];
   });
@@ -560,12 +560,12 @@ export function mockLinkSubCallback(): MockedObject<
 
 export function cacheEntryContaining(x: Partial<Entry<any>>): Entry<any> {
   return {
-    piiFieldKey: x.piiFieldKey ?? expect.any(Object),
+    piiFieldKey: (x as any).piiFieldKey ?? expect.any(Object),
     value: "value" in x
       ? x.value
       : expect.toBeOneOf([expect.anything(), undefined]),
     status: x.status ?? expect.anything(),
-    lastUpdated: x.lastUpdated ?? expect.anything(),
+    lastUpdated: (x as any).lastUpdated ?? expect.anything(),
   };
 }
 
@@ -585,7 +585,7 @@ export function objectPayloadContaining(
     object: nonOptionalValue(x, "object"),
     isDeferred: expect.any(Boolean),
     status: x.status ?? expect.anything(),
-    lastUpdated: x.lastUpdated ?? expect.anything(),
+    lastUpdated: (x as any).lastUpdated ?? expect.anything(),
   };
 }
 
@@ -593,15 +593,15 @@ export function scrubFieldPayloadContaining(
   x: Partial<ScrubFieldPayload>,
 ): ScrubFieldPayload {
   return {
-    fetchMore: x.fetchMore ?? expect.any(Function),
-    hasMore: x.hasMore ?? expect.any(Boolean),
+    fetchMore: (x as any).fetchMore ?? expect.any(Function),
+    hasMore: (x as any).hasMore ?? expect.any(Boolean),
     resolvedScrubField: "resolvedScrubField" in x
       ? x.resolvedScrubField
       : expect.anything(),
     isDeferred: expect.any(Boolean),
     status: x.status ?? expect.anything(),
-    lastUpdated: x.lastUpdated ?? expect.anything(),
-    pipelineSet: x.pipelineSet ?? expect.anything(),
+    lastUpdated: (x as any).lastUpdated ?? expect.anything(),
+    pipelineSet: (x as any).pipelineSet ?? expect.anything(),
   } as ScrubFieldPayload;
 }
 

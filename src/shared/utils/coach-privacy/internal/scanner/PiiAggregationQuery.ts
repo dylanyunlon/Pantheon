@@ -124,7 +124,7 @@ export abstract class AggregationQuery extends Query<
     this.#invalidationTypes = new Set([this.apiName]);
     if (serializedPipelineSet) {
       this.parsedWirePipelineSet = JSON.parse(
-        serializedPipelineSet,
+        serializedPipelineSet as any,
       ) as WirePipelineSet;
       this.#invalidationTypesPromise = this.#computeInvalidationTypes(
         this.parsedWirePipelineSet,
@@ -138,7 +138,7 @@ export abstract class AggregationQuery extends Query<
     try {
       const { invalidationSet } = await getPiiFieldTypesThatInvalidate(
         this.store.client[additionalContext],
-        wirePipelineSet,
+        wirePipelineSet as any,
       );
       return new Set([this.apiName, ...invalidationSet]);
     } catch (error) {
@@ -164,10 +164,10 @@ export abstract class AggregationQuery extends Query<
       subject.pipe(
         map((x) => {
           return {
-            status: x.status,
-            result: x.value,
-            lastUpdated: x.lastUpdated,
-            error: x.status === "error"
+            status: (x as any).status,
+            result: (x as any).value,
+            lastUpdated: (x as any).lastUpdated,
+            error: (x as any).status === "error"
               ? new Error("Aggregation failed")
               : undefined,
           };

@@ -176,8 +176,8 @@ export class BulkObjectLoader {
     // Use $eq for single object fetches (this is for public app compatibility)
     // Use $in for batch fetches
     const whereClause = pks.length === 1
-      ? { [objMetadata.primaryKeyApiName]: { $eq: pks[0] } }
-      : { [objMetadata.primaryKeyApiName]: { $in: pks } };
+      ? { [(objMetadata as any).primaryKeyApiName]: { $eq: pks[0] } }
+      : { [(objMetadata as any).primaryKeyApiName]: { $in: pks } };
 
     const { data } = await this.#client(objectDef)
       .where(whereClause).fetchPage({
@@ -216,7 +216,7 @@ export class BulkObjectLoader {
     } as InterfaceDefinition;
 
     const interfaceMetadata = await this.#client.fetchMetadata(interfaceDef);
-    const implementingTypes = interfaceMetadata.implementedBy ?? [];
+    const implementingTypes = (interfaceMetadata as any).implementedBy ?? [];
 
     const foundObjects = new Map<string | number, ObjectHolder>();
 
@@ -233,8 +233,8 @@ export class BulkObjectLoader {
       }
 
       const whereClause = remainingPks.length === 1
-        ? { [objMetadata.primaryKeyApiName]: { $eq: remainingPks[0] } }
-        : { [objMetadata.primaryKeyApiName]: { $in: remainingPks } };
+        ? { [(objMetadata as any).primaryKeyApiName]: { $eq: remainingPks[0] } }
+        : { [(objMetadata as any).primaryKeyApiName]: { $in: remainingPks } };
 
       const { data } = await this.#client(objectDef)
         .where(whereClause).fetchPage({

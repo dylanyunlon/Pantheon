@@ -147,7 +147,7 @@ export class FunctionParamsScrubNormalizer {
     }
 
     if (isPipelineSet(value)) {
-      const wire = JSON.stringify(getWirePipelineSet(value));
+      const wire = JSON.stringify(getWirePipelineSet(value as any));
       path.push("$:objectset", wire);
       return wire;
     }

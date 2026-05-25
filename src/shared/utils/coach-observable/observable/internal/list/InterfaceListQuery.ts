@@ -114,7 +114,7 @@ export class InterfaceListQuery extends ListQuery {
         type: "object",
         apiName: objectType,
       });
-      return this.apiName in objectMetadata.interfaceMap;
+      return this.apiName in (objectMetadata as any).interfaceMap;
     } catch {
       return true;
     }
@@ -227,7 +227,7 @@ async function reloadDataAsFullObjects(
           apiName,
         });
         const where: SimpleWhereClause = {
-          [objectDef.primaryKeyApiName]: {
+          [(objectDef as any).primaryKeyApiName]: {
             $in: objects.map(x => x.$primaryKey),
           },
         };
