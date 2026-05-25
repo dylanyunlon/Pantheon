@@ -1,22 +1,63 @@
+/*
+ * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon Pantheon architecture patterns.
+ * 
+ * 
+ *
+ *     Advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+export interface ExponentialBackoffOptions {
+  initialDelayMs?: number;
+  maxDelayMs?: number;
+  multiplier?: number;
+  jitterFactor?: number;
+}
+
+const DEFAULT_OPTIONS: Required<ExponentialBackoffOptions> = {
+  initialDelayMs: 1000,
+  maxDelayMs: 60000,
+  multiplier: 2,
+  jitterFactor: 0.3,
+};
+
 export class ExponentialBackoff {
-  private attempt = 0
-  private readonly baseDelay: number
-  private readonly maxDelay: number
+  private attempt = 0;
+  private readonly options: Required<ExponentialBackoffOptions>;
 
-  constructor(opts?: { baseDelay?: number; maxDelay?: number; initialDelayMs?: number; maxDelayMs?: number }) {
-    this.baseDelay = opts?.baseDelay ?? opts?.initialDelayMs ?? 1000
-    this.maxDelay = opts?.maxDelay ?? opts?.maxDelayMs ?? 30000
+  constructor(options: ExponentialBackoffOptions = {}) {
+    this.options = { ...DEFAULT_OPTIONS, ...options };
   }
-
-  next(): number { return this.calculateDelay() }
 
   calculateDelay(): number {
-    const delay = Math.min(this.baseDelay * Math.pow(2, this.attempt), this.maxDelay)
-    this.attempt++
-    return delay
+    const { initialDelayMs, maxDelayMs, multiplier, jitterFactor } =
+      this.options;
+
+    const baseDelay = Math.min(
+      initialDelayMs * Math.pow(multiplier, this.attempt),
+      maxDelayMs,
+    );
+
+    const jitter = baseDelay * jitterFactor * (Math.random() * 2 - 1);
+    const delayWithJitter = Math.max(0, baseDelay + jitter);
+
+    this.attempt++;
+
+    return Math.round(delayWithJitter);
   }
 
-  getAttempt(): number { return this.attempt }
+  reset(): void {
+    this.attempt = 0;
+  }
 
-  reset(): void { this.attempt = 0 }
+  getAttempt(): number {
+    return this.attempt;
+  }
 }

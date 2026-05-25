@@ -20,7 +20,7 @@ export const DEFAULT_SCRUB_STRATEGIES: ScrubStrategyRule[] = [
     id: "strategy-puuid-hash",
     category: "puuid",
     action: "hash",
-    salt: "pantheon-coach-privacy-v1",
+    salt: "pantheon-privacy-v1",
     description: "Hash PUUIDs with deterministic salt for cross-reference",
   },
   {
@@ -33,7 +33,7 @@ export const DEFAULT_SCRUB_STRATEGIES: ScrubStrategyRule[] = [
     id: "strategy-account-hash",
     category: "account_id",
     action: "hash",
-    salt: "pantheon-coach-privacy-v1",
+    salt: "pantheon-privacy-v1",
     description: "Hash account IDs",
   },
   {
@@ -73,7 +73,7 @@ export const DEFAULT_SCRUB_STRATEGIES: ScrubStrategyRule[] = [
     id: "strategy-composite-hash",
     category: "composite",
     action: "hash",
-    salt: "pantheon-coach-privacy-v1",
+    salt: "pantheon-privacy-v1",
     description: "Hash composite PII fields",
   },
 ]

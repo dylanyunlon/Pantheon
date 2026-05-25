@@ -30,7 +30,7 @@ import { createMediaReferenceProperty as MediaReferencePropertyImpl } from "../.
 import { TimeSeriesPropertyImpl } from "../../createTimeseriesProperty";
 import type { DerivedPropertyRuntimeMetadata } from "../../derivedProperties/derivedPropertyRuntimeMetadata";
 import type { MinimalClient } from "../../MinimalClientContext";
-import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
+import type { FetchedObjectTypeDefinition } from "../../gamestate/GameStateProvider";
 import { hydrateAttachmentFromRidInternal } from "../../public-utils/hydrateAttachmentFromRid";
 import { createObjectSpecifierFromPrimaryKey } from "../../util/objectSpecifierUtils";
 import {

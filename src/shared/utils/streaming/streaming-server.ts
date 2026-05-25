@@ -2,9 +2,9 @@ import type { PantheonAdvice } from '../engine'
 import type { GamePhase } from '../scheduler'
 import type { CaptureEvent, FeatureVector, TrainingSample } from '../capture/experiment-capture'
 import type { PrivacyScrubber } from '../capture/privacy-scrubber'
-import type { ReplayAnalysisReport } from '../coach-replay'
-import type { InferenceResult } from '../coach-inference'
-import type { ExperimentSnapshot } from '../coach-abtest'
+import type { ReplayAnalysisReport } from '../replay'
+import type { InferenceResult } from '../inference'
+import type { ExperimentSnapshot } from '../abtest'
 
 export type StreamMessageType =
   | 'advice-generated'

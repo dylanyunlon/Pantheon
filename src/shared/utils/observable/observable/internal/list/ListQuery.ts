@@ -698,7 +698,7 @@ export function isListCacheKey(
 }
 
 /**
- * Copied from @shared/types/league-client/coach-api
+ * Copied from @shared/types/league-client/pantheon-api
  */
 type ObjectUpdate<
   O extends ObjectOrInterfaceDefinition,

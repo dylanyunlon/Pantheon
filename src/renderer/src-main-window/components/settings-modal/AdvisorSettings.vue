@@ -272,7 +272,7 @@ onMounted(() => { refreshCaptureStats(); pollTimer = setInterval(refreshCaptureS
 onUnmounted(() => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null } })
 async function handleExportData() {
   isExporting.value = true
-  try { const d = await ca.getExperimentExport(); const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `coach-capture-${Date.now()}.json`; a.click(); URL.revokeObjectURL(u) } catch (_) {}
+  try { const d = await ca.getExperimentExport(); const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `advisor-capture-${Date.now()}.json`; a.click(); URL.revokeObjectURL(u) } catch (_) {}
   isExporting.value = false
 }
 </script>

@@ -7,11 +7,11 @@ import {
   createPantheonEngine
 } from '@shared/utils/engine'
 import { getPhaseDisplayName } from '@shared/utils/scheduler'
-import { PantheonDataTracker } from '@shared/utils/coach-cache'
-import type { PantheonDataType, PantheonQueryStatus } from '@shared/utils/coach-cache'
+import { PantheonDataTracker } from '@shared/utils/cache'
+import type { PantheonDataType, PantheonQueryStatus } from '@shared/utils/cache'
 import type { GamePhase } from '@shared/utils/scheduler'
 import { mapQueryPhaseToGamePhase } from '@shared/utils/scheduler'
-import { createPrivacyPipeline, PrivacyPipeline } from '@shared/utils/coach-privacy'
+import { createPrivacyPipeline, PrivacyPipeline } from '@shared/utils/privacy'
 import { createPrivacyScrubber } from '@shared/utils/capture/privacy-scrubber'
 import { comparer } from 'mobx'
 import { makeAutoObservable, observable, runInAction } from 'mobx'
@@ -771,7 +771,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
 
     const scrubber = createPrivacyScrubber({
       strategy: 'hash',
-      hashSalt: 'pantheon-coach-privacy-v1',
+      hashSalt: 'pantheon-privacy-v1',
       knownPuuids: [],
     })
 

@@ -1,1 +1,222 @@
-export { hasWithProperties, extractRdpDefinition } from '../util/extractRdpDefinition'
+// @ts-nocheck
+/*
+ * Copyright 2025 dylanyunlon <dylanyunlong@gmail.com>. Advisor infrastructure.
+ *
+ * Licensed under MIT. Derived from dylanyunlon Pantheon architecture patterns.
+ * 
+ * 
+ *
+ *     Advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { ObjectSet } from "../types";
+import invariant from "tiny-invariant";
+import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derivedPropertyRuntimeMetadata";
+import type { MinimalClient } from "../MinimalClientContext";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const _os = (x: any): any => x;
+
+export async function extractRdpDefinition(
+  clientCtx: MinimalClient,
+  objectSet: ObjectSet,
+): Promise<
+  DerivedPropertyRuntimeMetadata
+> {
+  if (!hasWithProperties(objectSet)) {
+    return {};
+  }
+  return (await extractRdpDefinitionInternal(
+    clientCtx,
+    objectSet,
+    undefined,
+  )).definitions;
+}
+
+export function hasWithProperties(objectSet: ObjectSet): boolean {
+  if (objectSet.type === "withProperties") {
+    return true;
+  }
+  if ("objectSet" in objectSet && objectSet.objectSet != null) {
+    return hasWithProperties(_os(objectSet).objectSet);
+  }
+  if ("objectSets" in objectSet && _os(objectSet).objectSets != null) {
+    return _os(objectSet).objectSets.some(hasWithProperties);
+  }
+  return false;
+}
+
+/* @internal
+* Returns a tuple of the derived property definitions and the object type that the derived property is defined on.
+*/
+async function extractRdpDefinitionInternal(
+  clientCtx: MinimalClient,
+  objectSet: ObjectSet,
+  methodInputObjectType: string | undefined,
+): Promise<
+  {
+    definitions: DerivedPropertyRuntimeMetadata;
+    childObjectType?: string;
+  }
+> {
+  switch (objectSet.type) {
+    case "searchAround": {
+      const { definitions, childObjectType } =
+        await extractRdpDefinitionInternal(
+          clientCtx,
+          _os(objectSet).objectSet,
+          methodInputObjectType,
+        );
+
+      if (childObjectType === undefined || childObjectType === "") {
+        return { definitions: {} };
+      }
+      const objDef = await clientCtx.gameStateProvider.getObjectDefinition(
+        childObjectType,
+      );
+      const linkDef = objDef.links[_os(objectSet).link];
+      invariant(linkDef, `Missing link definition for '${_os(objectSet).link}'`);
+      return {
+        definitions,
+        childObjectType: objDef.links[_os(objectSet).link].targetType,
+      };
+    }
+    case "withProperties": {
+      // These are the definitions and current object type for all object set operations prior to the definition (e.g. filter, pivotTo, etc.)
+      const { definitions, childObjectType } =
+        await extractRdpDefinitionInternal(
+          clientCtx,
+          _os(objectSet).objectSet,
+          methodInputObjectType,
+        );
+      if (childObjectType === undefined || childObjectType === "") {
+        return { definitions: {} };
+      }
+
+      for (
+        const [name, definition] of Object.entries(_os(objectSet).derivedProperties)
+      ) {
+        if ((definition as any).type !== "selection") {
+          definitions[name] = {
+            selectedOrCollectedPropertyType: undefined,
+            definition,
+          };
+          continue;
+        }
+
+        switch ((definition as any).operation.type) {
+          case "collectList":
+          case "collectSet":
+          case "get":
+            // This is the object set construction for the derived property definition construction. We pass in childObjectType so that when we reach MethodInputObjectSet, we know where to start looking.
+            const { childObjectType: operationLevelObjectType } =
+              await extractRdpDefinitionInternal(
+                clientCtx,
+                (definition as any).objectSet,
+                childObjectType,
+              );
+            if (
+              operationLevelObjectType === undefined
+              || operationLevelObjectType === ""
+            ) {
+              return { definitions: {} };
+            }
+            const objDef = await clientCtx.gameStateProvider.getObjectDefinition(
+              operationLevelObjectType,
+            );
+
+            definitions[name] = {
+              selectedOrCollectedPropertyType:
+                objDef.properties[(definition as any).operation.selectedPropertyApiName],
+              definition,
+            };
+            break;
+
+          default:
+            definitions[name] = {
+              selectedOrCollectedPropertyType: undefined,
+              definition,
+            };
+        }
+      }
+      return { definitions, childObjectType };
+    }
+    case "methodInput":
+      return { definitions: {}, childObjectType: methodInputObjectType };
+    case "base":
+      return { definitions: {}, childObjectType: _os(objectSet).objectType };
+    case "interfaceBase":
+      return { definitions: {}, childObjectType: _os(objectSet).interfaceType };
+    case "filter":
+    case "asBaseObjectTypes":
+    case "asType":
+    case "nearestNeighbors":
+      return extractRdpDefinitionInternal(
+        clientCtx,
+        _os(objectSet).objectSet,
+        methodInputObjectType,
+      );
+    // These will throw in OSS so we should throw here so no request is made
+    case "intersect":
+    case "subtract":
+    case "union":
+      const objectSets = _os(objectSet).objectSets;
+      const objectSetTypes = await Promise.all(
+        objectSets.map((os) =>
+          extractRdpDefinitionInternal(
+            clientCtx,
+            os,
+            methodInputObjectType,
+          )
+        ),
+      );
+
+      const definitions = objectSetTypes.reduce(
+        (acc, { definitions }) => ({ ...acc, ...definitions }),
+        {},
+      );
+      invariant(
+        Object.keys(definitions).length === 0,
+        "Object sets combined using intersect, subtract, or union must not contain any derived property definitions",
+      );
+
+      const firstValidChildObjectType = objectSetTypes.find(
+        ({ childObjectType }) => childObjectType != null,
+      )?.childObjectType;
+      invariant(
+        objectSetTypes.every(
+          ({ childObjectType }) =>
+            childObjectType === firstValidChildObjectType
+            || childObjectType == null,
+        ),
+        "All object sets in an intersect, subtract, or union must have the same child object type",
+      );
+
+      return {
+        definitions: {},
+        childObjectType: firstValidChildObjectType,
+      };
+    case "static":
+    case "reference":
+      // Static and reference object sets are always intersected with a base object set, so we can just return no child object type.
+      return { definitions: {} };
+    // We don't have to worry about new object sets being added and doing a runtime break and breaking people since the COACH is always constructing these.
+    case "interfaceLinkSearchAround":
+      invariant(
+        false,
+        `Unsupported object set type for Runtime Derived Properties`,
+      );
+    default:
+      const _: never = objectSet;
+      invariant(
+        false,
+        `Unsupported object set type for Runtime Derived Properties`,
+      );
+  }
+}

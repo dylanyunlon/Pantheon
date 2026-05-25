@@ -1,5 +1,5 @@
 import type { CaptureEvent, TrainingSample, CaptureSessionMeta, FeatureVector } from "../capture/experiment-capture"
-import type { PostGamePlayerStats, ReplayOutcome, ReplayAnalysisReport } from "../coach-replay"
+import type { PostGamePlayerStats, ReplayOutcome, ReplayAnalysisReport } from "../replay"
 import type { PiiFieldCategory } from "./internal/PiiCacheKey"
 import { createPiiCacheKey } from "./internal/PiiCacheKey"
 import { PiiCacheKeys } from "./internal/PiiCacheKeys"
@@ -32,7 +32,7 @@ export interface PrivacyPipelineConfig {
 
 const DEFAULT_PIPELINE_CONFIG: PrivacyPipelineConfig = {
   enabled: true,
-  hashSalt: "pantheon-coach-privacy-v1",
+  hashSalt: "pantheon-privacy-v1",
   redactedPlaceholder: "[REDACTED]",
   scrubPuuids: true,
   scrubSessionIds: false,

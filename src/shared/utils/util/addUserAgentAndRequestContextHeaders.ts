@@ -1,1 +1,48 @@
-export function addUserAgentAndRequestContextHeaders(_client: unknown, _withMetadata: unknown): (headers: Headers) => Headers { return (h) => h }
+// @ts-nocheck
+/*
+ * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
+ *
+ * Licensed under MIT. Derived from dylanyunlon Pantheon architecture patterns.
+ * 
+ * 
+ *
+ *     Advisor module for Pantheon (League of Legends assistant)
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+import type { ObjectOrInterfaceDefinition } from "../types";
+import { USER_AGENT_HEADER } from "../types";
+import { createFetchHeaderMutator } from "../types";
+import type { MinimalClient } from "../MinimalClientContext";
+
+export const addUserAgentAndRequestContextHeaders = (
+  client: MinimalClient,
+  withMetadata: Pick<ObjectOrInterfaceDefinition, "apiName" | "properties" | "type">,
+): MinimalClient => ({
+  ...client,
+  fetch: createFetchHeaderMutator(
+    client.fetch,
+    (headers) => {
+      headers.set(
+        "X-COACH-Request-Context",
+        JSON.stringify(client.requestContext),
+      );
+
+      if ((withMetadata as any).coachMetadata) {
+        headers.set(
+          USER_AGENT_HEADER,
+          [
+            headers.get(USER_AGENT_HEADER),
+            (withMetadata as any).coachMetadata.extraUserAgent,
+          ].filter(x => x && x?.length > 0).join(" "),
+        );
+      }
+      return headers;
+    },
+  ),
+});

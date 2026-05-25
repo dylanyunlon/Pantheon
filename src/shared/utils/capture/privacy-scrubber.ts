@@ -5,7 +5,7 @@ import type {
   CaptureSessionMeta,
   FeatureVector
 } from './experiment-capture'
-import type { PostGamePlayerStats, ReplayOutcome, ReplayAnalysisReport } from '../coach-replay'
+import type { PostGamePlayerStats, ReplayOutcome, ReplayAnalysisReport } from '../replay'
 
 export type ScrubStrategy = 'hash' | 'redact' | 'tokenize'
 
@@ -26,7 +26,7 @@ export interface PrivacyScrubberConfig {
 
 const DEFAULT_CONFIG: PrivacyScrubberConfig = {
   strategy: 'hash',
-  hashSalt: 'pantheon-coach-privacy-v1',
+  hashSalt: 'pantheon-privacy-v1',
   redactedPlaceholder: '[REDACTED]',
   tokenPrefix: 'tok_',
   scrubPuuids: true,

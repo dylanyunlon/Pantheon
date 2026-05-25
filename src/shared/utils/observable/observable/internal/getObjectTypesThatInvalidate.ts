@@ -25,7 +25,7 @@ import type { MinimalClient } from "../../MinimalClientContext";
 import type {
   FetchedObjectTypeDefinition,
   GameStateProvider,
-} from "../../gameState/GameStateProvider";
+} from "../../gamestate/GameStateProvider";
 
 // Suppose we did an object set that is basically
 // A.where()

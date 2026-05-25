@@ -1,7 +1,7 @@
 import type { PantheonAdvice, PantheonAdviceType } from '../engine'
 import type { GamePhase } from '../scheduler'
 import type { FeatureVector, TrainingSample } from '../capture/experiment-capture'
-import type { InferenceResult, AdvicePrediction, InferenceBackend } from '../coach-inference'
+import type { InferenceResult, AdvicePrediction, InferenceBackend } from '../inference'
 
 export interface ExperimentVariant {
   id: string

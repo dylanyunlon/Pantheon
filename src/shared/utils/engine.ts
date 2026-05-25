@@ -12,8 +12,8 @@ import {
   canonicalizeCacheKey,
   computeDataCompleteness,
   shouldReplace
-} from './coach-cache'
-import type { PantheonCacheKeyParams } from './coach-cache'
+} from './cache'
+import type { PantheonCacheKeyParams } from './cache'
 import {
   aggregateTeamProfile,
   compareTeams,
@@ -30,33 +30,33 @@ import type { GamePhase, ScheduledAdvice, SchedulerConfig } from './scheduler'
 import {
   ExperimentCapture,
   createExperimentCapture
-} from './coach-capture'
-import type { FeatureVector, TrainingSample, CaptureSessionMeta } from './coach-capture'
+} from './capture'
+import type { FeatureVector, TrainingSample, CaptureSessionMeta } from './capture'
 import {
   PantheonInferenceEngine,
   createInferenceEngine
-} from './coach-inference'
-import type { InferenceResult, InferenceConfig, InferenceBackend, OnnxSessionFactory } from './coach-inference'
+} from './inference'
+import type { InferenceResult, InferenceConfig, InferenceBackend, OnnxSessionFactory } from './inference'
 import {
   ExperimentManager,
   createExperimentManager
-} from './coach-abtest'
-import type { ExperimentDefinition, ExperimentSnapshot, SessionAssignment, ComparisonResult } from './coach-abtest'
+} from './abtest'
+import type { ExperimentDefinition, ExperimentSnapshot, SessionAssignment, ComparisonResult } from './abtest'
 import {
   PantheonObservableStore,
   createObservableStore
-} from './coach-observable-adapter'
-import type { ObservableStatus, SubjectListener } from './coach-observable-adapter'
+} from './observable-adapter'
+import type { ObservableStatus, SubjectListener } from './observable-adapter'
 import {
   ReplayAnalysisPipeline,
   createReplayAnalysisPipeline
-} from './coach-replay'
-import type { ReplayAnalysisReport } from './coach-replay'
+} from './replay'
+import type { ReplayAnalysisReport } from './replay'
 import {
   PantheonStreamServer,
   createStreamServer
-} from './coach-streaming'
-import type { StreamServerConfig } from './coach-streaming'
+} from './streaming'
+import type { StreamServerConfig } from './streaming'
 
 export const enum PantheonAdvicePriority {
   CRITICAL = 0,
