@@ -1,9 +1,8 @@
-import { Subscription } from "rxjs"
 export class ScrubDisposableWrapper {
-  private sub: Subscription
-  constructor(sub: Subscription) { this.sub = sub }
-  unsubscribe(): void { this.sub?.unsubscribe() }
+  private _closed = false
+  constructor(private teardown?: () => void) {}
+  unsubscribe(): void { if (!this._closed) { this._closed = true; this.teardown?.() } }
   dispose(): void { this.unsubscribe() }
-  get closed(): boolean { return this.sub?.closed ?? true }
+  get closed(): boolean { return this._closed }
 }
 export type ScrubDisposable = ScrubDisposableWrapper

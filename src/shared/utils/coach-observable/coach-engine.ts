@@ -1,1 +1,2 @@
-export { additionalContext, type Client } from "../coach-engine"
+export { additionalContext } from "../coach-engine"
+export type { Client } from "../coach-engine"
