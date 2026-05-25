@@ -161,20 +161,6 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
   setCaptureShowStatsInPanel(value: boolean) { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureShowStatsInPanel', value) }
   setCaptureExportFormat(value: 'json' | 'csv') { return this._setting.set(COACH_SHARD_NAMESPACE, 'captureExportFormat', value) }
 
-  getSchedulerStats() {
-    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getSchedulerStats') as Promise<Record<string, number>>
-  }
-
-  getCaptureStats() {
-    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getCaptureStats') as Promise<{
-      sessionId: string
-      isActive: boolean
-      eventCount: number
-      sampleCount: number
-      mergeCount: number
-    }>
-  }
-
   getLoadProgress() {
     return this._ipc.call(COACH_SHARD_NAMESPACE, 'getLoadProgress') as Promise<{
       loaded: number
