@@ -128,14 +128,14 @@ const choices = ref([
   },
   {
     id: 'pro',
-    title: '⭐ Pro 版',
+    title: 'Pro 版',
     price: 30000,
     description: '进阶用户最爱！',
     privileges: [...commonPart, { level: 2, text: '多花 30 阿卡林币' }]
   },
   {
     id: 'max',
-    title: '⭐ Max 版',
+    title: 'Max 版',
     price: 198000,
     description: '满足一切需求！',
     privileges: [

@@ -1,0 +1,55 @@
+:root {
+  --astro-radius: 0.5rem;
+  --astro-scrollbar-thumb: rgba(76, 76, 76, 0.3);
+}
+
+[data-theme='dark'] {
+  --astro-primary: hsl(195, 95%, 85%);
+  --astro-foreground: hsl(0, 0%, 98%);
+  --astro-muted-foreground: hsl(240, 5%, 74.9%);
+  --astro-background: hsl(240, 20.54%, 5.2%);
+  --astro-muted: hsl(240, 5.9%, 13%);
+  --astro-card: hsl(240, 3.7%, 24.9%);
+  --astro-border: hsl(240, 3.7%, 22.9%);
+  --astro-input: hsl(240, 3.7%, 17.9%);
+  --astro-ring: hsl(240, 4.9%, 83.9%);
+  --astro-scrollbar-thumb: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='light'] {
+  --astro-primary: hsl(200, 29%, 45%);
+  --astro-foreground: hsl(240, 10%, 3.9%);
+  --astro-muted-foreground: hsl(240, 3.8%, 28.1%);
+  --astro-background: hsl(210, 33%, 99%);
+  --astro-muted: hsl(240, 4.8%, 96%);
+  --astro-card: hsl(0, 0%, 90%);
+  --astro-border: hsl(240, 5.9%, 88%);
+  --astro-input: hsl(240, 5.9%, 90%);
+  --astro-ring: hsl(240, 5.9%, 10%);
+  --astro-scrollbar-thumb: rgba(0, 0, 0, 0.3);
+}
+
+@keyframes astro-fade-in-up {
+  0% {
+    transform: translateY(2rem);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.astro-animate {
+  opacity: 0;
+  animation: 300ms astro-fade-in-up;
+  animation-fill-mode: forwards;
+}
+
+@media (prefers-reduced-motion) {
+  .astro-animate {
+    opacity: 0;
+    animation: 100ms astro-fade-in-up;
+    animation-fill-mode: forwards;
+  }
+}

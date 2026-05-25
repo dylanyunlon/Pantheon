@@ -65,7 +65,7 @@ export class AkariManager {
   public readonly global: AkariSharedGlobal = {}
 
   public static readonly SHARED_GLOBAL_ID = Symbol('<akari-shared-global>')
-  public static readonly INTERNAL_RUNNER_ID = Symbol('<akari-shard-runner~(∠・ω<)⌒★>')
+  public static readonly INTERNAL_RUNNER_ID = Symbol('<akari-shard-runner>')
 
   use(shard: Constructor, config?: object) {
     const { id, priority } = this._extractMetadata(shard)

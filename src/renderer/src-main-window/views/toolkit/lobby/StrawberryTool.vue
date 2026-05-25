@@ -278,15 +278,15 @@ const setMap = async () => {
 
 const difficultyOptions = [
   {
-    label: '🐰',
+    label: t('StrawberryTool.difficulty.easy', 'Easy'),
     value: 1
   },
   {
-    label: '★★',
+    label: t('StrawberryTool.difficulty.normal', 'Normal'),
     value: 2
   },
   {
-    label: '★★★',
+    label: t('StrawberryTool.difficulty.hard', 'Hard'),
     value: 3
   }
 ]

@@ -23,8 +23,8 @@ import FunnyPricing from './FunnyPricing.vue'
 
 const subscriptionText = {
   basic: '基础版',
-  pro: '⭐ Pro 版',
-  max: '⭐ Max 版'
+  pro: 'Pro 版',
+  max: 'Max 版'
 }
 
 const show = ref(false)

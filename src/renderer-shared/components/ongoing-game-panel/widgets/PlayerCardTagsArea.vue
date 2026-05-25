@@ -143,7 +143,7 @@
                     t('PlayerInfoCard.metPopover.inspectByGameId', {
                       gameId: masked(
                         item.gameId.toString(),
-                        (index + 1).toString().padStart(6, '●')
+                        (index + 1).toString().padStart(6, '*')
                       )
                     })
                   }}

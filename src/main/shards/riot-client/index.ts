@@ -145,7 +145,7 @@ export class RiotClientMain implements IAkariShardInitDispose {
   }
 
   /**
-   * RC 的请求, 🐰
+   * RC 的请求
    */
   async request<T = any, D = any>(config: AxiosRequestConfig<D>) {
     if (!this._http) {
