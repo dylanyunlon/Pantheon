@@ -2353,7 +2353,7 @@ CoachAdvisorSettings:
   experimentSamples: Training Samples
   sessionActive: Session Status
 
-  titleAdvanced: Advanced & Experiment Capture
+  titleCapture: Advanced & Experiment Capture
 
   captureEnabled:
     label: Enable experiment capture

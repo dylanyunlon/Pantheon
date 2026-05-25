@@ -2357,7 +2357,7 @@ CoachAdvisorSettings:
   experimentSamples: 训练样本数
   sessionActive: 会话状态
 
-  titleAdvanced: 高级设置与实验捕获
+  titleCapture: 高级设置与实验捕获
 
   captureEnabled:
     label: 启用实验数据捕获
