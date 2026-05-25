@@ -5,10 +5,10 @@ import type {
   MinimalPantheonClientParams
 } from './MinimalPantheonClientContext'
 import type { PipelineFactory } from '../pipeline/PipelineFactory'
-import type { GameStateProvider } from '../gamestate/GameStateProvider'
+import type { GameStateProvider } from '../gameState/GameStateProvider'
 import {
   createStandardGameStateProviderFactory,
-} from '../gamestate/StandardGameStateProvider'
+} from '../gameState/StandardGameStateProvider'
 import { USER_AGENT_HEADER } from '../types'
 import { createPipeline } from '../pipeline/createPipeline'
 

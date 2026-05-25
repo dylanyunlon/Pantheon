@@ -24,7 +24,7 @@ import invariant from "tiny-invariant";
 import type { MinimalClient } from "../../MinimalClientContext";
 import type {
     GameStateProvider,
-} from "../../gamestate/GameStateProvider";
+} from "../../gameState/GameStateProvider";
 
 // Suppose we did an object set that is basically
 // A.where()

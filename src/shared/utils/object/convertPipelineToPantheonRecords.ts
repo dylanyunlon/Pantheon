@@ -33,7 +33,7 @@ import type { DerivedPropertyRuntimeMetadata } from "../derivedProperties/derive
 import type { MinimalClient } from "../MinimalClientContext";
 import {
   type FetchedObjectTypeDefinition,
-} from "../gamestate/GameStateProvider";
+} from "../gameState/GameStateProvider";
 import { createPantheonRecord } from "./convertPipelineToPantheonRecords/createPantheonRecord";
 import type { InterfaceHolder } from "./convertPipelineToPantheonRecords/InterfaceHolder";
 import type { ObjectHolder } from "./convertPipelineToPantheonRecords/ObjectHolder";

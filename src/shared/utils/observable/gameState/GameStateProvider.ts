@@ -1,2 +1,2 @@
-export type { GameStateProvider } from "../../gamestate/GameStateProvider"
+export type { GameStateProvider } from "../../gameState/GameStateProvider"
 export type { FetchedObjectTypeDefinition, FetchedPiiFieldTypeDefinition } from "../../types"

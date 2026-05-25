@@ -1,6 +1,6 @@
 import type { Logger } from '../types'
 import type { PipelineFactory } from '../pipeline/PipelineFactory'
-import type { GameStateProvider } from '../gamestate/GameStateProvider'
+import type { GameStateProvider } from '../gameState/GameStateProvider'
 
 declare const tag: unique symbol
 

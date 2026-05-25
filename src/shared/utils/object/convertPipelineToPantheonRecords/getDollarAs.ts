@@ -18,7 +18,7 @@ import type { ObjectOrInterfaceDefinition, PantheonBase } from "../../types";
 import {
   type FetchedObjectTypeDefinition,
   InterfaceDefinitions,
-} from "../../gamestate/GameStateProvider";
+} from "../../gameState/GameStateProvider";
 import { createSimpleCache } from "../SimpleCache";
 import { createPantheonInterface } from "./createPantheonInterface";
 import type { InterfaceHolder } from "./InterfaceHolder";

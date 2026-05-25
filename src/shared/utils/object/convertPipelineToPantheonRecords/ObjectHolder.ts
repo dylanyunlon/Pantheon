@@ -16,7 +16,7 @@
 
 import type { Coach } from "../../types";
 import type { MinimalClient } from "../../MinimalClientContext";
-import type { FetchedObjectTypeDefinition } from "../../gamestate/GameStateProvider";
+import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
 import type { BaseHolder } from "./BaseHolder";
 import type { get$link } from "./getDollarLink";
 import type { ClientRef, ObjectDefRef } from "./InternalSymbols";

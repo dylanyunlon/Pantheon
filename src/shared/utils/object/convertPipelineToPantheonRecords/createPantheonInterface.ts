@@ -16,7 +16,7 @@
 
 import type { InterfaceMetadata, PropertySecurity } from "../../types";
 import { extractNamespace } from "../../internal/conversions/extractNamespace";
-import type { FetchedObjectTypeDefinition } from "../../gamestate/GameStateProvider";
+import type { FetchedObjectTypeDefinition } from "../../gameState/GameStateProvider";
 import { get$linkForInterface } from "./getDollarLink";
 import type { InterfaceHolder } from "./InterfaceHolder";
 import {
