@@ -1,4 +1,6 @@
-export type LIST_API_NAME_IDX = any
-export type LIST_RDP_IDX = any
+import type { PiiFieldKey } from "../../../../coach-types"
+export type ListPiiFieldKey = PiiFieldKey & { type: "list" }
 export const API_NAME_IDX = 0
-export const RDP_IDX = 1
+export const WHERE_IDX = 1
+export const ORDER_BY_IDX = 2
+export const SELECT_IDX = 3

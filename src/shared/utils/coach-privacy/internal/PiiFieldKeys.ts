@@ -1,2 +1,6 @@
-import type { PiiFieldKey } from './PiiFieldKey'
-export interface PiiFieldKeys { get<T extends PiiFieldKey>(...args: unknown[]): T; retain(k: PiiFieldKey): void; release(k: PiiFieldKey): void }
+export class PiiFieldKeys<_K = unknown> {
+  constructor(_opts?: unknown) {}
+  get<T = unknown>(..._args: unknown[]): T { return undefined as any }
+  retain(_k: unknown): void {}
+  release(_k: unknown): void {}
+}

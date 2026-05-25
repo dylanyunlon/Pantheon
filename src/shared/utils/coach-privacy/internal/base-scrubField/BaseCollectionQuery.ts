@@ -1,2 +1,1 @@
-export type CollectionStorageData<T = unknown> = { data: T[]; totalCount?: number }
-export type CollectionConnectableParams = { pageSize?: number }
+export class BaseCollectionQuery { constructor(..._args: unknown[]) {}; [key: string]: any }

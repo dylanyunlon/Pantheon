@@ -1,3 +1,7 @@
-export interface SortingStrategy { sort(data: unknown[]): unknown[] }
-export class NoOpSortingStrategy implements SortingStrategy { sort(data: unknown[]) { return data } }
-export class OrderBySortingStrategy implements SortingStrategy { constructor(..._args: unknown[]) {{}} sort(data: unknown[]) { return data } }
+export interface SortingStrategy {
+  sortPiiFieldKeys(keys: unknown[], batch: unknown): unknown[]
+  compare?(a: unknown, b: unknown): number
+}
+export class DefaultSortingStrategy implements SortingStrategy {
+  sortPiiFieldKeys(keys: unknown[]): unknown[] { return keys }
+}

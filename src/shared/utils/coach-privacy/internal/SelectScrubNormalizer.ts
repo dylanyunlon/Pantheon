@@ -1,2 +1,1 @@
-import type { ScrubNormalized } from './ScrubNormalized'
-export type SelectScrubNormalizer = { scrubNormalize(v: unknown): ScrubNormalized<unknown> }
+export class SelectScrubNormalizer { constructor(..._args: unknown[]) {}; scrubNormalize(_v: unknown): unknown { return _v } }

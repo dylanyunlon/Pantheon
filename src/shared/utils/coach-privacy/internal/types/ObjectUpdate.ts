@@ -1,1 +1,1 @@
-export type ObjectUpdate = { type: 'add' | 'modify' | 'remove'; objectType: string; primaryKey: string }
+export type ObjectUpdate = { type: "added" | "modified" | "removed"; objectType: string; primaryKey: string | number; properties?: Record<string, unknown> }

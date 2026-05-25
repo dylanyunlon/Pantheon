@@ -1,2 +1,2 @@
-import type { PiiFieldKey } from './PiiFieldKey'
-export interface BatchContext { read(key: PiiFieldKey): any; write(key: PiiFieldKey, value: unknown, status: string): any; delete(key: PiiFieldKey, status: string): any; changes: { modified: Set<PiiFieldKey>; deleted: Set<PiiFieldKey>; addedObjects: Map<string, unknown>; modifiedObjects: Map<string, unknown>; registerPipelineSet(k: PiiFieldKey): void; registerScrubField(k: PiiFieldKey): void; registerFunction(k: PiiFieldKey): void } }
+export { BatchContext } from "./store/BatchContext"
+export type { BatchContext as BatchContextType } from "./store/BatchContext"

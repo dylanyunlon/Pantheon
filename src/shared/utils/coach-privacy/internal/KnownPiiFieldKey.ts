@@ -1,2 +1,1 @@
-import type { PiiFieldKey } from './PiiFieldKey'
-export type KnownPiiFieldKey = PiiFieldKey
+export type KnownPiiFieldKey = import("../../../shared/utils/coach-types").PiiFieldKey

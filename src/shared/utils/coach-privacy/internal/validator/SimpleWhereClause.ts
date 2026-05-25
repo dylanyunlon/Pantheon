@@ -1,1 +1,1 @@
-export type SimpleWhereClause = any
+export { simpleWhereClause, type SimpleWhereClause } from "../SimpleWhereClause"

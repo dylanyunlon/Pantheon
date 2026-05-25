@@ -1,2 +1,1 @@
-import type { ScrubNormalized } from './ScrubNormalized'
-export type ObjectSetArrayScrubNormalizer = { scrubNormalize(v: unknown): ScrubNormalized<unknown[]> }
+export class ObjectSetArrayScrubNormalizer { constructor(..._args: unknown[]) {}; scrubNormalize(_v: unknown): unknown { return _v }; scrubNormalizeUnion(_v: unknown): unknown { return _v }; scrubNormalizeIntersect(_v: unknown): unknown { return _v }; scrubNormalizeSubtract(_v: unknown): unknown { return _v } }

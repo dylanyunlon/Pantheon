@@ -1,2 +1,1 @@
-import type { ScrubNormalized } from './ScrubNormalized'
-export type RidScrubFieldScrubNormalizer = { scrubNormalize(v: unknown): ScrubNormalized<string[]> }
+export class RidScrubFieldScrubNormalizer { constructor(..._args: unknown[]) {}; scrubNormalize(_v: unknown): unknown { return _v } }

@@ -1,3 +1,1 @@
-import type { ScrubNormalized } from './ScrubNormalized'
-export type PivotInfo = { field: string; direction: 'asc' | 'desc' }
-export type PivotScrubNormalizer = { scrubNormalize(v: unknown): ScrubNormalized<PivotInfo> }
+export class PivotScrubNormalizer { constructor(..._args: unknown[]) {}; scrubNormalize(_v: unknown): unknown { return _v }; scrubNormalizeLink(_v: unknown): unknown { return _v } }

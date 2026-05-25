@@ -1,2 +1,2 @@
-export type ScrubPayload = { data: unknown; scrubbed: boolean }
-export function createScrubPayload(data: unknown): ScrubPayload { return { data, scrubbed: false } }
+export type ScrubPayload = { value: unknown; status: string; lastUpdated?: number; isDeferred?: boolean }
+export function createScrubPayload(): ScrubPayload { return { value: undefined, status: "init" } }

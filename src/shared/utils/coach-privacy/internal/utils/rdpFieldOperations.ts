@@ -1,2 +1,2 @@
-export function extractRdpFieldNames(_config: unknown): Set<string> { return new Set() }
-export function applyRdpFields(_obj: unknown, _fields: unknown): unknown { return _obj }
+export function mergeRdpFields(..._args: unknown[]): unknown { return {} }
+export function extractRdpFields(..._args: unknown[]): unknown { return {} }

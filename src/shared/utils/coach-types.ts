@@ -246,7 +246,7 @@ export interface MediaReference {
   path: string
 }
 
-export type MediaPropertyLocation = { mediaSetRid: string; path: string }
+export type MediaPropertyLocation = { mediaSetRid?: string; path?: string; apiName: string; objectType: string; primaryKey: string | number; propertyName: string; piiFieldType: string; piiKey: string | number; getMediaReference?: () => unknown }
 
 export type MediaUpload = {
   path: string

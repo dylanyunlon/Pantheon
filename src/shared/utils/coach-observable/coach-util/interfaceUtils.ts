@@ -1,2 +1,2 @@
-export { getDefType } from "../../coach-util/interfaceUtils"
-export type { DefType } from "../../coach-util/interfaceUtils"
+export function isInterfaceActionParam(..._args: unknown[]): boolean { return false }
+export function isInterfaceObjectParam(..._args: unknown[]): boolean { return false }

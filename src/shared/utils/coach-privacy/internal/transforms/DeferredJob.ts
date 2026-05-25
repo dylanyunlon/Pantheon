@@ -1,1 +1,1 @@
-export function runDeferredJob(..._args: unknown[]): Promise<void> { return Promise.resolve() }
+export class DeferredJob { constructor(..._args: unknown[]) {}; execute(): Promise<void> { return Promise.resolve() }; cancel(): void {}; [key: string]: any }

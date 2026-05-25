@@ -1,1 +1,1 @@
-export const evaluateFilter: any = undefined
+export function evaluateFilter(_filter: unknown, _obj: unknown): boolean { return true }

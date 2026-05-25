@@ -1,2 +1,2 @@
-export type ScrubCanonical<T> = T & { __scrubbed: true }
-export type ScrubStatus = "pending" | "scrubbed" | "redacted" | "tokenized" | "pass-through"
+export type ScrubCanonical<T = unknown> = T & { __canonical?: true }
+export type Canonical<T = unknown> = ScrubCanonical<T>
