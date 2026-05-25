@@ -68,7 +68,7 @@ export const useCoachAdvisorStore = defineStore('coach-advisor', () => {
   return { settings, state }
 })
 
-@Shard()
+@Shard(CoachAdvisorRenderer.id)
 export class CoachAdvisorRenderer implements IAkariShardInitDispose {
   static id = 'coach-advisor-renderer'
 
