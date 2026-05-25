@@ -113,7 +113,7 @@ export class ObjectsHelper extends AbstractHelper<
         apiName: v.$piiFieldType ?? v.$apiName,
         pk: v.$piiKey,
         $includeAllBaseObjectProperties: includeAllBaseObjectProperties,
-(}, rdpConfig) as any).writeToStore(
+      }, rdpConfig).writeToStore(
         v as ScrubRecord,
         "loaded",
         batch,

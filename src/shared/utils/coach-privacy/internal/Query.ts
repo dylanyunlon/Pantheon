@@ -25,7 +25,5 @@ export class Query<_K = unknown, _P = unknown, _O = unknown> {
   get includeAllBaseObjectProperties(): boolean { return false }
   dependsOnObject(..._args: unknown[]): boolean { return false }
   ensureInvalidationTypesReady(): Promise<void> { return Promise.resolve() }
-}
-  dispose(): void {}
   dispose(): void {}
 }
