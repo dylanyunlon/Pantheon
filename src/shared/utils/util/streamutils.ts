@@ -130,8 +130,7 @@ export async function* parseNdjsonStream(
   for await (const chunk of asyncIterable) {
     buffer += decoder.decode(chunk, { stream: true });
     let newlineIdx: number;
-    while ((newlineIdx = buffer.indexOf("
-")) !== -1) {
+    while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
       const line = buffer.slice(0, newlineIdx);
       buffer = buffer.slice(newlineIdx + 1);
       if (line.length > 0) {
