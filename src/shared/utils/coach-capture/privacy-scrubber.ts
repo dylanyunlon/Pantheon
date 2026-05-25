@@ -19,6 +19,7 @@ export interface PrivacyScrubberConfig {
   scrubGameIds: boolean
   piiFieldPatterns: RegExp[]
   allowlist: Set<string>
+  knownPuuids?: string[]
 }
 
 const DEFAULT_CONFIG: PrivacyScrubberConfig = {

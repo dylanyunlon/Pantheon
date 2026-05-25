@@ -162,12 +162,12 @@ export interface AggregationClause<_T = unknown> {
   operation: 'sum' | 'avg' | 'min' | 'max' | 'count'
 }
 
-export interface GroupByClause {
+export interface GroupByClause<_T = any> {
   field: string
   type: 'exact' | 'range'
 }
 
-export interface GroupByRange {
+export interface GroupByRange<_T = any> {
   startValue: number
   endValue: number
 }
@@ -196,7 +196,7 @@ export interface IntervalRule {
 
 export type SearchJsonQueryV2 = WhereClause
 
-export interface ObjectSet {
+export interface ObjectSet<_T = any> {
   type: string
   objectType?: string
   where?: WhereClause
@@ -377,11 +377,11 @@ export type ValidateActionResponseV2 = ActionValidationResponse
 export type ActionMetadata = ActionDefinition & { displayName?: string }
 export namespace ActionMetadata {
   export type Parameters = Record<string, Parameter>
-  export type Parameter = { dataType: DataType; required?: boolean; description?: string }
+  export type Parameter<_T = any> = { dataType: DataType; required?: boolean; description?: string; type?: DataType; multiplicity?: boolean }
   export namespace DataType {
-    export type Object = { type: 'object'; objectApiName: string; objectTypeApiName?: string }
-    export type PipelineSet = { type: 'objectSet'; objectApiName?: string; objectTypeApiName?: string; subType?: string }
-    export type Struct = { type: 'struct'; fields: Record<string, { dataType: DataType }> }
+    export type Object<_T = any> = { type: 'object'; objectApiName: string; objectTypeApiName?: string }
+    export type PipelineSet<_T = any> = { type: 'objectSet'; objectApiName?: string; objectTypeApiName?: string; subType?: string }
+    export type Struct<_T = any> = { type: 'struct'; fields: Record<string, { dataType: DataType }> }
     export type Array = { type: 'array'; subType: DataType }
   }
   export type DataType = { type: string; objectApiName?: string; objectTypeApiName?: string; subType?: string | DataType; fields?: Record<string, unknown>; [key: string]: unknown }
@@ -430,7 +430,7 @@ export const MediaSets: Record<string, any> = {
 
 export type PrimaryKeyTypes = string | number
 
-export interface QueryDataTypeDefinition {
+export interface QueryDataTypeDefinition<_T = any> {
   type: string
   subType?: string
   objectTypeApiName?: string
@@ -509,7 +509,7 @@ export type LinkNames<Q extends ObjectOrInterfaceDefinition> = string & { __link
 
 export type LinkTypeApiNamesFor<Q extends ObjectOrInterfaceDefinition> = string & { __linkTypeOf: Q }
 
-export type MinimalDirectedObjectLinkInstance = {
+export type MinimalDirectedObjectLinkInstance<_Q = any, _LINK = any> = {
   sourceObjectApiName: string
   sourcePrimaryKey: string
   targetObjectApiName: string
@@ -785,19 +785,19 @@ export type CoreMediaReference = MediaReference
 export type ActionReturnTypeForOptions<_T = unknown, _O = unknown> = unknown
 export type AggregateObjectsRequestV2 = any
 export type AggregateOpts<_Q = any> = Record<string, AggregationClause>
-export type AggregateOptsThatErrorsAndDisallowsOrderingWithMultipleGroupBy = any
+export type AggregateOptsThatErrorsAndDisallowsOrderingWithMultipleGroupBy<_Q = any, _AO = any> = any
 export type AggregationGroupByV2 = any
 export type AggregationRangeV2 = any
 
 
 export type AggregationsResults<_Q = any, _A = any> = { data: unknown[]; excludedItems?: number }
-export type AndWhereClause = any
+export type AndWhereClause<_T = any, _RDPs = any> = WhereClause & { type: '$and'; value: WhereClause[] }
 export type ApplyActionOptions = any
 export type ApplyBatchActionOptions = any
 export type AudioEncoding = any
 export type AudioOperation = any
 export type AudioToTextOperation = any
-export type Augment = any
+export type Augment<_Q = any, _T = any> = any
 export type BatchApplyActionResponseV2 = any
 
 export type DatetimeFormat = any
@@ -811,7 +811,7 @@ export type DocumentToTextOperation = any
 export type EmailToAttachmentOperation = any
 export type EmailToTextOperation = any
 export type FetchPageArgs<_T = any, _L = any, _R = any, _A = any, _S = any, _U = any> = { $pageSize?: number; $nextPageToken?: string; $select?: string[]; $orderBy?: Record<string, string>; $loadPropertySecurityMetadata?: boolean }
-export type GeotimeSeriesProperty = any
+export type GeotimeSeriesProperty<_T = any> = any
 export type ImageOperation = any
 export type ImageSpec = any
 export type ImageToDocumentOperation = any
@@ -825,7 +825,7 @@ export type LayoutAwareExtractionParameters = any
 export type LlmSpec = any
 export type LoadObjectSetV2MultipleObjectTypesRequest = any
 export type MediaTransformation = any
-export type NotWhereClause = any
+export type NotWhereClause<_T = any, _RDPs = any> = WhereClause & { type: '$not'; value: WhereClause }
 export type NumberFormatAffix = any
 export type NumberFormatCurrency = any
 export type NumberFormatCustomUnit = any
@@ -838,7 +838,7 @@ export type NumberScaleType = any
 export type OcrLanguageOrScript = any
 export type OcrOutputFormat = any
 export type OcrParameters = any
-export type OrWhereClause = any
+export type OrWhereClause<_T = any, _RDPs = any> = WhereClause & { type: '$or'; value: WhereClause[] }
 export type PageRange = any
 export type PropertyIdentifier = any
 export type PropertyNumberFormattingRuleType = any
@@ -881,8 +881,8 @@ export type ObjectUpdate<_O = unknown, _P extends string = string> = {
   state: 'ADDED_OR_UPDATED' | 'REMOVED'
 }
 
-export type ObserveAggregationOptions<_T = unknown, _A = unknown> = { apiName: string; aggregate: unknown; where?: WhereClause; withProperties?: Record<string, unknown> }
-export type ObserveAggregationOptionsWithPipelineSet<_T = unknown, _A = unknown> = ObserveAggregationOptions<_T, _A> & { pipelineSet?: ObjectSet }
+export type ObserveAggregationOptions<_T = unknown, _A = unknown, _RDPs = unknown> = { apiName: string; aggregate: unknown; where?: WhereClause; withProperties?: Record<string, unknown> }
+export type ObserveAggregationOptionsWithPipelineSet<_T = unknown, _A = unknown, _RDPs = unknown> = ObserveAggregationOptions<_T, _A, _RDPs> & { pipelineSet?: ObjectSet }
 export type ObserveFunctionOptions = { apiName: string; params?: unknown }
 export type ObserveFunctionCallbackArgs<_T = unknown> = { result: unknown; status: Status }
 export type ObserveListOptions<_T = unknown, _RDPs = {}> = ObserveScrubFieldOptions<_T, _RDPs>

@@ -24,7 +24,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "@leagueakari/league-akari-addons": "^1.0.0",
+    "@leagueakari/league-akari-addons": "file:stubs/league-akari-addons",
     "@types/luaparse": "^0.2.12",
     "@wry/trie": "^0.5.0",
     "ajv": "^8.17.1",

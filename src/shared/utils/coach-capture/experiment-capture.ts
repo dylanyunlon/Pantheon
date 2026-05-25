@@ -568,6 +568,16 @@ export class ExperimentCapture {
     return this._samples.toArray()
   }
 
+  getKnownPuuids(): string[] {
+    const puuids = new Set<string>()
+    if (this._meta.selfPuuid) puuids.add(this._meta.selfPuuid)
+    for (const event of this._events) {
+      const p = (event as any).puuid
+      if (typeof p === 'string' && p) puuids.add(p)
+    }
+    return Array.from(puuids)
+  }
+
   getExportPayload(): {
     meta: CaptureSessionMeta
     events: CaptureEvent[]

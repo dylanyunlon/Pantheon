@@ -300,6 +300,19 @@ export class CoachStreamServer {
     })
   }
 
+  setSessionId(sessionId: string): void {
+    this._sessionId = sessionId
+  }
+
+  broadcastFeedback(adviceType: string, feedback: string): void {
+    this._enqueue({
+      type: 'feedback',
+      timestamp: Date.now(),
+      sessionId: this._sessionId,
+      payload: { adviceType, feedback }
+    })
+  }
+
   broadcastReplayAnalysis(report: ReplayAnalysisReport): void {
     this._enqueue({
       type: 'replay-analyzed',

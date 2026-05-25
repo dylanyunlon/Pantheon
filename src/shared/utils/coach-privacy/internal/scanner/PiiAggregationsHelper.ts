@@ -179,5 +179,5 @@ export class AggregationsHelper extends AbstractHelper<
   }
 }
 
-type ObserveAggregationOptions = any
-type ObserveAggregationOptionsWithPipelineSet = any
+type ObserveAggregationOptions<_T = any, _A = any, _RDPs = any> = any
+type ObserveAggregationOptionsWithPipelineSet<_T = any, _A = any, _RDPs = any> = any

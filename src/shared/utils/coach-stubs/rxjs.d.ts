@@ -51,5 +51,5 @@ declare module 'rxjs' {
   export function distinctUntilChanged<T>(compare?: (a: T, b: T) => boolean): (source: Observable<T>) => Observable<T>
   export const asapScheduler: unknown
 
-  export type PrivacyScrub = Observable<unknown>
+  export type PrivacyScrub<T = unknown> = Observable<T>
 }

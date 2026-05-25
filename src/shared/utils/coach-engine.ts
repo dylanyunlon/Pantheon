@@ -1279,6 +1279,14 @@ export class CoachEngine {
     return this._experimentManager
   }
 
+  get streaming(): CoachStreamServer {
+    return this._streamServer
+  }
+
+  getKnownPuuids(): string[] {
+    return this._capture.getKnownPuuids()
+  }
+
   get observableStore(): CoachObservableStore {
     return this._observableStore
   }

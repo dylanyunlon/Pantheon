@@ -1,1 +1,1 @@
-export type ScrubRecord = any
+export type ScrubRecord<_T = unknown> = any

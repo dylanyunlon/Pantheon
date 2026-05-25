@@ -1,1 +1,1 @@
-export interface QuerySubscription { unsubscribe(): void }
+export interface QuerySubscription<_Q = unknown> { unsubscribe(): void }

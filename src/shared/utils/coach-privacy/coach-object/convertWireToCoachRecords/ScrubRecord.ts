@@ -1,1 +1,1 @@
-export type ScrubRecord = Record<string, unknown> & { $objectType: string; $primaryKey: string }
+export type ScrubRecord<_T = unknown> = Record<string, unknown> & { $objectType: string; $primaryKey: string }

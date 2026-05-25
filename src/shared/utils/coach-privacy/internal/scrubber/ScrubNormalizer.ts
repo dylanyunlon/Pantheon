@@ -1,1 +1,1 @@
-export class CachingScrubNormalizer { scrubNormalize(v: unknown): unknown { return v } }
+export class CachingScrubNormalizer<_I = unknown, _O = unknown> { scrubNormalize(v: unknown): unknown { return v } }
