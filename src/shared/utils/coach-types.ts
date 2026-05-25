@@ -364,8 +364,9 @@ export namespace ActionMetadata {
   export type DataType = { type: string }
 }
 
-export const Actions = {
-  applyAction: async (_client: unknown, _action: unknown, _params: unknown) => ({} as ActionEditResponse)
+export const Actions: Record<string, any> = {
+  applyAction: async (..._args: unknown[]) => ({} as ActionEditResponse),
+  validateAction: async (..._args: unknown[]) => ({} as ActionValidationResponse),
 }
 
 export const Attachments: Record<string, any> = {
@@ -381,13 +382,19 @@ export const GameStateObjectSets = {
   create: (_client: unknown, _type: string) => ({} as ObjectSet)
 }
 
-export const Queries = {
-  execute: async (_client: unknown, _query: unknown, _params: unknown) => ({} as unknown)
+export const Queries: Record<string, any> = {
+  execute: async (..._args: unknown[]) => ({} as unknown),
+  executeStreaming: async (..._args: unknown[]) => ({} as any),
 }
 
-export const MediaSets = {
-  upload: async (_client: unknown, _ref: MediaReference, _data: Blob | ArrayBuffer) => {},
-  getUrl: (_client: unknown, _ref: MediaReference) => ''
+export const MediaSets: Record<string, any> = {
+  upload: async (..._args: unknown[]) => ({}),
+  getUrl: (..._args: unknown[]) => '',
+  uploadMedia: async (..._args: unknown[]) => ({}),
+  transform: async (..._args: unknown[]) => ({}),
+  transformAndWait: async (..._args: unknown[]) => ({}),
+  getStatus: async (..._args: unknown[]) => ({}),
+  getResult: async (..._args: unknown[]) => ({}),
 }
 
 
@@ -574,8 +581,58 @@ export type SubscriptionClosed = {
   reason: string
 }
 
-export type DataValueClientToWire<T = unknown> = T
-export type DataValueWireToClient<T = unknown> = T
+export interface DataValueClientToWire {
+  attachment: string | AttachmentUpload | Blob & { readonly name: string }
+  boolean: boolean
+  byte: number
+  datetime: string
+  date: string
+  decimal: string | number
+  float: number
+  double: number
+  integer: number
+  long: string | number
+  marking: string
+  null: null
+  short: number
+  string: string
+  timestamp: string
+  set: Set<any>
+  mediaReference: MediaReference | unknown
+  twoDimensionalAggregation: { key: AllowedBucketKeyTypes; value: AllowedBucketTypes }[]
+  threeDimensionalAggregation: { key: AllowedBucketKeyTypes; groups: { key: AllowedBucketKeyTypes; value: AllowedBucketTypes }[] }[]
+  struct: Record<string, any>
+  objectType: string
+  geohash: unknown
+  geoshape: unknown
+  [key: string]: unknown
+}
+export interface DataValueWireToClient {
+  attachment: Attachment
+  boolean: boolean
+  byte: number
+  datetime: string
+  date: string
+  decimal: string
+  float: number
+  double: number
+  integer: number
+  long: string
+  marking: string
+  null: null
+  short: number
+  string: string
+  timestamp: string
+  mediaReference: MediaReference
+  twoDimensionalAggregation: { key: AllowedBucketKeyTypes; value: AllowedBucketTypes }[]
+  threeDimensionalAggregation: { key: AllowedBucketKeyTypes; groups: { key: AllowedBucketKeyTypes; value: AllowedBucketTypes }[] }[]
+  struct: Record<string, any>
+  set: Set<any>
+  objectType: string
+  geohash: unknown
+  geoshape: unknown
+  [key: string]: unknown
+}
 
 export type InterfaceQueryDataType<_T = unknown> = QueryDataTypeDefinition & { interface: string }
 export type ObjectQueryDataType<_T = unknown> = QueryDataTypeDefinition & { object: string }
