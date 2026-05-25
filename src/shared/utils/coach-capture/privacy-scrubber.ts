@@ -20,6 +20,7 @@ export interface PrivacyScrubberConfig {
   piiFieldPatterns: RegExp[]
   allowlist: Set<string>
   knownPuuids?: string[]
+  knownPuuids?: string[]
 }
 
 const DEFAULT_CONFIG: PrivacyScrubberConfig = {

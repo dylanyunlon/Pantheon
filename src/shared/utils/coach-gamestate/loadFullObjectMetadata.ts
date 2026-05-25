@@ -14,7 +14,7 @@ export async function loadFullObjectMetadata(
     { headers: { Authorization: `Bearer ${token}` } }
   )
   if (!resp.ok) throw new Error(`Failed to load object metadata for ${apiName}: ${resp.status}`)
-  return resp.json()
+  return resp.json() as any
 }
 
 export const loadFullGameStateMetadata: any = undefined

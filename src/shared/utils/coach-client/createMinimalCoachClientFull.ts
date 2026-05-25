@@ -27,7 +27,7 @@ export function createMinimalCoachClientFull(
     input: Request | URL | string,
     init?: RequestInit | undefined
   ) => Promise<Response> = globalThis.fetch,
-  pipelineFactory?: PipelineFactory,
+  pipelineFactory?: PipelineFactory<any, any>,
   createGameStateProviderFactory: (
     opts: { logger?: Logger }
   ) => (client: MinimalCoachClient) => GameStateProvider = createStandardGameStateProviderFactory
@@ -37,7 +37,7 @@ export function createMinimalCoachClientFull(
     tokenProvider,
     fetchFn,
     gameStateId: metadata.gameStateId,
-    pipelineFactory: (pipelineFactory || createPipeline) as unknown as PipelineFactory,
+    pipelineFactory: (pipelineFactory || createPipeline) as unknown as PipelineFactory<any, any>,
     logger: options.logger,
     transactionId: options.transactionId,
     flushEdits: options.flushEdits,
@@ -45,6 +45,10 @@ export function createMinimalCoachClientFull(
     clientCacheKey: {} as CoachCacheKey,
     requestContext: {},
     narrowTypeMapping: {},
+    narrowTypeInterfaceOrObjectMapping: {},
+    objectSetFactory: (...args: any[]) => args,
+    objectFactory: (...args: any[]) => args,
+    gameStateRid: metadata.gameStateId,
     gameStateProvider: undefined as any
   }
 

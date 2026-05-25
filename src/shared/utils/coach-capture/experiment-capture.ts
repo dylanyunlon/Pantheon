@@ -570,8 +570,8 @@ export class ExperimentCapture {
 
   getKnownPuuids(): string[] {
     const puuids = new Set<string>()
-    if (this._meta.selfPuuid) puuids.add(this._meta.selfPuuid)
-    for (const event of this._events) {
+    if (this._sessionMeta.selfPuuid) puuids.add(this._sessionMeta.selfPuuid)
+    for (const event of this._events.toArray()) {
       const p = (event as any).puuid
       if (typeof p === 'string' && p) puuids.add(p)
     }

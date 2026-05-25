@@ -60,6 +60,7 @@ import type {  } from "../LinkPayload";
 import type { ListPayload } from "../ListPayload";
 import type { ObjectPayload } from "../ObjectPayload";
 import type {  } from "../PipelineSetPayload";
+import type { PrivacyScrubClient } from "../../../coach-types";
 import type {
   CacheSnapshot,
                       ObserveObjectOptions,
@@ -237,7 +238,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
     >,
   ) => ScrubDisposable = (objects, linkName, options, subFn) => {
     const objectsArray = Array.isArray(objects) ? objects : [objects];
-    const observer = subFn as unknown as Observer<>;
+    const observer = subFn as unknown as Observer<unknown>;
 
     return objectsArray.length <= 1
       ? observeSingleLink(
@@ -281,7 +282,7 @@ export class PrivacyScrubClientImpl implements PrivacyScrubClient {
     return this.__experimentalStore.objectSets.observe(
       { basePipelineSet, ...options },
       // cast to cross typed to untyped barrier
-      subFn as unknown as Observer<>,
+      subFn as unknown as Observer<unknown>,
     );
   }
 
@@ -414,7 +415,7 @@ function observeSingleLink(
   objectsArray: ReadonlyArray<Coach.Instance<ObjectOrInterfaceDefinition>>,
   linkName: string,
   options: ObserveLinks.Options<ObjectOrInterfaceDefinition, string>,
-  observer: Observer<>,
+  observer: Observer<unknown>,
 ): ScrubDisposable {
   if (objectsArray.length === 0) {
     observer.next({
@@ -463,7 +464,7 @@ function observeMultiLinks(
   objectsArray: ReadonlyArray<Coach.Instance<ObjectOrInterfaceDefinition>>,
   linkName: string,
   options: ObserveLinks.Options<ObjectOrInterfaceDefinition, string>,
-  observer: Observer<>,
+  observer: Observer<unknown>,
 ): ScrubDisposable {
   const parentSub = new Subscription();
   const totalExpected = objectsArray.length;

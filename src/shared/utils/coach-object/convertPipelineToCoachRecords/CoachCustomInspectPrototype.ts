@@ -44,7 +44,7 @@ export const CoachCustomInspectPrototype: {
 function customInspect(
   this:
     & HolderBase<ObjectOrInterfaceDefinition>
-    & Coach<any>,
+    & Coach.Instance<any>,
   _depth: number,
   options: InspectOptionsStylized,
   localInspect: typeof inspect,

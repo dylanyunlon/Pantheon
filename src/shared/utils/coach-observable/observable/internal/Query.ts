@@ -22,6 +22,7 @@ import type {
   Subscribable,
   Subscription,
 } from "rxjs";
+import type { Subscribable } from "rxjs/internal/types";
 import { additionalContext } from "../../coach-engine";
 import type {
   CommonObserveOptions,

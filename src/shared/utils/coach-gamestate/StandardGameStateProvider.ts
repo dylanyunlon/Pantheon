@@ -62,7 +62,7 @@ export const createStandardGameStateProviderFactory: (
       return loadActionMetadata(client, key)
     }
 
-    function makeGetter<N>(
+    function makeGetter<N extends {}>(
       fn: (client: MinimalCoachClient, key: string) => Promise<N>
     ) {
       const cache = createAsyncClientCache<string, N>((c, key) => fn(c, key))

@@ -54,7 +54,7 @@ export {
 } from './SatisfiesSemver'
 
 export {
-  createGeotimeSeriesProperty
+  GeotimeSeriesPropertyImpl as createGeotimeSeriesProperty
 } from './createGeotimeSeriesProperty'
 
 export {
@@ -62,7 +62,7 @@ export {
 } from './createMediaFromReference'
 
 export {
-  createMediaReferenceProperty
+  MediaReferencePropertyImpl as createMediaReferenceProperty
 } from './createMediaReferenceProperty'
 
 export {

@@ -462,12 +462,12 @@ export async function fetchPageWithErrorsInternal<
 ): Promise<Result<FetchPageResult<Q, L, R, S, T>>> {
   try {
     const result = await fetchPageInternal(client, objectType, pipelineSet, args);
-    return { value: result };
+    return { type: "ok" as const, value: result };
   } catch (e) {
     if (e instanceof Error) {
-      return { error: e };
+      return { type: "err" as const, error: e };
     }
-    return { error: e as Error };
+    return { type: "err" as const, error: e as Error };
   }
 }
 

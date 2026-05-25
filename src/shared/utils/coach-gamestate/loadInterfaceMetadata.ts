@@ -14,5 +14,5 @@ export async function loadInterfaceMetadata(
     { headers: { Authorization: `Bearer ${token}` } }
   )
   if (!resp.ok) throw new Error(`Failed to load interface metadata for ${apiName}: ${resp.status}`)
-  return resp.json()
+  return resp.json() as any
 }

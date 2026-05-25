@@ -55,7 +55,7 @@ export function makeGeoFilterWithin(
           : withinBody.$of,
         distance: {
           value: withinBody.$distance[0],
-          unit: DistanceUnitMapping[withinBody.$distance[1]],
+          unit: DistanceUnitMapping[(withinBody as any).$distance[1]],
         },
       },
     };

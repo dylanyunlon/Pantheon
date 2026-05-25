@@ -24,8 +24,8 @@ import type {
   SecuredPropertyValue,
 } from "../../coach-types";
 import invariant from "tiny-invariant";
-import { GeotimeSeriesPropertyImpl } from "../../createGeotimeSeriesProperty";
-import { MediaReferencePropertyImpl } from "../../createMediaReferenceProperty";
+import { createGeotimeSeriesProperty as GeotimeSeriesPropertyImpl } from "../../createGeotimeSeriesProperty";
+import { createMediaReferenceProperty as MediaReferencePropertyImpl } from "../../createMediaReferenceProperty";
 import { TimeSeriesPropertyImpl } from "../../createTimeseriesProperty";
 import type { DerivedPropertyRuntimeMetadata } from "../../derivedProperties/derivedPropertyRuntimeMetadata";
 import type { MinimalClient } from "../../MinimalClientContext";

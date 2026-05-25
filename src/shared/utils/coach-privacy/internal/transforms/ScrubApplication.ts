@@ -18,7 +18,7 @@ import type { ActionDefinition, ActionEditResponse } from "../../../coach-types"
 import type { ActionSignatureFromDef } from "../../../actions/applyAction";
 import { API_NAME_IDX } from "../list/ListPiiFieldKey";
 import type { Store } from "../Store";
-import { runDeferredJob } from "./DeferredJob";
+import { DeferredJob as runDeferredJob } from "./DeferredJob";
 
 const ACTION_DELAY = process.env.NODE_ENV === "production" ? 0 : 1000;
 

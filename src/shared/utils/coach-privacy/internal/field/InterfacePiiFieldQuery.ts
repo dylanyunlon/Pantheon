@@ -144,7 +144,7 @@ export class InterfaceScrubFieldQuery extends ScrubFieldQuery {
     changes: Changes,
   ): ExtractRelevantObjectsResult {
     const matchesApiName = ([, object]: [unknown, ScrubRecord]) => {
-      return this.apiName in object[ObjectDefRef].interfaceMap;
+      return this.apiName in (object as any)[ObjectDefRef].interfaceMap;
     };
 
     const added = Array.from(changes.addedObjects).filter(matchesApiName).map((
@@ -250,7 +250,7 @@ async function reloadDataAsFullObjects(
 
   return data.map((obj) => {
     const fullObject =
-      piiFieldTypeToPrimaryKeyToObject[obj.$piiFieldType][obj.$piiKey];
+      piiFieldTypeToPrimaryKeyToObject[(obj as any).$piiFieldType][(obj as any).$piiKey];
     invariant(
       fullObject,
       `Could not find object ${obj.$piiFieldType} ${obj.$piiKey}`,

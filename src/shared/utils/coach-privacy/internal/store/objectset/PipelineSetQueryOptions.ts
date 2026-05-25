@@ -1,1 +1,1 @@
-export type ObserveObjectSetOptions<_T = any, _RDPs = any> = { apiName?: string; where?: unknown; select?: string[]; orderBy?: unknown; pageSize?: number; $includeAllBaseObjectProperties?: boolean; [key: string]: unknown }
+export type ObserveObjectSetOptions<_T = any, _R = any> = { apiName?: string; where?: unknown; select?: string[]; orderBy?: unknown; pageSize?: number; $includeAllBaseObjectProperties?: boolean; withProperties?: Record<string, unknown>; [key: string]: unknown }

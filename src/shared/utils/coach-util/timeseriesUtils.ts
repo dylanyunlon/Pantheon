@@ -33,7 +33,7 @@ export function getTimeRange(body: TimeSeriesQuery): TimeRange {
       startTime: {
         when: "BEFORE",
         value: body.$before,
-        unit: TimeseriesDurationMapping[body.$unit],
+        unit: TimeseriesDurationMapping[(body as any).$unit],
       },
     }
     : {
@@ -41,7 +41,7 @@ export function getTimeRange(body: TimeSeriesQuery): TimeRange {
       endTime: {
         when: "AFTER",
         value: body.$after!,
-        unit: TimeseriesDurationMapping[body.$unit],
+        unit: TimeseriesDurationMapping[(body as any).$unit],
       },
     };
 }

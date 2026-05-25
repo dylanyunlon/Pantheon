@@ -5,3 +5,10 @@ export interface SortingStrategy {
 export class DefaultSortingStrategy implements SortingStrategy {
   sortPiiFieldKeys(keys: unknown[]): unknown[] { return keys }
 }
+export class OrderBySortingStrategy implements SortingStrategy {
+  constructor(..._args: unknown[]) {}
+  sortPiiFieldKeys(keys: unknown[]): unknown[] { return keys }
+}
+export class NoOpSortingStrategy implements SortingStrategy {
+  sortPiiFieldKeys(keys: unknown[]): unknown[] { return keys }
+}

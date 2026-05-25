@@ -492,7 +492,7 @@ export class PipelineListenerWebsocket {
     }, WEBSOCKET_HEARTBEAT_INTERVAL_MS);
   };
 
-  #onMessage = async (message: WebSocket.MessageEvent): Promise<void> => {
+  #onMessage = async (message: any): Promise<void> => {
     const data = JSON.parse(String(message.data)) as StreamMessage;
     if (process.env.NODE_ENV !== "production") {
       this.#logger?.debug({ payload: data }, "received message from ws");
@@ -718,7 +718,7 @@ export class PipelineListenerWebsocket {
     this.#unsubscribe(sub, "error");
   }
 
-  #onClose = (event: WebSocket.CloseEvent) => {
+  #onClose = (event: any) => {
     if (process.env.NODE_ENV !== "production") {
       this.#logger?.debug({ event }, "Received close event from ws", event);
     }

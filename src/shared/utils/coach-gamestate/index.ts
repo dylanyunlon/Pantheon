@@ -1,23 +1,17 @@
-/*
- * Copyright 2024 dylanyunlon Technologies, Inc. All rights reserved.
- *
- * Licensed under MIT. Derived from dylanyunlon COACH architecture patterns.
- *
- *     Coach-advisor module for Pantheon (League of Legends assistant)
- *
- */
-
 export {
   type GameStateProvider,
-  type GameStateProviderConfig
 } from './GameStateProvider'
 
-export {
+export type {
   StandardGameStateProvider
 } from './StandardGameStateProvider'
 
 export {
-  loadGameStateActionMetadata
+  createStandardGameStateProviderFactory
+} from './StandardGameStateProvider'
+
+export {
+  loadActionMetadata as loadGameStateActionMetadata
 } from './loadActionMetadata'
 
 export {
@@ -25,7 +19,7 @@ export {
 } from './loadFullObjectMetadata'
 
 export {
-  loadGameStateInterfaceMetadata
+  loadInterfaceMetadata as loadGameStateInterfaceMetadata
 } from './loadInterfaceMetadata'
 
 export {

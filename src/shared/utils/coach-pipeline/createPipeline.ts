@@ -251,7 +251,7 @@ export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
             pipelineSet,
             primaryKey,
           ),
-        ) as Coach<Q>;
+        ) as Coach.Instance<Q>;
       }
       : undefined) as PipelineSet<Q>["fetchOne"],
 
@@ -274,7 +274,7 @@ export function createPipeline<Q extends ObjectOrInterfaceDefinition>(
             pipelineSet,
             primaryKey,
           ),
-        ) as Result<Coach<Q>>;
+        ) as Result<Coach.Instance<Q>>;
       }
       : undefined) as PipelineSet<Q>["fetchOneWithErrors"],
 

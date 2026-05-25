@@ -16,7 +16,7 @@
 
 import type { ScrubNormalized } from "../ScrubNormalized";
 import type { Rdp } from "../RdpScrubNormalizer";
-import { extractRdpFieldNames } from "../utils/rdpFieldOperations";
+import { extractRdpFields as extractRdpFieldNames } from "../utils/rdpFieldOperations";
 import type { ObjectPiiFieldKey } from "./ObjectPiiFieldKey";
 
 interface PiiFieldKeyMetadata {

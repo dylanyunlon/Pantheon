@@ -4,12 +4,12 @@ import type { MatchHistoryGamesAnalysisAll } from './analysis'
 import type { RankedStats } from '@shared/types/league-client/ranked'
 
 
-export type Status = 'init' | 'loading' | 'loaded' | 'error'
+export type Status = 'init' | 'loading' | 'loaded' | 'error' | string
 export type Observer<T = unknown> = { next(value: T): void; error?(err: unknown): void; complete?(): void }
 export type CommonObserveOptions = { dedupe?: boolean; invalidationMode?: string }
-export interface CacheSnapshot { entries: Array<{ key: unknown; value: unknown; status: string }> }
-export type CacheEntry = { key: unknown; value: unknown; status: string; timestamp?: number }
-export type ScrubDisposable = { unsubscribe(): void; dispose?(): void; closed?: boolean }
+export interface CacheSnapshot { stats?: { totalEntries: number; totalSize: number }; entries: Array<{ key: unknown; value: unknown; status: string }> }
+export type CacheEntry = { key?: unknown; value: unknown; status: string; timestamp?: number; type?: string }
+
 export type InvalidationMode = 'auto' | 'manual'
 export type ObserveOptions = { invalidationMode?: InvalidationMode }
 
@@ -26,6 +26,7 @@ export interface Logger {
   fatal?(...args: unknown[]): void
   child(meta: Record<string, unknown>, extra?: Record<string, unknown>): Logger
   level?: string
+  isLevelEnabled?(level: string): boolean
 }
 
 export interface PageResult<T> {
@@ -128,7 +129,7 @@ export interface CompileTimeMetadata<T = unknown> {
   strictProps?: Record<string, unknown>
   linksType?: unknown
   signature?: unknown
-  parameters?: Record<string, ParameterDefinition>
+  parameters: Record<string, ParameterDefinition>
   output?: QueryDataTypeDefinition
 }
 
@@ -172,7 +173,7 @@ export interface GroupByRange<_T = any> {
   endValue: number
 }
 
-export type AllGroupByValues = string | number | boolean
+export type AllGroupByValues = string | number | boolean | object
 
 export interface AggregateObjectsResponseV2 {
   data: Array<{ group: Record<string, unknown>; metrics: Record<string, number> }>
@@ -222,11 +223,14 @@ export interface MinimalObjectSet {
 }
 
 export interface GeoFilterOptions {
+  $intersects?: { type: string; coordinates: number[][] }
+  $within?: { type?: string; coordinates?: number[][]; distance?: unknown; point?: unknown; $of?: unknown; $distance?: unknown[] }
   type: 'bbox' | 'polygon' | 'intersects' | 'within'
   coordinates: number[][]
 }
 
 export interface Attachment {
+  fetchContents?(client?: unknown): Promise<unknown>
   rid: string
   filename: string
   sizeBytes: number
@@ -237,9 +241,11 @@ export type AttachmentUpload = {
   filename: string
   data: Blob | ArrayBuffer
   mediaType?: string
+  name?: string
 }
 
 export interface Media {
+  fetchContents?(client?: unknown): Promise<unknown>
   path: string
   mediaType: string
 }
@@ -248,7 +254,7 @@ export interface MediaMetadata {
   path: string
   sizeBytes: number
   mediaType: string
-  updatedAt: string
+  updatedAt?: string
 }
 
 export interface MediaReference {
@@ -265,8 +271,11 @@ export type MediaUpload = {
 }
 
 export interface Transformation {
-  type: 'resize' | 'crop' | 'rotate'
-  params: Record<string, number>
+  type: string
+  params?: Record<string, number>
+  operation?: unknown
+  encoding?: unknown
+  [key: string]: unknown
 }
 
 export interface DerivedProperty {
@@ -294,20 +303,22 @@ export interface DerivedPropertyDefinition extends DerivedProperty {
 
 export type DataValue = string | number | boolean | null | DataValue[] | { [key: string]: DataValue | undefined; key?: DataValue; value?: DataValue; groups?: DataValue[] }
 
-export type DatetimeLocalizedFormatType = 'short' | 'medium' | 'long' | 'full'
+export type DatetimeLocalizedFormatType = string
 
+export const DistanceUnitMapping: Record<string, string> = { miles: 'MILES', kilometers: 'KILOMETERS', meters: 'METERS', MILES: 'MILES', KILOMETERS: 'KILOMETERS', METERS: 'METERS' }
 export interface DistanceUnitMapping {
   unit: string
   factor: number
 }
 
+export const DurationMapping: Record<string, string> = { YEARS: 'YEARS', MONTHS: 'MONTHS', WEEKS: 'WEEKS', DAYS: 'DAYS', HOURS: 'HOURS', MINUTES: 'MINUTES', SECONDS: 'SECONDS', MILLISECONDS: 'MILLISECONDS' }
 export interface DurationMapping {
   unit: string
   factor: number
 }
 
 export interface PropertyValueFormattingRule {
-  type: 'number' | 'date' | 'boolean' | 'string'
+  type: string
   format?: string
   locale?: string
 }
@@ -315,6 +326,8 @@ export interface PropertyValueFormattingRule {
 export interface PropertyBooleanFormattingRule {
   trueLabel: string
   falseLabel: string
+  valueIfTrue?: string
+  valueIfFalse?: string
 }
 
 export type PropertyTypeReferenceOrStringConstant = string
@@ -324,8 +337,8 @@ export interface PropertySecurities {
 }
 
 export interface PropertySecurity {
-  redacted: boolean
-  securityMarkings: string[]
+  redacted?: boolean
+  securityMarkings?: string[]
   type?: string
   conjunctive?: string[][]
   disjunctive?: string[][]
@@ -334,7 +347,7 @@ export interface PropertySecurity {
   map?: Record<string, unknown>
 }
 
-export type ObjectOrInterfaceDefinition = ObjectTypeDefinition | InterfaceDefinition
+export type ObjectOrInterfaceDefinition = ObjectTypeDefinition | InterfaceDefinition | { type: string; apiName: string; [key: string]: unknown }
 
 export class CoachApiError extends Error {
   statusCode: number
@@ -451,6 +464,7 @@ export interface TimeRange {
 }
 
 export interface TimeSeriesQuery {
+  [key: string]: unknown
   range?: TimeRange
   type: string
 }
@@ -474,8 +488,8 @@ export interface TransformOptions {
 export const USER_AGENT_HEADER = 'X-Coach-User-Agent'
 
 export interface GameStateObjectV2 {
-  __apiName: string
-  __primaryKey: string
+  __apiName?: string
+  __primaryKey?: string
   __rid?: string
   [key: string]: unknown
 }
@@ -517,7 +531,7 @@ export type MinimalDirectedObjectLinkInstance<_Q = any, _LINK = any> = {
   linkTypeApiName: string
 }
 
-export type NullabilityAdherence = 'strict' | 'loose'
+export type NullabilityAdherence = string | boolean
 
 export namespace NullabilityAdherence {
   export const Default: NullabilityAdherence = 'strict'
@@ -568,7 +582,7 @@ export type LoadObjectSetLinksResponseV2 = {
   nextPageToken?: string
 }
 
-export type ObjectSetStreamSubscribeRequest = {
+export type ObjectSetStreamSubscribeRequest = {  [key: string]: unknown
   objectSetRid: string
   objectTypes: string[]
 }
@@ -576,6 +590,8 @@ export type ObjectSetStreamSubscribeRequest = {
 export type ObjectSetStreamSubscribeRequests = ObjectSetStreamSubscribeRequest[]
 
 export type ObjectSetSubscribeResponses = {
+  id?: string
+  responses?: unknown[]
   subscriptionId: string
 }
 
@@ -586,7 +602,7 @@ export type ObjectSetUpdates = {
   properties?: Record<string, unknown>
 }
 
-export type ObjectState = {
+export type ObjectState = string | {
   objectType: string
   primaryKey: string
   properties: Record<string, unknown>
@@ -595,6 +611,8 @@ export type ObjectState = {
 export type RefreshPipelineSet = WirePipelineSet & { refresh: boolean }
 
 export type StreamMessage =
+  | { type: 'objectSetChanged'; data: unknown }
+  | { type: 'refreshPipelineSet'; data: unknown }
   | { type: 'subscribeResponses'; data: ObjectSetSubscribeResponses }
   | { type: 'objectSetUpdates'; data: ObjectSetUpdates }
   | { type: 'refreshObjectSet'; data: RefreshPipelineSet }
@@ -712,6 +730,7 @@ export type ObjectSpecifier<Q extends ObjectOrInterfaceDefinition = ObjectOrInte
 export type ActionParam<T = unknown> = T
 
 export namespace ActionParam {
+  export type StructType<_T = unknown> = Record<string, DataValue>
   export type ObjectType<_T = unknown> = { $objectType: string; $primaryKey: string | number }
   export type InterfaceType<_T = unknown> = { $objectType: string; $primaryKey: string | number; __isInterface: true }
   export type ObjectSetType<_T = unknown> = ObjectSet
@@ -792,7 +811,7 @@ export type AggregationRangeV2 = any
 
 export type AggregationsResults<_Q = any, _A = any> = { data: unknown[]; excludedItems?: number }
 export type AndWhereClause<_T = any, _RDPs = any> = WhereClause & { type: '$and'; value: WhereClause[] }
-export type ApplyActionOptions = any
+export type ApplyActionOptions = { mode?: string; optimisticUpdate?: (ctx: unknown) => void; deferredUpdate?: unknown; [key: string]: unknown }
 export type ApplyBatchActionOptions = any
 export type AudioEncoding = any
 export type AudioOperation = any
@@ -810,7 +829,7 @@ export type DocumentToImageOperation = any
 export type DocumentToTextOperation = any
 export type EmailToAttachmentOperation = any
 export type EmailToTextOperation = any
-export type FetchPageArgs<_T = any, _L = any, _R = any, _A = any, _S = any, _U = any> = { $pageSize?: number; $nextPageToken?: string; $select?: string[]; $orderBy?: Record<string, string>; $loadPropertySecurityMetadata?: boolean }
+export type FetchPageArgs<_T = any, _L = any, _R = any, _A = any, _S = any, _U = any, _V = any, _W = any, _X = any, _Y = any> = { $pageSize?: number; $nextPageToken?: string; $select?: string[]; $orderBy?: Record<string, string>; $loadPropertySecurityMetadata?: boolean; $includeRid?: boolean; $includeAllBaseObjectProperties?: boolean }
 export type GeotimeSeriesProperty<_T = any> = any
 export type ImageOperation = any
 export type ImageSpec = any
@@ -860,20 +879,25 @@ export type VideoToTextOperation = any
 export type VlmPreprocessingConfig = any
 
 
-export type ObserveObjectOptions<_T = unknown> = { apiName: string; pk: PiiKeyType; $select?: string[]; $includeAllBaseObjectProperties?: boolean; $loadPropertySecurityMetadata?: boolean }
+export type ObserveObjectOptions<_T = unknown> = { apiName: string; pk: PiiKeyType; select?: string[]; $select?: string[]; $includeAllBaseObjectProperties?: boolean; $loadPropertySecurityMetadata?: boolean; $includeRid?: boolean; $includeAllBaseObjectProperties?: boolean }
 export type ObserveScrubFieldOptions<_T = unknown, _RDPs = {}> = CommonObserveOptions & {
   select?: readonly string[]
   orderBy?: Record<string, 'asc' | 'desc' | undefined>
   where?: WhereClause
   pivotTo?: { linkName: string; sourceType: string }
   rids?: string[]
-  intersectWith?: ObjectSet
+  intersectWith?: ObjectSet | ObjectSet[]
   observe?: boolean
   streamUpdates?: boolean
   type?: string
   $includeAllBaseObjectProperties?: boolean
   $pageSize?: number
   $expectedLength?: number
+  withProperties?: Record<string, unknown>
+  $loadPropertySecurityMetadata?: boolean
+  autoFetchMore?: boolean | number
+  mode?: string
+  [key: string]: unknown
 }
 
 export type ObjectUpdate<_O = unknown, _P extends string = string> = {
@@ -882,7 +906,7 @@ export type ObjectUpdate<_O = unknown, _P extends string = string> = {
 }
 
 export type ObserveAggregationOptions<_T = unknown, _A = unknown, _RDPs = unknown> = { apiName: string; aggregate: unknown; where?: WhereClause; withProperties?: Record<string, unknown> }
-export type ObserveAggregationOptionsWithPipelineSet<_T = unknown, _A = unknown, _RDPs = unknown> = ObserveAggregationOptions<_T, _A, _RDPs> & { pipelineSet?: ObjectSet }
+export type ObserveAggregationOptionsWithPipelineSet<_T = unknown, _A = unknown, _RDPs = unknown> = ObserveAggregationOptions<_T, _A, _RDPs> & { pipelineSet?: ObjectSet } & { pipelineSet?: ObjectSet }
 export type ObserveFunctionOptions = { apiName: string; params?: unknown }
 export type ObserveFunctionCallbackArgs<_T = unknown> = { result: unknown; status: Status }
 export type ObserveListOptions<_T = unknown, _RDPs = {}> = ObserveScrubFieldOptions<_T, _RDPs>
@@ -901,7 +925,7 @@ export type QueryReturnType<_T = unknown> = unknown
 export type FetchedObjectTypeDefinition = ObjectTypeDefinition & ObjectOrInterfaceDefinition & {
   links: Record<string, LinkDefinition>
   interfaceMap?: Record<string, Record<string, string>>
-  primaryKeyApiName: string
+  primaryKeyApiName?: string
 }
 
 export type FetchedPiiFieldTypeDefinition = FetchedObjectTypeDefinition
@@ -924,9 +948,9 @@ export type NormalizedProcedure<_C = unknown> = (def: ObjectOrInterfaceDefinitio
 export type MinimalCoachClient = import('./coach-client/MinimalCoachClientContext').MinimalCoachClient
 
 export type AggregationResultsWithoutGroups<_Q = any, _AC = any> = { data: unknown[]; excludedItems?: number }
-export type AggregationResultsWithGroups<_Q = any, _AC = any> = { data: Array<{ group: Record<string, unknown>; metrics: Record<string, number> }> }
+export type AggregationResultsWithGroups<_Q = any, _AC = any, _R = any> = { data: Array<{ group: Record<string, unknown>; metrics: Record<string, number> }> }
 export type CoachRecordLinksObject<_Q = any> = Record<string, unknown>
-export type SingleLinkAccessor<_Q = any, _L extends string = string> = { get(): Promise<Coach.Instance | undefined> }
+export type SingleLinkAccessor<_Q = any, _L extends string = string> = { get?(): Promise<Coach.Instance | undefined>; fetchOne?(...args: unknown[]): Promise<unknown>; fetchOneWithErrors?(...args: unknown[]): Promise<unknown> }
 
 export type PiiFieldKey<_T extends string = string, _V = unknown, _Q = unknown, _O extends unknown[] = unknown[]> = {
   type: string
@@ -971,7 +995,7 @@ export class BaseScrubFieldQuery<_K = unknown, _P = unknown, _O = unknown> exten
   currentTotalCount?: string
 }
 export class CachingScrubNormalizer<_I = unknown, _O = unknown> { scrubNormalize(_input: unknown): unknown { return undefined } }
-export type ScrubDefinition<_T = unknown> = { apiName: string; fields?: string[] }
+export type ScrubDefinition<_T = unknown> = { apiName: string; fields?: string[]; version?: string | number }
 export type PiiKeyType<_T = unknown> = string | number
 export type CollectionConnectableParams = { resolvedData?: unknown[]; isDeferred?: boolean; status?: string; lastUpdated?: number; totalCount?: number; hasMore?: boolean; fetchMore?: () => Promise<void> }
 export type BatchContext = { read(key: unknown): { value: any } | undefined; write(key: unknown, data: unknown, status: string): unknown; delete(key: unknown, status: string): unknown; changes: Changes; deferredWrite?: boolean }
@@ -1042,7 +1066,7 @@ export const ObjectDefRef = Symbol('ObjectDefRef')
 export const UnderlyingCoachRecord = Symbol('UnderlyingCoachRecord')
 export const ClientRef = Symbol('ClientRef')
 
-export type DeferredBuilder = { updateObject?(value: unknown): void; deleteObject?(value: unknown): void; addLink?(source: unknown, target: unknown, linkType: string): void; deleteLink?(source: unknown, target: unknown, linkType: string): void }
+export type DeferredBuilder = { [key: string]: unknown; updateObject?(value: unknown): void; deleteObject?(value: unknown): void; addLink?(source: unknown, target: unknown, linkType: string): void; deleteLink?(source: unknown, target: unknown, linkType: string): void }
 
 export namespace GeoJSON { export type Point = { type: 'Point'; coordinates: [number, number] } }
 
@@ -1051,7 +1075,7 @@ export namespace Store {
   export type GetValueOptions = { layer?: string }
 }
 
-export namespace ObjectMetadata { export type Link = LinkDefinition }
+
 
 export const additionalContext = Symbol('additionalContext')
 
@@ -1069,7 +1093,7 @@ export type ObjectHolder<_T = unknown> = Coach.Instance & { $primaryKey: string 
 
 export type Chalk = { red(s: string): string; green(s: string): string; blue(s: string): string; yellow(s: string): string; gray(s: string): string; cyan(s: string): string; magenta(s: string): string; redBright(s: string): string; bgRed(s: string): string; bgGreen(s: string): string; bgCyan(s: string): string; bgGray(s: string): string; bgYellow(s: string): string; bgRedBright(s: string): string }
 
-export type DerivedStatDefinition = { type: string; operation: { type: string; selectedPropertyApiName?: string }; objectSet?: ObjectSet }
+export type DerivedStatDefinition = { type?: string; operation: { type: string; selectedPropertyApiName?: string }; objectSet?: ObjectSet }
 
 export type OrderBy<_T = any> = Record<string, 'asc' | 'desc' | undefined>
 
@@ -1113,7 +1137,14 @@ export type CoachEngine = {
 }
 
 export type ObserveLinks = any
-export type Observer = any
-export type CacheEntry = any
-export type Status = any
-export type CacheSnapshot = any
+export namespace ObserveLinks {
+  export type Options<_T = any, _L extends string = string> = { apiName?: string; sourceType?: string; sourceTypeKind?: 'object' | 'interface'; sourcePiiKey?: unknown; linkType?: string; where?: unknown; orderBy?: unknown; select?: readonly string[]; pageSize?: number; autoFetchMore?: boolean | number; streamUpdates?: boolean; $loadPropertySecurityMetadata?: boolean; $includeAllBaseObjectProperties?: boolean; [key: string]: unknown }
+  export type CallbackArgs<_T = any, _L extends string = string> = { data: unknown[]; status: string; hasMore: boolean; fetchMore: () => Promise<void>; totalCount?: number }
+}
+export type ObserveObjectSetOptions<_T = any, _R = any> = { apiName?: string; where?: unknown; select?: string[]; orderBy?: unknown; pageSize?: number; $includeAllBaseObjectProperties?: boolean; withProperties?: Record<string, unknown>; [key: string]: unknown }
+
+export namespace ObjectMetadata { export type Property = PropertyDefinition }
+export type ScrubDefinitionWithVersion<_T = unknown> = ScrubDefinition<_T> & { version?: string | number }
+export namespace PrivacyScrubClient {
+  export type ApplyActionOptions = { mode?: string; optimisticUpdate?: (ctx: unknown) => void; [key: string]: unknown }
+}

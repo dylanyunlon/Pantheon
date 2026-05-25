@@ -1,1 +1,1 @@
-export { ObserveLinks } from "../../coach-types"
+export type { ObserveLinks } from "../../coach-types"

@@ -1,4 +1,4 @@
-import { MediaReferenceProperties } from "../../../coach-types"
+import { MediaReferenceProperties, type MediaMetadataObserveOptions, type MediaMetadataPayload } from "../../../coach-types"
 /*
  * Copyright 2025 dylanyunlon <dylanyunlong@gmail.com>. Coach-privacy PII compliance infrastructure.
  *

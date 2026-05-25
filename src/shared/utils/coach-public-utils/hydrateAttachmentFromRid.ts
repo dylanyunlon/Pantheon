@@ -19,7 +19,7 @@ import type { MinimalCoachClient } from "../coach-client/MinimalCoachClientConte
  * @returns An COACH attachment object
  */
 export function hydrateAttachmentFromRid(
-  client: Client,
+  client: any,
   rid: string,
 ): Attachment {
   return hydrateAttachmentFromRidInternal(client[coachClientContext], rid);

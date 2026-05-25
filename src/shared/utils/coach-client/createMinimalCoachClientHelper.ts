@@ -12,7 +12,7 @@ export function createMinimalCoachClientHelper(
     headers?: Record<string, string>
   },
   fetchFn?: typeof globalThis.fetch,
-  pipelineFactory?: PipelineFactory
+  pipelineFactory?: PipelineFactory<any, any>
 ): MinimalCoachClient {
   return createMinimalCoachClientFull(
     metadata,

@@ -42,8 +42,8 @@ function stripRdpFields(
     return value;
   }
 
-  const underlying = value[UnderlyingCoachRecord] as SimpleCoachProperties;
-  const objectDef = value[ObjectDefRef];
+  const underlying = (value as any)[UnderlyingCoachRecord] as SimpleCoachProperties;
+  const objectDef = (value as any)[ObjectDefRef];
 
   const newProps: SimpleCoachProperties = {
     $apiName: underlying.$apiName,
@@ -59,7 +59,7 @@ function stripRdpFields(
     }
   }
 
-  return createCoachRecord(value[ClientRef], objectDef, newProps);
+  return createCoachRecord((value as any)[ClientRef], objectDef, newProps);
 }
 
 function isSuperset(
@@ -79,8 +79,8 @@ function filterToRdpFields(
   rdpFieldsToKeep: ReadonlySet<string>,
   sourceRdpFields: ReadonlySet<string>,
 ): ObjectHolder {
-  const underlying = value[UnderlyingCoachRecord] as SimpleCoachProperties;
-  const objectDef = value[ObjectDefRef];
+  const underlying = (value as any)[UnderlyingCoachRecord] as SimpleCoachProperties;
+  const objectDef = (value as any)[ObjectDefRef];
 
   const newProps: SimpleCoachProperties = {
     $apiName: underlying.$apiName,
@@ -99,7 +99,7 @@ function filterToRdpFields(
     }
   }
 
-  return createCoachRecord(value[ClientRef], objectDef, newProps);
+  return createCoachRecord((value as any)[ClientRef], objectDef, newProps);
 }
 
 export function mergeSelectFields(
@@ -108,10 +108,10 @@ export function mergeSelectFields(
   existingValue: ObjectHolder,
 ): ObjectHolder {
   const sourceUnderlying =
-    sourceValue[UnderlyingCoachRecord] as SimpleCoachProperties;
+    (sourceValue as any)[UnderlyingCoachRecord] as SimpleCoachProperties;
   const existingUnderlying =
-    existingValue[UnderlyingCoachRecord] as SimpleCoachProperties;
-  const objectDef = sourceValue[ObjectDefRef];
+    (existingValue as any)[UnderlyingCoachRecord] as SimpleCoachProperties;
+  const objectDef = (sourceValue as any)[ObjectDefRef];
 
   const newProps: SimpleCoachProperties = {
     $apiName: sourceUnderlying.$apiName,
@@ -133,7 +133,7 @@ export function mergeSelectFields(
     }
   }
 
-  return createCoachRecord(sourceValue[ClientRef], objectDef, newProps);
+  return createCoachRecord((sourceValue as any)[ClientRef], objectDef, newProps);
 }
 
 export function mergeObjectFields(
@@ -154,8 +154,8 @@ export function mergeObjectFields(
   }
 
   const sourceUnderlying =
-    sourceValue[UnderlyingCoachRecord] as SimpleCoachProperties;
-  const objectDef = sourceValue[ObjectDefRef];
+    (sourceValue as any)[UnderlyingCoachRecord] as SimpleCoachProperties;
+  const objectDef = (sourceValue as any)[ObjectDefRef];
 
   const newProps: SimpleCoachProperties = {
     $apiName: sourceUnderlying.$apiName,
@@ -176,7 +176,7 @@ export function mergeObjectFields(
 
   if (targetCurrentValue) {
     const targetUnderlying =
-      targetCurrentValue[UnderlyingCoachRecord] as SimpleCoachProperties;
+      (targetCurrentValue as any)[UnderlyingCoachRecord] as SimpleCoachProperties;
     for (const field of targetRdpFields) {
       if (field in targetUnderlying) {
         // Preserve target's value when:
@@ -193,7 +193,7 @@ export function mergeObjectFields(
   }
 
   return createCoachRecord(
-    sourceValue[ClientRef],
+    (sourceValue as any)[ClientRef],
     objectDef,
     newProps,
   );

@@ -176,7 +176,7 @@ export class ObjectsHelper extends AbstractHelper<
       const expectedRdpFields = this.store.objectCacheKeyRegistry
         .getRdpFieldSet(sourceCacheKey);
       if (expectedRdpFields.size > 0) {
-        const underlying = valueToWrite[UnderlyingCoachRecord];
+        const underlying = (valueToWrite as any)[UnderlyingCoachRecord];
         const actualRdpFields = new Set<string>();
         for (const field of expectedRdpFields) {
           if (underlying && field in underlying) {

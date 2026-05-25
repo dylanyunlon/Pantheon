@@ -1,1 +1,1 @@
-export type ListPayload = { data: unknown[]; totalCount?: number; status: string }
+export type ListPayload = { data: unknown[]; totalCount?: number; status: string; fetchMore?: () => Promise<void>; hasMore?: boolean; resolvedScrubField?: unknown[]; isDeferred?: boolean; lastUpdated?: number; linkedObjectsBySourcePrimaryKey?: unknown }

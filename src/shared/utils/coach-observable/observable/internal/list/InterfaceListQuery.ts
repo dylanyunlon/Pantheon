@@ -143,7 +143,7 @@ export class InterfaceListQuery extends ListQuery {
     changes: Changes,
   ): ExtractRelevantObjectsResult {
     const matchesApiName = ([, object]: [unknown, ObjectHolder]) => {
-      return this.apiName in object[ObjectDefRef].interfaceMap;
+      return this.apiName in (object as any)[ObjectDefRef].interfaceMap;
     };
 
     const added = Array.from(changes.addedObjects).filter(matchesApiName).map((

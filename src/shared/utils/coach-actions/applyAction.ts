@@ -219,7 +219,7 @@ async function remapActionParams<AD extends ActionDefinition<any>>(
     parameterMap[key] = await toDataValue(value, client, actionMetadata);
   }
 
-  return parameterMap;
+  return parameterMap as any;
 }
 
 async function remapBatchActionParams<

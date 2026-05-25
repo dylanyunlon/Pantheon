@@ -20,7 +20,7 @@ export interface MinimalCoachClient {
   gameStateProvider: GameStateProvider
   logger?: Logger
   branch?: string
-  pipelineFactory: PipelineFactory
+  pipelineFactory: PipelineFactory<any, any>
   objectSetFactory: (...args: any[]) => any
   objectFactory: (...args: any[]) => any
   transactionId?: string

@@ -75,11 +75,11 @@ export async function fetchSingleWithErrors<
 > {
   try {
     const result = await fetchSingle(client, objectType, args, pipelineSet);
-    return { value: result as any };
+    return { type: "ok" as const, value: result as any };
   } catch (e) {
     if (e instanceof Error) {
-      return { error: e };
+      return { type: "err" as const, error: e };
     }
-    return { error: e as Error };
+    return { type: "err" as const, error: e as Error };
   }
 }

@@ -1271,7 +1271,7 @@ export class CoachEngine {
     this._inference.switchBackend(backend)
   }
 
-  getInferenceStats(): ReturnType<CoachInferenceEngine['stats']> {
+  getInferenceStats(): CoachInferenceEngine["stats"] {
     return this._inference.stats
   }
 
@@ -1319,7 +1319,7 @@ export class CoachEngine {
     return this._observableStore.subscribe<CoachAdvice[]>(key, listener)
   }
 
-  getObservableStoreStats(): ReturnType<CoachObservableStore['stats']> {
+  getObservableStoreStats(): CoachObservableStore["stats"] {
     return this._observableStore.stats
   }
 
@@ -1372,7 +1372,7 @@ export class CoachEngine {
     this._streamServer.stop()
   }
 
-  getStreamStats(): ReturnType<CoachStreamServer['stats']> {
+  getStreamStats(): CoachStreamServer["stats"] {
     return this._streamServer.stats
   }
 

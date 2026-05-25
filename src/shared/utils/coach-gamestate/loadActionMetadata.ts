@@ -14,5 +14,5 @@ export async function loadActionMetadata(
     { headers: { Authorization: `Bearer ${token}` } }
   )
   if (!resp.ok) throw new Error(`Failed to load action metadata for ${apiName}: ${resp.status}`)
-  return resp.json()
+  return resp.json() as any
 }

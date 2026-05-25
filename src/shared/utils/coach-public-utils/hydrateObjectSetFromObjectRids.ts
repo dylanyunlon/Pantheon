@@ -21,7 +21,7 @@ import { createObjectSet } from "../coach-pipeline/createObjectSet";
  */
 export function hydrateObjectSetFromObjectRids<
   T extends ObjectOrInterfaceDefinition,
->(client: CoachClient, definition: T, rids: readonly string[]): ObjectSet<T> {
+>(client: any, definition: T, rids: readonly string[]): ObjectSet<T> {
   return createObjectSet(definition as any, client[coachClientContext], {
     type: "intersect",
     objectSets: [

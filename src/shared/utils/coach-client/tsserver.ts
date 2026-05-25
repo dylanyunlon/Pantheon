@@ -58,7 +58,7 @@ class TsServerImpl extends EventEmitter<{
 
     if ((this.#logger as any).isLevelEnabled("trace")) {
       this.#subprocess.on("message", (req) => {
-        this.#logger.trace({ req }, "message received");
+        this.#logger.trace?.({ req }, "message received");
       });
     }
 
@@ -125,7 +125,7 @@ class TsServerImpl extends EventEmitter<{
       arguments: args,
       seq,
     } as T;
-    this.#logger.trace({ req }, "requesting");
+    this.#logger.trace?.({ req }, "requesting");
 
     await this.#subprocess?.sendMessage(req as any);
 

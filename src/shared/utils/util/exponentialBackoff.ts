@@ -3,9 +3,9 @@ export class ExponentialBackoff {
   private readonly baseDelay: number
   private readonly maxDelay: number
 
-  constructor(opts?: { baseDelay?: number; maxDelay?: number }) {
-    this.baseDelay = opts?.baseDelay ?? 1000
-    this.maxDelay = opts?.maxDelay ?? 30000
+  constructor(opts?: { baseDelay?: number; maxDelay?: number; initialDelayMs?: number; maxDelayMs?: number }) {
+    this.baseDelay = opts?.baseDelay ?? opts?.initialDelayMs ?? 1000
+    this.maxDelay = opts?.maxDelay ?? opts?.maxDelayMs ?? 30000
   }
 
   next(): number { return this.calculateDelay() }

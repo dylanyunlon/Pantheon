@@ -14,6 +14,7 @@ export type StreamMessageType =
   | 'phase-transition'
   | 'replay-analyzed'
   | 'inference-result'
+  | 'feedback'
   | 'experiment-update'
   | 'heartbeat'
   | 'welcome'

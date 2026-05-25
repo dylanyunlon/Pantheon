@@ -28,7 +28,7 @@ import type {
   Status,
 } from "../../PrivacyScrubClient/common";
 import type { BatchContext } from "../BatchContext";
-import { type PiiFieldKey, DEBUG_ONLY__piiFieldKeysToString } from "../PiiFieldKey";
+import { type PiiFieldKey, DEBUG_ONLY__piiFieldKeyToString as DEBUG_ONLY__piiFieldKeysToString } from "../PiiFieldKey";
 import type { ScrubNormalized } from "../ScrubNormalized";
 import { isObjectInstance } from "../isObjectInstance";
 import type { Entry } from "../Layer";

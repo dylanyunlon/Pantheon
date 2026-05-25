@@ -18,7 +18,7 @@ import { additionalContext } from "../../../coach-engine";
 import type { ScrubRecord } from "../../../object/convertWireToCoachRecords/ScrubRecord";
 import type { DeferredBuilder } from "../../DeferredBuilder";
 import { type Changes } from "../Changes";
-import { createDeferredId, type DeferredId } from "../DeferredId";
+import { nextDeferredId as createDeferredId, type DeferredId } from "../DeferredId";
 import type { Store } from "../Store";
 
 export class DeferredJob {

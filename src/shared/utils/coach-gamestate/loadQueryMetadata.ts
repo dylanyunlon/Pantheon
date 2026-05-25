@@ -16,7 +16,7 @@ export async function loadQueryMetadata(
     headers: { Authorization: `Bearer ${token}` }
   })
   if (!resp.ok) throw new Error(`Failed to load query metadata for ${apiName}: ${resp.status}`)
-  return resp.json()
+  return resp.json() as any
 }
 
 export const loadGameStateQueryMetadata: any = undefined

@@ -54,7 +54,7 @@ class CoachQueryInvoker {
 }
 
 export function createCoachClientFullInternal(
-  pipelineFactory: PipelineFactory,
+  pipelineFactory: PipelineFactory<any, any>,
   transactionId: string | undefined,
   flushEdits: (() => Promise<void>) | undefined,
   baseUrl: string,
@@ -144,7 +144,7 @@ export function createCoachClientFullExport(
   fetchFn?: typeof fetch
 ): CoachClientFull {
   return createCoachClientFullInternal(
-    createPipeline as unknown as PipelineFactory,
+    createPipeline as unknown as PipelineFactory<any, any>,
     undefined,
     undefined,
     baseUrl,
@@ -161,7 +161,7 @@ export function createCoachClientFullWithTransaction(
   ...args: Parameters<typeof createCoachClientFullExport>
 ): CoachClientFull {
   return createCoachClientFullInternal(
-    createPipeline as unknown as PipelineFactory,
+    createPipeline as unknown as PipelineFactory<any, any>,
     transactionId,
     flushEdits,
     ...args

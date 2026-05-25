@@ -28,7 +28,7 @@ export const fetchCoachMetadataInternal = async <
   } else if (defType === 'action') {
     return client.gameStateProvider.getActionDefinition(apiName) as any
   } else if (defType === 'query') {
-    return client.gameStateProvider.getQueryDefinition(apiName) as any
+    return client.gameStateProvider.getQueryDefinition(apiName, undefined) as any
   }
   throw new Error('Unsupported metadata definition type: ' + defType)
 }

@@ -20,7 +20,7 @@ import { createObjectSet } from "../coach-pipeline/createObjectSet";
  * @returns An COACH object set.
  */
 export function hydrateObjectSetFromRid<T extends ObjectOrInterfaceDefinition>(
-  client: CoachClient,
+  client: any,
   definition: T,
   rid: string,
 ): ObjectSet<T> {
