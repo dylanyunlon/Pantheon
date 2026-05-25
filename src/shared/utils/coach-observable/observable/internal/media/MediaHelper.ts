@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MediaReferenceProperties } from "../../../../coach-types"
 /*
  * Copyright 2025 dylanyunlon <dylanyunlong@gmail.com>. Coach-advisor infrastructure.

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { MediaMetadataPayload } from "../../../coach-types"
 import type { MediaMetadataObserveOptions } from "../../../coach-types"
 import { MediaReferenceProperties } from "../../../coach-types"

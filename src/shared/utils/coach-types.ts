@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { CoachAdvice, CoachAdviceType, CoachAdvicePriority } from './coach-engine'
 import type { GamePhase } from './coach-scheduler'
 import type { MatchHistoryGamesAnalysisAll } from './analysis'

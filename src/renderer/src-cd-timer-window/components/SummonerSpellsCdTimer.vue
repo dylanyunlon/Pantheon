@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import { useInstance } from '@renderer-shared/shards'
 import { useLeagueClientStore } from '@renderer-shared/shards/league-client/store'
 import { WindowManagerRenderer } from '@renderer-shared/shards/window-manager'

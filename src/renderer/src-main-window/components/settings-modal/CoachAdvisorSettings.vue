@@ -240,7 +240,7 @@
         <NSelect style="width: 160px" size="small" :value="cas.settings.captureExportFormat" :options="exportFormatOptions" @update:value="(val) => ca.setCaptureExportFormat(val)" />
       </ControlItem>
       <div class="advanced-info">
-        <div class="info-row"><span class="info-label">{{ t('CoachAdvisorSettings.schedulerPhase') }}</span><span class="info-value">{{ cas.state.currentPhase || '-' }}</span></div>
+        <div class="info-row"><span class="info-label">{{ t('CoachAdvisorSettings.schedulerPhase') }}</span><span class="info-value">{{ cas.state.currentGamePhase || '-' }}</span></div>
         <div class="info-row" v-if="captureStats"><span class="info-label">{{ t('CoachAdvisorSettings.experimentEvents') }}</span><span class="info-value">{{ captureStats.eventCount }}</span></div>
         <div class="info-row" v-if="captureStats"><span class="info-label">{{ t('CoachAdvisorSettings.experimentSamples') }}</span><span class="info-value">{{ captureStats.sampleCount }}</span></div>
         <div class="info-row" v-if="captureStats"><span class="info-label">{{ t('CoachAdvisorSettings.sessionActive') }}</span><span class="info-value">{{ captureStats.isActive ? '\u2705' : '\u274C' }}</span></div>

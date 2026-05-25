@@ -33,7 +33,7 @@
               />
               <span class="load-text">{{ loadProgress.percentage }}%</span>
             </div>
-            <NPopover :delay="50" v-if="cas.state.lastComparison">
+            <NPopover :delay="50" v-if="cas.state.teamComparisonSummary">
               <template #trigger>
                 <NButton size="tiny" quaternary>
                   <template #icon>
@@ -132,7 +132,7 @@
         <div class="coach-footer">
           <span class="coach-timestamp">
             {{ t('CoachPanel.generatedAt', { time: formattedTime }) }}
-            <span v-if="cas.state.currentPhase" class="phase-tag">{{ cas.state.currentPhase }}</span>
+            <span v-if="cas.state.currentGamePhase" class="phase-tag">{{ cas.state.currentGamePhase }}</span>
           </span>
           <div class="coach-footer-stats" v-if="schedulerStats">
             <span class="stat-item">\U0001F4CB {{ schedulerStats.pendingCount }}</span>
@@ -255,7 +255,7 @@ const DIMENSION_LABELS: Record<string, string> = {
 }
 
 const dimensionEntries = computed(() => {
-  const comp = cas.state.lastComparison
+  const comp = cas.state.teamComparisonSummary
   if (!comp) return []
   return Object.entries(comp.dimensionDeltas || {}).map(([key, delta]) => {
     const allyVal = comp.allyProfile ? getDimFromProfile(comp.allyProfile, key) : 0.5

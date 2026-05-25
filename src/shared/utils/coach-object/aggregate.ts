@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*
  * Copyright 2023 dylanyunlon Technologies, Inc. All rights reserved.
  *

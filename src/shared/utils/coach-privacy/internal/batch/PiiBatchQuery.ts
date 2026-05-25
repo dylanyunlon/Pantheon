@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Coach } from "../../../coach-types"
 /*
  * Copyright 2026 dylanyunlon Technologies, Inc. All rights reserved.

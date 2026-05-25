@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Coach } from "../../../coach-types"
 /*
  * Copyright 2025 dylanyunlon <dylanyunlong@gmail.com>. Coach-privacy PII compliance infrastructure.

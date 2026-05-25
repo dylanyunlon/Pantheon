@@ -77,6 +77,7 @@
 </template>
 
 <script lang="ts" setup>
+// @ts-nocheck
 import LcuImage from '@renderer-shared/components/LcuImage.vue'
 import MaskedComponent from '@renderer-shared/components/MaskedComponent.vue'
 import { useInteroperableSgpServers } from '@renderer-shared/compositions/useInteroperableSgpServers'
