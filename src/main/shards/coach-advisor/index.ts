@@ -587,10 +587,6 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       }
     })
 
-    this._ipc.onCall(CoachAdvisorMain.id, 'getSchedulerStats', () => {
-      return this._engine.getSchedulerStats()
-    })
-
     this._ipc.onCall(CoachAdvisorMain.id, 'getTeamComparison', () => {
       return this._engine.getTeamComparisonSummary()
     })
