@@ -51,10 +51,10 @@ export class RemoteGitRepository {
     const r = repo === 'akari-config' ? 'Pantheon-Config' : 'Pantheon'
 
     if (this._config.source === 'github') {
-      return `https://api.github.com/repos/Pantheon/${r}/${uri}`
+      return `https://api.github.com/repos/dylanyunlon/${r}/${uri}`
     }
 
-    return `https://gitee.com/api/v5/repos/Pantheon/${r}/${uri}`
+    return `https://gitee.com/api/v5/repos/dylanyunlon/${r}/${uri}`
   }
 
   private _rawContentUrl(
@@ -69,10 +69,10 @@ export class RemoteGitRepository {
     const r = repo === 'akari-config' ? 'Pantheon-Config' : 'Pantheon'
 
     if (this._config.source === 'github') {
-      return `https://raw.githubusercontent.com/Pantheon/${r}/refs/heads/${branch}/${uri}`
+      return `https://raw.githubusercontent.com/dylanyunlon/${r}/refs/heads/${branch}/${uri}`
     }
 
-    return `https://gitee.com/Pantheon/${r}/raw/${branch}/${uri}`
+    return `https://gitee.com/dylanyunlon/${r}/raw/${branch}/${uri}`
   }
 
   setConfig(config: Partial<RemoteConfigRepositoryConfig>) {
