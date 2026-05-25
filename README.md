@@ -1,7 +1,7 @@
 
 # 3. Build & Run
 
-This section describes how to build League Akari from the source code.
+
 
 ## 3.1 Electron Main Program
 
