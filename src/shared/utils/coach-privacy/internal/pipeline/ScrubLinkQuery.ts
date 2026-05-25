@@ -76,7 +76,7 @@ export class SpecificLinkQuery extends BaseScrubFieldQuery<
     params: CollectionConnectableParams,
   ): SpecificLinkPayload {
     return {
-      (...super as any).createPayload(params),
+      ...(super.createPayload(params) as any),
       linkedObjectsBySourcePrimaryKey: new Map([[
         this.#sourcePk,
         params.resolvedData ?? [],

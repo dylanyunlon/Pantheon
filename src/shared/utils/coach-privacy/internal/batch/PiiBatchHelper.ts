@@ -68,7 +68,7 @@ export class ObjectSetHelper extends AbstractHelper<
     options: ObjectSetQueryOptions,
     subFn: Observer<ObjectSetPayload>,
   ): QuerySubscription<ObjectSetQuery> {
-    const ret = (super as any).observe(options, subFn);
+    const ret = super.observe(options, subFn);
 
     if (options.streamUpdates) {
       if (options.pivotTo) {

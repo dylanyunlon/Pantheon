@@ -215,7 +215,7 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
     params: CollectionConnectableParams,
   ): ScrubFieldPayload {
     return {
-      (...super as any).createPayload(params),
+      ...(super.createPayload(params) as any),
       pipelineSet: this.#pipelineSet,
     } as ScrubFieldPayload;
   }
@@ -436,8 +436,8 @@ export abstract class ScrubFieldQuery extends BaseScrubFieldQuery<
     ) {
       const fetchedType = this.#fetchedPiiFieldType;
       if (
-        ((changes.addedObjects.get(fetchedType)? as any).length ?? 0) > 0
-        || ((changes.modifiedObjects.get(fetchedType)? as any).length ?? 0) > 0
+        ((changes.addedObjects.get(fetchedType) as any)?.length ?? 0) > 0
+        || ((changes.modifiedObjects.get(fetchedType) as any)?.length ?? 0) > 0
       ) {
         return this.revalidate(true);
       }

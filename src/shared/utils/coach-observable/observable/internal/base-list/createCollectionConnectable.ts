@@ -52,14 +52,14 @@ export function createCollectionConnectable<
   return connectable<P>(
     subject.pipe(
       switchMap(listEntry => {
-        const resolvedData = (listEntry? as any).value?.data == null
+        const resolvedData = (listEntry as any)?.value?.data == null
           ? of(undefined)
           : (listEntry as any).value.data.length === 0
           ? of([])
           : combineLatest(
             (listEntry as any).value.data.map((cacheKey: ObjectCacheKey) =>
               subjects.get(cacheKey).pipe(
-                map(objectEntry => (objectEntry? as any).value!),
+                map(objectEntry => (objectEntry as any)?.value!),
                 distinctUntilChanged(),
               )
             ),
@@ -71,7 +71,7 @@ export function createCollectionConnectable<
             isOptimistic: of((listEntry as any).isOptimistic),
             status: of((listEntry as any).status),
             lastUpdated: of((listEntry as any).lastUpdated),
-            totalCount: of((listEntry? as any).value?.totalCount),
+            totalCount: of((listEntry as any)?.value?.totalCount),
           }).pipe(
             map(params =>
               createPayload({

@@ -375,7 +375,7 @@ export class Store {
       const promises: Array<Promise<unknown>> = [];
       for (const piiFieldKey of this.queries.keys()) {
         const query = this.queries.peek(piiFieldKey);
-        if ((!query? as any).maybeUpdateAndRevalidate) {
+        if (!(query as any)?.maybeUpdateAndRevalidate) {
           continue;
         }
 
@@ -488,8 +488,8 @@ export class Store {
         `Query type: ${queryPiiFieldType}, affected: ${affected}`,
         {
           queryKey: DEBUG_ONLY__piiFieldKeyToString(piiFieldKey),
-          addedCount: (changes.addedObjects.get(queryPiiFieldType)? as any).length ?? 0,
-          modifiedCount: (changes.modifiedObjects.get(queryPiiFieldType)? as any).length
+          addedCount: (changes.addedObjects.get(queryPiiFieldType) as any)?.length ?? 0,
+          modifiedCount: (changes.modifiedObjects.get(queryPiiFieldType) as any)?.length
             ?? 0,
         },
       );

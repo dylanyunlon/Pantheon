@@ -25,4 +25,6 @@ export class BaseScrubFieldQuery<_K = unknown, _P = unknown, _O = unknown> {
   protected _updateScrubField(..._args: unknown[]): void {}
   protected fetchMore: any
   protected getObjectPiiFieldKey(_obj: unknown): unknown { return undefined }
+  protected _preFetch(): void {}
+  createPayload(_params: unknown): Record<string, unknown> { return {} }
 }

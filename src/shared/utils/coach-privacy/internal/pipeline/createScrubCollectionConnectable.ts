@@ -52,14 +52,14 @@ export function createCollectionConnectable<
   return connectable<P>(
     subject.pipe(
       switchMap(scrubFieldEntry => {
-        const resolvedData = (scrubFieldEntry? as any).value?.data == null
+        const resolvedData = (scrubFieldEntry as any)?.value?.data == null
           ? of(undefined)
           : (scrubFieldEntry as any).value.data.length === 0
           ? of([])
           : combineLatest(
             (scrubFieldEntry as any).value.data.map((piiFieldKey: ObjectPiiFieldKey) =>
               subjects.get(piiFieldKey).pipe(
-                map(objectEntry => (objectEntry? as any).value!),
+                map(objectEntry => (objectEntry as any)?.value!),
                 distinctUntilChanged(),
               )
             ),
@@ -71,7 +71,7 @@ export function createCollectionConnectable<
             isDeferred: of((scrubFieldEntry as any).isDeferred),
             status: of((scrubFieldEntry as any).status),
             lastUpdated: of((scrubFieldEntry as any).lastUpdated),
-            totalCount: of((scrubFieldEntry? as any).value?.totalCount),
+            totalCount: of((scrubFieldEntry as any)?.value?.totalCount),
           }).pipe(
             map(params =>
               createPayload({

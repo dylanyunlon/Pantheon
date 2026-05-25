@@ -52,7 +52,7 @@ export class FunctionsHelper extends AbstractHelper<
     options: ObserveFunctionOptions,
     subFn: Observer<FunctionPayload>,
   ): QuerySubscription<FunctionQuery> {
-    return (super as any).observe(options, subFn);
+    return super.observe(options, subFn);
   }
 
   getQuery(options: ObserveFunctionOptions): FunctionQuery {

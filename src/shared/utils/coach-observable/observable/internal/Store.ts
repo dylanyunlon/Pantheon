@@ -216,8 +216,8 @@ export class Store {
       console.log(
         `CacheKey cleaning up (${
           JSON.stringify({
-            closed: (subject? as any).closed,
-            observed: (subject? as any).observed,
+            closed: (subject as any)?.closed,
+            observed: (subject as any)?.observed,
           })
         })`,
         JSON.stringify([key.type, ...key.otherKeys], null, 2),

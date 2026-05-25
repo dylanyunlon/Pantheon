@@ -249,6 +249,6 @@ export class MediaMetadataQuery extends Query<
       this.logger?.child({ methodName: "dispose" }).debug("Disposing query");
     }
 
-    (super as any).dispose();
+    super.dispose();
   }
 }

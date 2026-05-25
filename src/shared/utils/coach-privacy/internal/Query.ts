@@ -26,3 +26,6 @@ export class Query<_K = unknown, _P = unknown, _O = unknown> {
   dependsOnObject(..._args: unknown[]): boolean { return false }
   ensureInvalidationTypesReady(): Promise<void> { return Promise.resolve() }
 }
+  dispose(): void {}
+  dispose(): void {}
+}

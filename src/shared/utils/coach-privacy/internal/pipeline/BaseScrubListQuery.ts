@@ -336,7 +336,7 @@ export abstract class BaseScrubFieldQuery<
    */
   protected _preFetch(): void {
     this.nextPageToken = undefined;
-    (super as any)._preFetch();
+    super._preFetch();
   }
 
   /**

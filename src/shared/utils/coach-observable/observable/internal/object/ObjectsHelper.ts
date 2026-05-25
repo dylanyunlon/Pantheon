@@ -258,7 +258,7 @@ export class ObjectsHelper extends AbstractHelper<
    */
   private isKeyActive(key: ObjectCacheKey): boolean {
     const subject = this.store.subjects.peek(key);
-    if ((subject? as any).observed === true) {
+    if ((subject as any)?.observed === true) {
       return true;
     }
     return (this.store.pendingCleanup.get(key) ?? 0) > 0;

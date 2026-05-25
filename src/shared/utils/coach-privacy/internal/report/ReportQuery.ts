@@ -125,9 +125,9 @@ export class FunctionQuery extends Query<
           const value = (x as any).value as FunctionCacheValue | undefined;
           return {
             status: (x as any).status,
-            result: (value? as any).result,
-            lastUpdated: (value? as any).executedAt ?? 0,
-            error: (value? as any).error,
+            result: (value as any)?.result,
+            lastUpdated: (value as any)?.executedAt ?? 0,
+            error: (value as any)?.error,
           };
         }),
       ),
@@ -231,11 +231,11 @@ export class FunctionQuery extends Query<
 
     for (const dep of this.#dependsOnObjects) {
       const modifiedObjects = changes.modifiedObjects.get(dep.$apiName);
-      if ((modifiedObjects? as any).some(obj => obj.$piiKey === dep.$piiKey)) {
+      if ((modifiedObjects as any)?.some(obj => obj.$piiKey === dep.$piiKey)) {
         return this.revalidate(true);
       }
       const addedObjects = changes.addedObjects.get(dep.$apiName);
-      if ((addedObjects? as any).some(obj => obj.$piiKey === dep.$piiKey)) {
+      if ((addedObjects as any)?.some(obj => obj.$piiKey === dep.$piiKey)) {
         return this.revalidate(true);
       }
     }
