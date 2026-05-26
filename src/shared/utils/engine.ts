@@ -66,6 +66,19 @@ import {
 import type { FusedAdvice, CoordinatorConfig } from './decision'
 import { runProfilePass } from './profiling'
 import type { ProfileSnapshot } from './profiling'
+import {
+  LiveIngestor,
+  createLiveIngestor
+} from '../../ontology/ingestion'
+import type {
+  LiveIngestorStats,
+  LiveIngestorSession,
+  LiveGameEvent,
+  GameSnapshot,
+  LiveEventType,
+  LiveEventListener,
+  SnapshotListener
+} from '../../ontology/ingestion'
 
 export const enum PantheonAdvicePriority {
   CRITICAL = 0,
@@ -1179,6 +1192,7 @@ export class PantheonEngine {
   private _replayAnalysis: ReplayAnalysisPipeline
   private _streamServer: PantheonStreamServer
   private _coordinator: DecisionCoordinator
+  private _liveIngestor: LiveIngestor | null = null
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new PantheonPipeline()
@@ -1382,7 +1396,68 @@ export class PantheonEngine {
     return this._streamServer.stats
   }
 
-  
+  initLiveIngestor(
+    fetchers: {
+      fetchPlayerList: () => Promise<PlayerList[]>
+      fetchGameStats: () => Promise<GameStats>
+      fetchEventData: () => Promise<{ Events: Record<string, unknown>[] }>
+    },
+    config?: Partial<{
+      pollIntervalMs: number
+      snapshotBufferCapacity: number
+      eventBufferCapacity: number
+      maxConsecutiveErrors: number
+      enableDerivedTimeSeries: boolean
+      enableRawDump: boolean
+    }>
+  ): LiveIngestor {
+    if (this._liveIngestor) {
+      this._liveIngestor.dispose()
+    }
+    this._liveIngestor = createLiveIngestor(fetchers, config)
+    return this._liveIngestor
+  }
+
+  get liveIngestor(): LiveIngestor | null {
+    return this._liveIngestor
+  }
+
+  getLiveIngestorStats(): LiveIngestorStats | null {
+    return this._liveIngestor?.getStats() ?? null
+  }
+
+  getLiveIngestorSession(): Readonly<LiveIngestorSession> | null {
+    return this._liveIngestor?.session ?? null
+  }
+
+  getLiveEvents(type?: LiveEventType): LiveGameEvent[] {
+    if (!this._liveIngestor) return []
+    return type
+      ? this._liveIngestor.getEventsByType(type)
+      : this._liveIngestor.getEvents()
+  }
+
+  getLiveSnapshots(): GameSnapshot[] {
+    return this._liveIngestor?.getSnapshots() ?? []
+  }
+
+  getLiveObjectiveTimeline(): LiveGameEvent[] {
+    return this._liveIngestor?.getObjectiveTimeline() ?? []
+  }
+
+  getLiveKillFeed(lastN?: number): LiveGameEvent[] {
+    return this._liveIngestor?.getKillFeed(lastN) ?? []
+  }
+
+  onLiveEvent(listener: LiveEventListener): () => void {
+    if (!this._liveIngestor) return () => {}
+    return this._liveIngestor.onEvent(listener)
+  }
+
+  onLiveSnapshot(listener: SnapshotListener): () => void {
+    if (!this._liveIngestor) return () => {}
+    return this._liveIngestor.onSnapshot(listener)
+  }
 
   generateAdvices(params: {
     playerStats: {
@@ -1619,6 +1694,9 @@ export class PantheonEngine {
     this._inference.clearCache()
     this._observableStore.clear()
     this._coordinator.clear()
+    if (this._liveIngestor) {
+      this._liveIngestor.stopPolling()
+    }
   }
 
     dispose() {
@@ -1630,6 +1708,10 @@ export class PantheonEngine {
     this._replayAnalysis.dispose()
     this._streamServer.dispose()
     this._coordinator.dispose()
+    if (this._liveIngestor) {
+      this._liveIngestor.dispose()
+      this._liveIngestor = null
+    }
     this.clearCache()
   }
 

@@ -1,6 +1,8 @@
 import { tools } from '@dylanyunlon/pantheon-addons'
 import { IAkariShardInitDispose, Shard } from '@shared/akari-shard'
 import { GameClientHttpApiAxiosHelper } from '@shared/http-api-axios-helper/game-client'
+import { createLiveIngestor } from '@shared/ontology/ingestion'
+import type { LiveIngestor } from '@shared/ontology/ingestion'
 import axios from 'axios'
 import cp from 'child_process'
 import https from 'https'
@@ -54,6 +56,7 @@ export class GameClientMain implements IAkariShardInitDispose {
   public readonly settings = new GameClientSettings()
 
   private _gcCachedRunningPids: number[] = []
+  private _liveIngestor: LiveIngestor | null = null
 
   constructor(
     private readonly _ipc: AkariIpcMain,
@@ -83,6 +86,41 @@ export class GameClientMain implements IAkariShardInitDispose {
 
   get api() {
     return this._api
+  }
+
+  get liveIngestor(): LiveIngestor | null {
+    return this._liveIngestor
+  }
+
+  createAndStartLiveIngestor(allyTeam: string = 'ORDER'): LiveIngestor {
+    if (this._liveIngestor) {
+      this._liveIngestor.dispose()
+    }
+    this._liveIngestor = createLiveIngestor({
+      fetchPlayerList: async () => {
+        const res = await this._api.getLiveClientDataPlayerList()
+        return res.data
+      },
+      fetchGameStats: async () => {
+        const res = await this._api.getGameStats()
+        return res.data
+      },
+      fetchEventData: async () => {
+        const res = await this._api.getEventData()
+        return res.data
+      }
+    })
+    this._liveIngestor.startSession({ allyTeam })
+    this._liveIngestor.startPolling()
+    return this._liveIngestor
+  }
+
+  stopLiveIngestor(): void {
+    if (this._liveIngestor) {
+      this._liveIngestor.endSession()
+      this._liveIngestor.dispose()
+      this._liveIngestor = null
+    }
   }
 
   async onInit() {
