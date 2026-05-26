@@ -64,6 +64,8 @@ import {
   createDecisionCoordinator
 } from './decision'
 import type { FusedAdvice, CoordinatorConfig } from './decision'
+import { runProfilePass } from './profiling'
+import type { ProfileSnapshot } from './profiling'
 
 export const enum PantheonAdvicePriority {
   CRITICAL = 0,
@@ -125,6 +127,7 @@ export interface PipelineStageContext {
   allyProfile: AggregatedTeamProfile | null
   enemyProfile: AggregatedTeamProfile | null
   currentGamePhase: GamePhase
+  profile: ProfileSnapshot | null
 }
 
 type PipelineStageHandler = (ctx: PipelineStageContext) => PipelineStageContext
@@ -323,14 +326,14 @@ function stageTeamSynergy(ctx: PipelineStageContext): PipelineStageContext {
 
 function stageMacroStrategy(ctx: PipelineStageContext): PipelineStageContext {
   const advices: PantheonAdvice[] = []
-  const allAlly = [ctx.selfPuuid, ...ctx.allyPuuids]
-  const allyPass = computeTeamScorePass(allAlly, ctx.playerAnalyses)
-  const enemyPass = computeTeamScorePass(ctx.enemyPuuids, ctx.playerAnalyses)
 
-  const allyAvg = allyPass.count > 0 ? allyPass.total / allyPass.count : 0
-  const enemyAvg = enemyPass.count > 0 ? enemyPass.total / enemyPass.count : 0
-  const diff = allyAvg - enemyAvg
-  const baseConfidence = Math.min(Math.min(allyPass.count, enemyPass.count) / 4, 1.0) * 0.7
+  const allyAvg = ctx.profile?.allyAvgScore ?? 0
+  const enemyAvg = ctx.profile?.enemyAvgScore ?? 0
+  const diff = ctx.profile?.scoreDiff ?? (allyAvg - enemyAvg)
+  const sampleCount = ctx.profile
+    ? Math.min(ctx.profile.allyScores.length, ctx.profile.enemyScores.length)
+    : 0
+  const baseConfidence = Math.min(sampleCount / 4, 1.0) * 0.7
 
   if (diff > 3) {
     advices.push({
@@ -526,26 +529,17 @@ function stageRankDisparity(ctx: PipelineStageContext): PipelineStageContext {
   if (ctx.gameMode === 'ARAM') return ctx
   const advices: PantheonAdvice[] = []
 
-  const selfRank = getRankNumeric(ctx.rankedStats, ctx.selfPuuid)
+  const selfRank = ctx.profile?.selfRank.numeric ?? -1
+  const highestEnemy = ctx.profile?.highestEnemyRank ?? null
 
-  let highestEnemyRank = -1
-  let highestEnemyPuuid = ''
-  for (const puuid of ctx.enemyPuuids) {
-    const r = getRankNumeric(ctx.rankedStats, puuid)
-    if (r > highestEnemyRank) {
-      highestEnemyRank = r
-      highestEnemyPuuid = puuid
-    }
-  }
-
-  if (selfRank >= 0 && highestEnemyRank >= 0) {
-    const gap = highestEnemyRank - selfRank
+  if (selfRank >= 0 && highestEnemy && highestEnemy.numeric >= 0) {
+    const gap = highestEnemy.numeric - selfRank
     if (gap >= 8) {
       advices.push({
         type: PantheonAdviceType.RANK_DISPARITY,
         priority: PantheonAdvicePriority.HIGH,
         title: '对方有高段位玩家',
-        message: `对方有${getRankLabel(ctx.rankedStats, highestEnemyPuuid)}段位玩家，注意避免正面硬刚，利用团队配合`,
+        message: `对方有${highestEnemy.label}段位玩家，注意避免正面硬刚，利用团队配合`,
         evidence: ['rankNumeric_gap'],
         confidence: 0.85,
         audience: 'team'
@@ -563,38 +557,28 @@ function stageRankDisparity(ctx: PipelineStageContext): PipelineStageContext {
     }
   }
 
-  const selfPos = ctx.positionAssignments[ctx.selfPuuid]?.position
-  if (selfPos && selfRank >= 0) {
-    for (const puuid of ctx.enemyPuuids) {
-      const enemyPos = ctx.positionAssignments[puuid]?.position
-      if (enemyPos === selfPos) {
-        const enemyRank = getRankNumeric(ctx.rankedStats, puuid)
-        if (enemyRank >= 0) {
-          const laneGap = enemyRank - selfRank
-          if (laneGap >= 6) {
-            advices.push({
-              type: PantheonAdviceType.LANE_MATCHUP,
-              priority: PantheonAdvicePriority.HIGH,
-              title: '对线对手段位较高',
-              message: `你的对线是${getRankLabel(ctx.rankedStats, puuid)}，对线可以更谨慎，优先保证不亏`,
-              evidence: ['laneRankGap'],
-              confidence: 0.8,
-              audience: 'self'
-            })
-          } else if (laneGap <= -6) {
-            advices.push({
-              type: PantheonAdviceType.LANE_MATCHUP,
-              priority: PantheonAdvicePriority.LOW,
-              title: '对线段位优势',
-              message: `对线对手段位较低（${getRankLabel(ctx.rankedStats, puuid)}），可以积极打出优势`,
-              evidence: ['laneRankAdvantage'],
-              confidence: 0.75,
-              audience: 'self'
-            })
-          }
-        }
-        break // only one lane opponent
-      }
+  const lane = ctx.profile?.laneMatchup
+  if (lane && selfRank >= 0) {
+    if (lane.laneRankGap >= 6) {
+      advices.push({
+        type: PantheonAdviceType.LANE_MATCHUP,
+        priority: PantheonAdvicePriority.HIGH,
+        title: '对线对手段位较高',
+        message: `你的对线是${lane.enemyRank.label}，对线可以更谨慎，优先保证不亏`,
+        evidence: ['laneRankGap'],
+        confidence: 0.8,
+        audience: 'self'
+      })
+    } else if (lane.laneRankGap <= -6) {
+      advices.push({
+        type: PantheonAdviceType.LANE_MATCHUP,
+        priority: PantheonAdvicePriority.LOW,
+        title: '对线段位优势',
+        message: `对线对手段位较低（${lane.enemyRank.label}），可以积极打出优势`,
+        evidence: ['laneRankAdvantage'],
+        confidence: 0.75,
+        audience: 'self'
+      })
     }
   }
 
@@ -697,24 +681,12 @@ function stageComposition(ctx: PipelineStageContext): PipelineStageContext {
   if (ctx.gameMode === 'ARAM') return ctx
   const advices: PantheonAdvice[] = []
 
-  let totalPhysShare = 0
-  let totalMagicShare = 0
-  let totalTankShare = 0
-  let allyCount = 0
+  const dmg = ctx.profile?.allyDamageProfile
+  const allyCount = dmg?.sampleCount ?? 0
 
-  const allAlly = [ctx.selfPuuid, ...ctx.allyPuuids]
-  for (const puuid of allAlly) {
-    const analysis = ctx.playerAnalyses[puuid]
-    if (!analysis) continue
-    totalPhysShare += analysis.summary.averagePhysicalDamageDealtToChampionShareOfTeam
-    totalMagicShare += analysis.summary.averageMagicDamageDealtToChampionShareOfTeam
-    totalTankShare += analysis.summary.averageDamageTakenShareOfTeam
-    allyCount++
-  }
-
-  if (allyCount >= 3) {
-    const avgPhys = totalPhysShare / allyCount
-    const avgMagic = totalMagicShare / allyCount
+  if (dmg && allyCount >= 3) {
+    const avgPhys = dmg.physicalShare
+    const avgMagic = dmg.magicalShare
 
     if (avgPhys > 0.7 && avgMagic < 0.2) {
       advices.push({
@@ -738,6 +710,7 @@ function stageComposition(ctx: PipelineStageContext): PipelineStageContext {
       })
     }
 
+    const allAlly = [ctx.selfPuuid, ...ctx.allyPuuids]
     const maxTankShare = Math.max(
       ...allAlly
         .map((p) => ctx.playerAnalyses[p]?.summary.averageDamageTakenShareOfTeam ?? 0)
@@ -1458,32 +1431,32 @@ export class PantheonEngine {
     )
     this._scheduler.transitionPhase(gamePhase)
 
+    const profile = runProfilePass({
+      playerStats: params.playerStats,
+      championSelections: params.championSelections,
+      positionAssignments: params.positionAssignments,
+      rankedStats: params.rankedStats,
+      selfPuuid: params.selfPuuid,
+      allyMembers: params.allyMembers,
+      enemyMembers: params.enemyMembers,
+      gameMode: params.gameMode,
+      queueType: params.queueType,
+      gamePhase,
+      inferredPremadeTeams: params.inferredPremadeTeams || {}
+    })
+    this._lastComparison = profile.teamComparison
+
     const batchCtx = new BatchAggregationContext()
-    const allyPuuids = params.allyMembers.filter((p) => p !== params.selfPuuid)
-    const allAllyPuuids = [params.selfPuuid, ...allyPuuids]
-
-    const teamComparison = compareTeams(
-      allAllyPuuids,
-      params.enemyMembers,
-      params.playerStats.players
-    )
-    this._lastComparison = teamComparison
-
-    const allyProfile = aggregateTeamProfile(allAllyPuuids, params.playerStats.players)
-    const enemyProfile = aggregateTeamProfile(params.enemyMembers, params.playerStats.players)
-
-    batchCtx.stage('teamComparison', teamComparison)
-    batchCtx.stage('allyProfile', allyProfile)
-    batchCtx.stage('enemyProfile', enemyProfile)
+    batchCtx.stage('teamComparison', profile.teamComparison)
+    batchCtx.stage('allyProfile', profile.allyProfile)
+    batchCtx.stage('enemyProfile', profile.enemyProfile)
     batchCtx.commit()
 
-    for (const puuid of allAllyPuuids) {
-      const analysis = params.playerStats.players[puuid]
-      if (analysis) {
-        this._aggregationReducer.push(puuid, analysis.akariScore.total)
-      }
+    for (const entry of profile.allyScores) {
+      this._aggregationReducer.push(entry.puuid, entry.score.total)
     }
 
+    const allyPuuids = profile.allyPuuids
     const ctx: PipelineStageContext = {
       stage: 'init',
       advices: [],
@@ -1498,10 +1471,11 @@ export class PantheonEngine {
       enemyPuuids: params.enemyMembers,
       gameMode: params.gameMode,
       queueType: params.queueType,
-      teamComparison,
-      allyProfile,
-      enemyProfile,
-      currentGamePhase: gamePhase
+      teamComparison: profile.teamComparison,
+      allyProfile: profile.allyProfile,
+      enemyProfile: profile.enemyProfile,
+      currentGamePhase: gamePhase,
+      profile
     }
 
     const result = this._pipeline.execute(ctx)
@@ -1527,64 +1501,28 @@ export class PantheonEngine {
     this._observableStore.write(`advices:${cacheKey}`, deduped, 'loaded')
     this._observableStore.write(`phase:${params.selfPuuid}`, gamePhase, 'loaded')
 
-    if (teamComparison) {
-      this._capture.captureTeamComparison(teamComparison, gamePhase)
+    if (profile.teamComparison) {
+      this._capture.captureTeamComparison(profile.teamComparison, gamePhase)
     }
 
     const selfAnalysisForFeature = params.playerStats.players[params.selfPuuid] || null
     const selfChampId = params.championSelections[params.selfPuuid] || null
-    const selfRank = getRankNumeric(params.rankedStats, params.selfPuuid)
-
-    let premadeMax = 0
-    if (params.inferredPremadeTeams) {
-      for (const groups of Object.values(params.inferredPremadeTeams)) {
-        for (const group of groups) {
-          if (group.length > premadeMax) premadeMax = group.length
-        }
-      }
-    }
-
-    let rankGapMax = 0
-    let laneRankGap = 0
-    const selfPos = params.positionAssignments[params.selfPuuid]?.position
-    for (const puuid of params.enemyMembers) {
-      const er = getRankNumeric(params.rankedStats, puuid)
-      if (er >= 0 && selfRank >= 0) {
-        const gap = Math.abs(er - selfRank)
-        if (gap > rankGapMax) rankGapMax = gap
-        if (params.positionAssignments[puuid]?.position === selfPos) {
-          laneRankGap = er - selfRank
-        }
-      }
-    }
-
-    let allyPhys = 0
-    let allyMagic = 0
-    let allyDmgCount = 0
-    const allAllyForFeature = [params.selfPuuid, ...allyPuuids]
-    for (const puuid of allAllyForFeature) {
-      const a = params.playerStats.players[puuid]
-      if (!a) continue
-      allyPhys += a.summary.averagePhysicalDamageDealtToChampionShareOfTeam
-      allyMagic += a.summary.averageMagicDamageDealtToChampionShareOfTeam
-      allyDmgCount++
-    }
 
     const featureVector = this._capture.extractFeatureVector({
       selfAnalysis: selfAnalysisForFeature,
       selfChampionId: selfChampId,
-      selfRankNumeric: selfRank,
-      allyProfile,
-      enemyProfile,
-      teamComparison,
+      selfRankNumeric: profile.selfRank.numeric,
+      allyProfile: profile.allyProfile,
+      enemyProfile: profile.enemyProfile,
+      teamComparison: profile.teamComparison,
       gameMode: params.gameMode,
       queueType: params.queueType,
       gamePhase,
-      premadeGroupMaxSize: premadeMax,
-      rankGapMax,
-      laneRankGap,
-      allyPhysDamageShare: allyDmgCount > 0 ? allyPhys / allyDmgCount : 0,
-      allyMagicDamageShare: allyDmgCount > 0 ? allyMagic / allyDmgCount : 0,
+      premadeGroupMaxSize: profile.premadeMaxSize,
+      rankGapMax: profile.rankGapMax,
+      laneRankGap: profile.laneMatchup?.laneRankGap ?? 0,
+      allyPhysDamageShare: profile.allyDamageProfile.physicalShare,
+      allyMagicDamageShare: profile.allyDamageProfile.magicalShare,
       dataCompletenessRatio: newCompleteness / 100
     })
 
@@ -1594,10 +1532,10 @@ export class PantheonEngine {
     const inferenceResult = this._inference.predictSync(featureVector, gamePhase)
 
     const replayHints = this._replayAnalysis.getHintAdvices()
-    const fused = this._coordinator.coordinate(
+    this._coordinator.coordinate(
       deduped,
       inferenceResult,
-      replayHints as PantheonAdvice[],
+      replayHints,
       gamePhase
     )
     const coordinatedAdvices = this._coordinator.extractFusedAdvices()
