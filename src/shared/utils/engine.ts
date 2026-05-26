@@ -84,6 +84,18 @@ import type {
   ChampionMetaWithBalance,
   ChampionMetaListener
 } from '../../ontology/ingestion'
+import {
+  ObjectStore,
+  createObjectStore
+} from '../../ontology/store'
+import type {
+  ObjectStoreStats,
+  OntologyObjectType,
+  OntologyLinkType,
+  ObjectListener,
+  TypeListener,
+  GlobalChangeListener
+} from '../../ontology/store'
 
 export const enum PantheonAdvicePriority {
   CRITICAL = 0,
@@ -1199,6 +1211,7 @@ export class PantheonEngine {
   private _coordinator: DecisionCoordinator
   private _liveIngestor: LiveIngestor | null = null
   private _metaIngestor: MetaIngestor | null = null
+  private _ontologyStore: ObjectStore
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new PantheonPipeline()
@@ -1241,6 +1254,8 @@ export class PantheonEngine {
     this._replayAnalysis = createReplayAnalysisPipeline()
     this._streamServer = createStreamServer()
     this._coordinator = createDecisionCoordinator()
+    this._ontologyStore = createObjectStore({ gcIntervalMs: 30000 })
+    this._ontologyStore.startGc()
   }
 
   get scheduler(): PantheonScheduler {
@@ -1514,6 +1529,60 @@ export class PantheonEngine {
     return this._metaIngestor.onMeta(listener)
   }
 
+  get ontologyStore(): ObjectStore {
+    return this._ontologyStore
+  }
+
+  getOntologyStoreStats(): ObjectStoreStats {
+    return this._ontologyStore.getStats()
+  }
+
+  ontologyWrite<T>(objectType: OntologyObjectType, primaryKey: string, value: T, ttlMs?: number): void {
+    this._ontologyStore.write(objectType, primaryKey, value, ttlMs)
+  }
+
+  ontologyRead<T>(objectType: OntologyObjectType, primaryKey: string): T | null {
+    return this._ontologyStore.read<T>(objectType, primaryKey)
+  }
+
+  ontologyQueryByType<T>(objectType: OntologyObjectType): T[] {
+    return this._ontologyStore.queryByType<T>(objectType)
+  }
+
+  ontologyAddLink(
+    sourceType: OntologyObjectType,
+    sourceKey: string,
+    linkType: OntologyLinkType,
+    targetType: OntologyObjectType,
+    targetKey: string
+  ): boolean {
+    return this._ontologyStore.addLink(sourceType, sourceKey, linkType, targetType, targetKey)
+  }
+
+  ontologyGetLinked<T>(
+    sourceType: OntologyObjectType,
+    sourceKey: string,
+    linkType: OntologyLinkType
+  ): T[] {
+    return this._ontologyStore.getLinkedObjects<T>(sourceType, sourceKey, linkType)
+  }
+
+  ontologySubscribe<T>(
+    objectType: OntologyObjectType,
+    primaryKey: string,
+    listener: ObjectListener<T>
+  ): () => void {
+    return this._ontologyStore.subscribe(objectType, primaryKey, listener)
+  }
+
+  ontologySubscribeType(objectType: OntologyObjectType, listener: TypeListener): () => void {
+    return this._ontologyStore.subscribeType(objectType, listener)
+  }
+
+  ontologyOnChange(listener: GlobalChangeListener): () => void {
+    return this._ontologyStore.onChange(listener)
+  }
+
   generateAdvices(params: {
     playerStats: {
       players: Record<string, MatchHistoryGamesAnalysisAll>
@@ -1755,6 +1824,7 @@ export class PantheonEngine {
     if (this._metaIngestor) {
       this._metaIngestor.clear()
     }
+    this._ontologyStore.clear()
   }
 
     dispose() {
@@ -1774,6 +1844,7 @@ export class PantheonEngine {
       this._metaIngestor.dispose()
       this._metaIngestor = null
     }
+    this._ontologyStore.dispose()
     this.clearCache()
   }
 
