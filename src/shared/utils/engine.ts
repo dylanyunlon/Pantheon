@@ -102,6 +102,19 @@ import type {
   AggregationResult,
   FetchPageResult
 } from '../../ontology/store'
+import {
+  PipelineRegistry,
+  createPipelineRegistry,
+  createTransformPipeline,
+  createOntologyWriter
+} from '../../ontology/pipeline'
+import type {
+  TransformPipeline,
+  PipelineDescriptor,
+  PipelineResult,
+  StageMetrics,
+  OntologyWriterStage
+} from '../../ontology/pipeline'
 
 export const enum PantheonAdvicePriority {
   CRITICAL = 0,
@@ -1218,6 +1231,8 @@ export class PantheonEngine {
   private _liveIngestor: LiveIngestor | null = null
   private _metaIngestor: MetaIngestor | null = null
   private _ontologyStore: ObjectStore
+  private _pipelineRegistry: PipelineRegistry
+  private _ontologyWriter: OntologyWriterStage
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new PantheonPipeline()
@@ -1262,6 +1277,8 @@ export class PantheonEngine {
     this._coordinator = createDecisionCoordinator()
     this._ontologyStore = createObjectStore({ gcIntervalMs: 30000 })
     this._ontologyStore.startGc()
+    this._pipelineRegistry = createPipelineRegistry()
+    this._ontologyWriter = createOntologyWriter(this._ontologyStore)
   }
 
   get scheduler(): PantheonScheduler {
@@ -1631,6 +1648,31 @@ export class PantheonEngine {
     return set.fetchPage(offset, pageSize)
   }
 
+  get pipelineRegistry(): PipelineRegistry {
+    return this._pipelineRegistry
+  }
+
+  get ontologyWriter(): OntologyWriterStage {
+    return this._ontologyWriter
+  }
+
+  registerPipeline<I, O>(pipeline: TransformPipeline<I, O>): void {
+    this._pipelineRegistry.register(pipeline)
+  }
+
+  executePipeline<I, O>(name: string, input: I): PipelineResult<O> | null {
+    return this._pipelineRegistry.execute<I, O>(name, input)
+  }
+
+  listPipelines(): PipelineDescriptor[] {
+    return this._pipelineRegistry.listPipelines()
+  }
+
+  getPipelineMetrics(name: string): StageMetrics[] | null {
+    const pipeline = this._pipelineRegistry.get(name)
+    return pipeline?.getStageMetrics() ?? null
+  }
+
   generateAdvices(params: {
     playerStats: {
       players: Record<string, MatchHistoryGamesAnalysisAll>
@@ -1873,6 +1915,8 @@ export class PantheonEngine {
       this._metaIngestor.clear()
     }
     this._ontologyStore.clear()
+    this._pipelineRegistry.clear()
+    this._ontologyWriter.resetStats()
   }
 
     dispose() {
@@ -1893,6 +1937,7 @@ export class PantheonEngine {
       this._metaIngestor = null
     }
     this._ontologyStore.dispose()
+    this._pipelineRegistry.dispose()
     this.clearCache()
   }
 
