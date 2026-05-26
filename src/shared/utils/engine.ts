@@ -68,7 +68,9 @@ import { runProfilePass } from './profiling'
 import type { ProfileSnapshot } from './profiling'
 import {
   LiveIngestor,
-  createLiveIngestor
+  createLiveIngestor,
+  MetaIngestor,
+  createMetaIngestor
 } from '../../ontology/ingestion'
 import type {
   LiveIngestorStats,
@@ -77,7 +79,10 @@ import type {
   GameSnapshot,
   LiveEventType,
   LiveEventListener,
-  SnapshotListener
+  SnapshotListener,
+  MetaIngestorStats as MetaIngestorStatsType,
+  ChampionMetaWithBalance,
+  ChampionMetaListener
 } from '../../ontology/ingestion'
 
 export const enum PantheonAdvicePriority {
@@ -1193,6 +1198,7 @@ export class PantheonEngine {
   private _streamServer: PantheonStreamServer
   private _coordinator: DecisionCoordinator
   private _liveIngestor: LiveIngestor | null = null
+  private _metaIngestor: MetaIngestor | null = null
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new PantheonPipeline()
@@ -1459,6 +1465,55 @@ export class PantheonEngine {
     return this._liveIngestor.onSnapshot(listener)
   }
 
+  initMetaIngestor(
+    fetchers: {
+      fetchChampion: (options: {
+        id: number
+        region: string
+        mode: string
+        tier: string
+        position?: string
+      }) => Promise<unknown>
+      fetchAramBalance?: () => Promise<unknown>
+      fetchFandomBalance?: () => Promise<Record<string, unknown>>
+    },
+    config?: Partial<{
+      cacheTtlMs: number
+      maxCacheSize: number
+      defaultRegion: string
+      defaultTier: string
+    }>
+  ): MetaIngestor {
+    if (this._metaIngestor) {
+      this._metaIngestor.dispose()
+    }
+    this._metaIngestor = createMetaIngestor(fetchers as Parameters<typeof createMetaIngestor>[0], config)
+    return this._metaIngestor
+  }
+
+  get metaIngestor(): MetaIngestor | null {
+    return this._metaIngestor
+  }
+
+  getMetaIngestorStats(): MetaIngestorStatsType | null {
+    return this._metaIngestor?.getStats() ?? null
+  }
+
+  async ingestChampionMeta(championId: number, gameMode?: string): Promise<ChampionMetaWithBalance | null> {
+    if (!this._metaIngestor) return null
+    return this._metaIngestor.ingestChampion({ championId, gameMode })
+  }
+
+  async ingestDraftMeta(championIds: number[], gameMode?: string): Promise<Map<number, ChampionMetaWithBalance>> {
+    if (!this._metaIngestor) return new Map()
+    return this._metaIngestor.ingestDraft({ championIds, gameMode })
+  }
+
+  onChampionMeta(listener: ChampionMetaListener): () => void {
+    if (!this._metaIngestor) return () => {}
+    return this._metaIngestor.onMeta(listener)
+  }
+
   generateAdvices(params: {
     playerStats: {
       players: Record<string, MatchHistoryGamesAnalysisAll>
@@ -1697,6 +1752,9 @@ export class PantheonEngine {
     if (this._liveIngestor) {
       this._liveIngestor.stopPolling()
     }
+    if (this._metaIngestor) {
+      this._metaIngestor.clear()
+    }
   }
 
     dispose() {
@@ -1711,6 +1769,10 @@ export class PantheonEngine {
     if (this._liveIngestor) {
       this._liveIngestor.dispose()
       this._liveIngestor = null
+    }
+    if (this._metaIngestor) {
+      this._metaIngestor.dispose()
+      this._metaIngestor = null
     }
     this.clearCache()
   }

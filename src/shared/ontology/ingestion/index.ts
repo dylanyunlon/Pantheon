@@ -21,3 +21,24 @@ export type {
   SnapshotListener,
   RawDumpListener
 } from './live-ingestor'
+
+export {
+  MetaIngestor,
+  createMetaIngestor,
+  ChampionMetaCache,
+  OpggNormalizer,
+  FandomBalanceMerger
+} from './meta-ingestor'
+
+export type {
+  ChampionMeta,
+  ChampionMetaWithBalance,
+  CounterMatchup,
+  RunePageMeta,
+  ItemBuildMeta,
+  SkillOrderMeta,
+  BalanceModifiers,
+  MetaIngestorConfig,
+  MetaIngestorStats,
+  ChampionMetaListener
+} from './meta-ingestor'
