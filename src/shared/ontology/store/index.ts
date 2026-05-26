@@ -19,3 +19,21 @@ export type {
   LinkListener,
   GlobalChangeListener
 } from './object-store'
+
+export {
+  ObjectSet,
+  createObjectSet
+} from './object-set'
+
+export type {
+  ComparisonOperator,
+  LogicalOperator,
+  FieldPredicate,
+  WhereClause,
+  OrderByField,
+  AggregationOp,
+  AggregationClause,
+  AggregationResult,
+  FetchPageResult,
+  ObjectSetSnapshot
+} from './object-set'

@@ -86,7 +86,9 @@ import type {
 } from '../../ontology/ingestion'
 import {
   ObjectStore,
-  createObjectStore
+  createObjectStore,
+  ObjectSet,
+  createObjectSet
 } from '../../ontology/store'
 import type {
   ObjectStoreStats,
@@ -94,7 +96,11 @@ import type {
   OntologyLinkType,
   ObjectListener,
   TypeListener,
-  GlobalChangeListener
+  GlobalChangeListener,
+  WhereClause,
+  AggregationClause,
+  AggregationResult,
+  FetchPageResult
 } from '../../ontology/store'
 
 export const enum PantheonAdvicePriority {
@@ -1581,6 +1587,48 @@ export class PantheonEngine {
 
   ontologyOnChange(listener: GlobalChangeListener): () => void {
     return this._ontologyStore.onChange(listener)
+  }
+
+  objectSet<T = unknown>(objectType: OntologyObjectType): ObjectSet<T> {
+    return createObjectSet<T>(this._ontologyStore, objectType)
+  }
+
+  ontologyQuery<T>(
+    objectType: OntologyObjectType,
+    where?: WhereClause,
+    orderByField?: string,
+    orderByDir?: 'asc' | 'desc',
+    limit?: number
+  ): T[] {
+    let set = this.objectSet<T>(objectType)
+    if (where) set = set.where(where)
+    if (orderByField) set = set.orderBy(orderByField, orderByDir ?? 'asc')
+    if (limit) set = set.limit(limit)
+    return set.fetchAll()
+  }
+
+  ontologyAggregate(
+    objectType: OntologyObjectType,
+    clauses: AggregationClause[],
+    where?: WhereClause
+  ): AggregationResult[] {
+    let set = this.objectSet(objectType)
+    if (where) set = set.where(where)
+    return set.aggregate(clauses)
+  }
+
+  ontologyFetchPage<T>(
+    objectType: OntologyObjectType,
+    offset: number,
+    pageSize: number,
+    where?: WhereClause,
+    orderByField?: string,
+    orderByDir?: 'asc' | 'desc'
+  ): FetchPageResult<T> {
+    let set = this.objectSet<T>(objectType)
+    if (where) set = set.where(where)
+    if (orderByField) set = set.orderBy(orderByField, orderByDir ?? 'asc')
+    return set.fetchPage(offset, pageSize)
   }
 
   generateAdvices(params: {
