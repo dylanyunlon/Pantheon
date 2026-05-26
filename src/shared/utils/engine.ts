@@ -1,11 +1,13 @@
 
 import {
   MatchHistoryGamesAnalysisAll,
+  MatchHistoryGamesAnalysisTeamSide,
   MatchHistoryChampionAnalysis,
   AkariScore,
   calculateAkariScore
 } from './analysis'
 import { RankedStats } from '@shared/types/league-client/ranked'
+import type { ParsedRole } from './ranked'
 import {
   PantheonCacheLayers,
   PantheonRefCounts,
@@ -57,6 +59,11 @@ import {
   createStreamServer
 } from './streaming'
 import type { StreamServerConfig } from './streaming'
+import {
+  DecisionCoordinator,
+  createDecisionCoordinator
+} from './decision'
+import type { FusedAdvice, CoordinatorConfig } from './decision'
 
 export const enum PantheonAdvicePriority {
   CRITICAL = 0,
@@ -103,11 +110,11 @@ export interface PantheonAdvice {
 export interface PipelineStageContext {
   stage: string
   advices: PantheonAdvice[]
-  intermediates: Record<string, any>
+  intermediates: Record<string, unknown>
   playerAnalyses: Record<string, MatchHistoryGamesAnalysisAll>
-  teamAnalyses: Record<string, any>
+  teamAnalyses: Record<string, MatchHistoryGamesAnalysisTeamSide>
   championSelections: Record<string, number>
-  positionAssignments: Record<string, { position: string; role: any }>
+  positionAssignments: Record<string, { position: string; role: ParsedRole | null }>
   rankedStats: Record<string, { data: RankedStats }>
   selfPuuid: string
   allyPuuids: string[]
@@ -209,7 +216,7 @@ function computeTeamScorePass(
 function finalizeStage(
   ctx: PipelineStageContext,
   newAdvices: PantheonAdvice[],
-  intermediateUpdates: Record<string, any>
+  intermediateUpdates: Record<string, unknown>
 ): PipelineStageContext {
   return {
     ...ctx,
@@ -1198,7 +1205,7 @@ export class PantheonEngine {
   private _observableStore: PantheonObservableStore
   private _replayAnalysis: ReplayAnalysisPipeline
   private _streamServer: PantheonStreamServer
-  
+  private _coordinator: DecisionCoordinator
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new PantheonPipeline()
@@ -1240,7 +1247,7 @@ export class PantheonEngine {
     this._observableStore.startStaleCheck(15000)
     this._replayAnalysis = createReplayAnalysisPipeline()
     this._streamServer = createStreamServer()
-    
+    this._coordinator = createDecisionCoordinator()
   }
 
   get scheduler(): PantheonScheduler {
@@ -1289,6 +1296,31 @@ export class PantheonEngine {
 
   get observableStore(): PantheonObservableStore {
     return this._observableStore
+  }
+
+  get coordinator(): DecisionCoordinator {
+    return this._coordinator
+  }
+
+  getCoordinatedAdvices(): PantheonAdvice[] {
+    return this._coordinator.extractFusedAdvices()
+  }
+
+  getCoordinatorStats(): DecisionCoordinator["stats"] {
+    return this._coordinator.stats
+  }
+
+  recordCoordinatorFeedback(
+    adviceType: string,
+    feedback: 'helpful' | 'not-helpful' | 'dismiss',
+    gamePhase: GamePhase,
+    sessionId: string
+  ): void {
+    this._coordinator.recordFeedback(adviceType, feedback, gamePhase, sessionId)
+  }
+
+  ingestReplayForCoordinator(report: ReplayAnalysisReport): void {
+    this._coordinator.ingestReplayReport(report)
   }
 
   createExperiment(params: {
@@ -1341,6 +1373,7 @@ export class PantheonEngine {
 
     this._observableStore.write(`replay:${params.eogStats.gameId}`, report, 'loaded')
     if (this._streamServer.isRunning) this._streamServer.broadcastReplayAnalysis(report)
+    this._coordinator.ingestReplayReport(report)
     return report
   }
 
@@ -1381,10 +1414,10 @@ export class PantheonEngine {
   generateAdvices(params: {
     playerStats: {
       players: Record<string, MatchHistoryGamesAnalysisAll>
-      teams: Record<string, any>
+      teams: Record<string, MatchHistoryGamesAnalysisTeamSide>
     } | null
     championSelections: Record<string, number>
-    positionAssignments: Record<string, { position: string; role: any }>
+    positionAssignments: Record<string, { position: string; role: ParsedRole | null }>
     rankedStats: Record<string, { data: RankedStats }>
     selfPuuid: string
     allyMembers: string[]
@@ -1558,6 +1591,18 @@ export class PantheonEngine {
     this._capture.captureFeatureSnapshot(featureVector, gamePhase)
     this._capture.buildTrainingSample(featureVector, deduped, gamePhase)
 
+    const inferenceResult = this._inference.predictSync(featureVector, gamePhase)
+
+    const replayHints = this._replayAnalysis.getHintAdvices()
+    const fused = this._coordinator.coordinate(
+      deduped,
+      inferenceResult,
+      replayHints as PantheonAdvice[],
+      gamePhase
+    )
+    const coordinatedAdvices = this._coordinator.extractFusedAdvices()
+    this._observableStore.write(`coordinated:${cacheKey}`, coordinatedAdvices, 'loaded')
+
     if (this._streamServer.isRunning) {
       this._streamServer.broadcastAdvices(deduped, gamePhase)
       this._streamServer.broadcastFeatureSnapshot(featureVector, gamePhase)
@@ -1580,7 +1625,7 @@ export class PantheonEngine {
     getLastPipelineInfo(params: {
     playerStats: {
       players: Record<string, MatchHistoryGamesAnalysisAll>
-      teams: Record<string, any>
+      teams: Record<string, MatchHistoryGamesAnalysisTeamSide>
     } | null
     allyMembers: string[]
     enemyMembers: string[]
@@ -1635,6 +1680,7 @@ export class PantheonEngine {
     this._capture.clear()
     this._inference.clearCache()
     this._observableStore.clear()
+    this._coordinator.clear()
   }
 
     dispose() {
@@ -1645,6 +1691,7 @@ export class PantheonEngine {
     this._observableStore.dispose()
     this._replayAnalysis.dispose()
     this._streamServer.dispose()
+    this._coordinator.dispose()
     this.clearCache()
   }
 
@@ -1724,6 +1771,12 @@ export class PantheonEngine {
       adviceType,
       feedback,
       this._scheduler.currentPhase
+    )
+    this._coordinator.recordFeedback(
+      adviceType,
+      feedback,
+      this._scheduler.currentPhase,
+      this._capture.sessionId
     )
   }
 

@@ -108,7 +108,7 @@ export class PantheonObservableStore {
       changes.updated.add(key)
     }
 
-    this._notifySubjectListeners(subject as any)
+    this._notifySubjectListeners(this._subjects.get(key)!)
     if (!changes.isEmpty()) {
       this._notifyChangeListeners(changes)
     }

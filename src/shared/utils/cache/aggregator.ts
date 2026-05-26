@@ -315,7 +315,7 @@ export class RingReducer<T> {
 }
 
 export class BatchAggregationContext {
-  private _pendingWrites: Map<string, { value: any; timestamp: number }> = new Map()
+  private _pendingWrites: Map<string, { value: unknown; timestamp: number }> = new Map()
   private _changes: PantheonChanges = createPantheonChanges()
   private _committed = false
 
@@ -337,7 +337,7 @@ export class BatchAggregationContext {
     }
   }
 
-  commit(): { entries: Map<string, { value: any; timestamp: number }>; changes: PantheonChanges } {
+  commit(): { entries: Map<string, { value: unknown; timestamp: number }>; changes: PantheonChanges } {
     this._committed = true
     return {
       entries: new Map(this._pendingWrites),

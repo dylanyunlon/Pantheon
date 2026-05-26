@@ -51,6 +51,17 @@ export interface DataAvailability {
   matchHistory: PantheonQueryStatus
 }
 
+export type DataAvailabilityField = 'analysis' | 'ranked' | 'championMastery' | 'matchHistory'
+
+function dataTypeToField(type: PantheonDataType): DataAvailabilityField {
+  switch (type) {
+    case 'champion-mastery': return 'championMastery'
+    case 'match-history': return 'matchHistory'
+    case 'analysis': return 'analysis'
+    case 'ranked': return 'ranked'
+  }
+}
+
 export class PantheonDataTracker {
   private _availability: Map<string, DataAvailability> = new Map()
   private _listeners: Array<(changes: PantheonChanges) => void> = []
@@ -72,9 +83,9 @@ export class PantheonDataTracker {
 
   setStatus(puuid: string, type: PantheonDataType, status: PantheonQueryStatus): PantheonChanges {
     const avail = this.getAvailability(puuid)
-    const oldStatus = avail[type === 'champion-mastery' ? 'championMastery' : type === 'match-history' ? 'matchHistory' : type]
-    const fieldKey = type === 'champion-mastery' ? 'championMastery' : type === 'match-history' ? 'matchHistory' : type
-    ;(avail as any)[fieldKey] = status
+    const field = dataTypeToField(type)
+    const oldStatus = avail[field]
+    avail[field] = status
 
     const changes = createPantheonChanges()
     const changeKey = `${puuid}:${type}`
@@ -122,10 +133,10 @@ export class PantheonDataTracker {
   }
 
   getLoadedPuuids(type: PantheonDataType): string[] {
-    const fieldKey = type === 'champion-mastery' ? 'championMastery' : type === 'match-history' ? 'matchHistory' : type
+    const field = dataTypeToField(type)
     const result: string[] = []
     for (const [puuid, avail] of this._availability) {
-      if ((avail as any)[fieldKey] === 'loaded') {
+      if (avail[field] === 'loaded') {
         result.push(puuid)
       }
     }
@@ -133,10 +144,10 @@ export class PantheonDataTracker {
   }
 
   getLoadingPuuids(type: PantheonDataType): string[] {
-    const fieldKey = type === 'champion-mastery' ? 'championMastery' : type === 'match-history' ? 'matchHistory' : type
+    const field = dataTypeToField(type)
     const result: string[] = []
     for (const [puuid, avail] of this._availability) {
-      if ((avail as any)[fieldKey] === 'loading') {
+      if (avail[field] === 'loading') {
         result.push(puuid)
       }
     }
@@ -144,10 +155,10 @@ export class PantheonDataTracker {
   }
 
   getErrorPuuids(type: PantheonDataType): string[] {
-    const fieldKey = type === 'champion-mastery' ? 'championMastery' : type === 'match-history' ? 'matchHistory' : type
+    const field = dataTypeToField(type)
     const result: string[] = []
     for (const [puuid, avail] of this._availability) {
-      if ((avail as any)[fieldKey] === 'error') {
+      if (avail[field] === 'error') {
         result.push(puuid)
       }
     }

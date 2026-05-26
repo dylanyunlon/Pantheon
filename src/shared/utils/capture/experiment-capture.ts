@@ -572,8 +572,20 @@ export class ExperimentCapture {
     const puuids = new Set<string>()
     if (this._sessionMeta.selfPuuid) puuids.add(this._sessionMeta.selfPuuid)
     for (const event of this._events.toArray()) {
-      const p = (event as any).puuid
+      const p = event.payload['puuid']
       if (typeof p === 'string' && p) puuids.add(p)
+      const allyMembers = event.payload['allyMembers']
+      if (Array.isArray(allyMembers)) {
+        for (const m of allyMembers) {
+          if (typeof m === 'string' && m) puuids.add(m)
+        }
+      }
+      const enemyMembers = event.payload['enemyMembers']
+      if (Array.isArray(enemyMembers)) {
+        for (const m of enemyMembers) {
+          if (typeof m === 'string' && m) puuids.add(m)
+        }
+      }
     }
     return Array.from(puuids)
   }

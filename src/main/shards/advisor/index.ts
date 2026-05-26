@@ -280,7 +280,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
             }
             this._log.info(`Experiment session started for phase: ${phase}`)
             this._engine.streaming.setSessionId(`${selfPuuid}:${gameInfo?.gameMode || ''}:${Date.now()}`)
-            if (this._engine.streaming.isRunning) this._engine.streaming.broadcastPhaseTransition('unknown', phase as any)
+            if (this._engine.streaming.isRunning) this._engine.streaming.broadcastPhaseTransition('unknown', mapQueryPhaseToGamePhase(phase))
           }
         }
       }
@@ -305,8 +305,8 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       () => this._og.state.matchHistoryLoadingState,
       (states) => {
         for (const [puuid, status] of Object.entries(states)) {
-          const mapped = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
-          this._dataTracker.setStatus(puuid, 'match-history', mapped as any)
+          const mapped: PantheonQueryStatus = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
+          this._dataTracker.setStatus(puuid, 'match-history', mapped)
         }
       },
       { fireImmediately: true }
@@ -316,8 +316,8 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       () => this._og.state.rankedStatsLoadingState,
       (states) => {
         for (const [puuid, status] of Object.entries(states)) {
-          const mapped = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
-          this._dataTracker.setStatus(puuid, 'ranked', mapped as any)
+          const mapped: PantheonQueryStatus = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
+          this._dataTracker.setStatus(puuid, 'ranked', mapped)
         }
       },
       { fireImmediately: true }
@@ -327,8 +327,8 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       () => this._og.state.championMasteryLoadingState,
       (states) => {
         for (const [puuid, status] of Object.entries(states)) {
-          const mapped = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
-          this._dataTracker.setStatus(puuid, 'champion-mastery', mapped as any)
+          const mapped: PantheonQueryStatus = status === 'loaded' ? 'loaded' : status === 'loading' ? 'loading' : status === 'error' ? 'error' : 'init'
+          this._dataTracker.setStatus(puuid, 'champion-mastery', mapped)
         }
       },
       { fireImmediately: true }
@@ -388,7 +388,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         playerStats: this._og.state.playerStats,
         championSelections: this._og.state.championSelections,
         positionAssignments: this._og.state.positionAssignments,
-        rankedStats: this._og.state.rankedStats as any,
+        rankedStats: this._og.state.rankedStats,
         selfPuuid,
         allyMembers,
         enemyMembers,
@@ -452,7 +452,7 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         this.state.lastGeneratedAt = Date.now()
         this.state.isGenerating = false
         this.state.pipelineInfo = pipelineInfo
-        this.state.currentGamePhase = schedulerStats.currentPhase as any
+        this.state.currentGamePhase = schedulerStats.currentPhase
         this.state.schedulerStats = {
           totalQueued: schedulerStats.totalQueued,
           delivered: schedulerStats.delivered,
@@ -550,9 +550,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       CoachAdvisorMain.id,
       'getFormattedMessages',
       (_, options?: { audience?: string; maxLines?: number }) => {
+        const validAudiences = new Set<string>(['self', 'ally', 'team'])
+        const audience = options?.audience && validAudiences.has(options.audience)
+          ? options.audience as 'self' | 'ally' | 'team'
+          : undefined
         return this._engine.formatAsMessages(this.state.advices, {
           maxLines: options?.maxLines || this.settings.maxAdviceCount,
-          audience: (options?.audience as any) || undefined,
+          audience,
           minPriority: this.settings.minPriority
         })
       }
@@ -631,12 +635,15 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       CoachAdvisorMain.id,
       'recordFeedback',
       (_, adviceType: string, feedback: string) => {
-        this._engine.recordUserFeedback(adviceType, feedback as 'helpful' | 'not-helpful' | 'dismiss')
+        const validFeedbacks = new Set<string>(['helpful', 'not-helpful', 'dismiss'])
+        if (!validFeedbacks.has(feedback)) return
+        const typedFeedback = feedback as 'helpful' | 'not-helpful' | 'dismiss'
+        this._engine.recordUserFeedback(adviceType, typedFeedback)
         if (this._engine.streaming.isRunning) this._engine.streaming.broadcastFeedback(adviceType, feedback)
         const selfPuuid = this._lc.data.summoner.me?.puuid
         if (selfPuuid) {
           const gameInfo = this._og.state.queryStage.gameInfo
-          this._engine.experimentManager.recordFeedback(`${selfPuuid}:${gameInfo?.gameMode || ''}`, feedback as any)
+          this._engine.experimentManager.recordFeedback(`${selfPuuid}:${gameInfo?.gameMode || ''}`, typedFeedback)
         }
       }
     )
@@ -668,11 +675,13 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       CoachAdvisorMain.id,
       'switchInferenceBackend',
       (_, backend: string) => {
-        this._engine.switchInferenceBackend(backend as any)
+        const validBackends = new Set<string>(['onnx', 'rule-engine', 'ensemble'])
+        if (!validBackends.has(backend)) return
+        this._engine.switchInferenceBackend(backend as 'onnx' | 'rule-engine' | 'ensemble')
       }
     )
 
-    this._ipc.onCall(CoachAdvisorMain.id, 'createExperiment', (_, params: any) => {
+    this._ipc.onCall(CoachAdvisorMain.id, 'createExperiment', (_, params: { name: string; description?: string; trafficSplit?: number }) => {
       return this._engine.createExperiment(params)
     })
 
@@ -751,6 +760,26 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
     this._ipc.onCall(CoachAdvisorMain.id, 'getAuditSummary', () => {
       if (!this._privacyPipeline) return null
       return this._privacyPipeline.auditLog.getSummary()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getCoordinatedAdvices', () => {
+      return this._engine.getCoordinatedAdvices()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getCoordinatorStats', () => {
+      return this._engine.getCoordinatorStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getCoordinatorFeedbackStats', () => {
+      return this._engine.coordinator.feedbackAdapter.getTypeStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getCoordinatorAccuracyStats', () => {
+      return this._engine.coordinator.calibrator.getTypeAccuracyStats()
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getCoordinatorSourceStats', () => {
+      return this._engine.coordinator.fusionLayer.getSourceStats()
     })
   }
 

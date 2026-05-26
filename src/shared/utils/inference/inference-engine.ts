@@ -446,6 +446,79 @@ export class PantheonInferenceEngine {
     return results
   }
 
+  predictSync(
+    featureVector: FeatureVector,
+    gamePhase: GamePhase
+  ): InferenceResult {
+    const start = Date.now()
+    const fvHash = hashFeatureVector(featureVector)
+
+    const cached = this._cache.get(fvHash)
+    if (cached && Date.now() - cached.timestamp < this._cacheMaxAge) {
+      return cached.result
+    }
+
+    const ruleResult = this._runRuleBasedInference(featureVector, fvHash, gamePhase)
+
+    if (this._config.backend === 'onnx' && this._session && this._isReady) {
+      const onnxCached = this._cache.get(`onnx:${fvHash}`)
+      if (onnxCached && Date.now() - onnxCached.timestamp < this._cacheMaxAge) {
+        const w = this._config.ensembleWeight
+        const merged = new Map<string, AdvicePrediction>()
+        for (const p of onnxCached.result.predictions) {
+          merged.set(p.adviceType, {
+            ...p,
+            score: p.score * w,
+            confidence: p.confidence * w,
+            reasoning: [...p.reasoning, `onnx_cached_weight=${w}`]
+          })
+        }
+        for (const p of ruleResult.predictions) {
+          const existing = merged.get(p.adviceType)
+          if (existing) {
+            existing.score += p.score * (1 - w)
+            existing.confidence = Math.max(existing.confidence, p.confidence * (1 - w))
+            existing.reasoning.push(...p.reasoning, `rule_weight=${1 - w}`)
+            existing.priority = Math.min(existing.priority, p.priority)
+          } else {
+            merged.set(p.adviceType, {
+              ...p,
+              score: p.score * (1 - w),
+              confidence: p.confidence * (1 - w),
+              reasoning: [...p.reasoning, `rule_only_weight=${1 - w}`]
+            })
+          }
+        }
+        const predictions = Array.from(merged.values())
+          .sort((a, b) => b.score - a.score)
+          .slice(0, this._config.maxPredictions)
+
+        const ensembleResult: InferenceResult = {
+          predictions,
+          latencyMs: Date.now() - start,
+          modelId: `sync-ensemble:${onnxCached.result.modelId}+rules`,
+          featureHash: fvHash
+        }
+        this._totalInferences++
+        this._totalLatencyMs += ensembleResult.latencyMs
+        this._cache.set(fvHash, { result: ensembleResult, timestamp: Date.now() })
+        return ensembleResult
+      }
+    }
+
+    ruleResult.latencyMs = Date.now() - start
+    this._totalInferences++
+    this._totalLatencyMs += ruleResult.latencyMs
+
+    if (this._cache.size >= this._cacheMaxSize) {
+      const oldest = this._cache.keys().next().value
+      if (oldest) this._cache.delete(oldest)
+    }
+    this._cache.set(fvHash, { result: ruleResult, timestamp: Date.now() })
+
+    return ruleResult
+  }
+
   switchBackend(backend: InferenceBackend): void {
     if (backend === 'onnx' && !this._session) {
       console.warn('PantheonInferenceEngine: cannot switch to onnx without loaded model')

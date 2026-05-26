@@ -444,6 +444,94 @@ export class ReplayAnalysisPipeline {
     return { avgPredictionError: avg, errors }
   }
 
+  getHintAdvices(): PantheonAdvice[] {
+    if (this._reports.length < 2) return []
+
+    const typeAccumulator = new Map<string, { totalAccuracy: number; count: number; lastWasAccurate: boolean }>()
+    for (const report of this._reports) {
+      for (const acc of report.adviceAccuracy) {
+        const entry = typeAccumulator.get(acc.adviceType) || { totalAccuracy: 0, count: 0, lastWasAccurate: false }
+        entry.totalAccuracy += acc.accuracyScore
+        entry.count++
+        entry.lastWasAccurate = acc.wasAccurate
+        typeAccumulator.set(acc.adviceType, entry)
+      }
+    }
+
+    const hints: PantheonAdvice[] = []
+    const latestReport = this._reports[this._reports.length - 1]
+    const latestOutcome = latestReport.outcome.outcome
+
+    for (const [adviceType, stats] of typeAccumulator) {
+      if (stats.count < 2) continue
+      const avgAccuracy = stats.totalAccuracy / stats.count
+
+      if (avgAccuracy > 0.7 && stats.lastWasAccurate) {
+        hints.push({
+          type: adviceType as PantheonAdviceType,
+          priority: 2 as PantheonAdvicePriority,
+          title: `${this._adviceTypeLabel(adviceType)}历史验证可靠`,
+          message: `近${stats.count}场该类建议准确率${(avgAccuracy * 100).toFixed(0)}%，可继续参考`,
+          evidence: [`replay_accuracy=${avgAccuracy.toFixed(3)}`, `sample_count=${stats.count}`],
+          confidence: Math.min(0.9, avgAccuracy),
+          audience: 'self'
+        })
+      }
+
+      if (avgAccuracy < 0.35 && stats.count >= 3) {
+        hints.push({
+          type: adviceType as PantheonAdviceType,
+          priority: 3 as PantheonAdvicePriority,
+          title: `${this._adviceTypeLabel(adviceType)}建议需谨慎`,
+          message: `近${stats.count}场该类建议准确率偏低(${(avgAccuracy * 100).toFixed(0)}%)，仅供参考`,
+          evidence: [`replay_accuracy=${avgAccuracy.toFixed(3)}`, `low_confidence`],
+          confidence: 0.4,
+          audience: 'self'
+        })
+      }
+    }
+
+    if (latestOutcome === 'loss' && latestReport.performanceDelta.predictionError > 0.3) {
+      hints.push({
+        type: 'macro_strategy' as PantheonAdviceType,
+        priority: 1 as PantheonAdvicePriority,
+        title: '上局预测偏差较大',
+        message: `上一场预测误差${(latestReport.performanceDelta.predictionError * 100).toFixed(0)}%，本局建议更保守的策略`,
+        evidence: [
+          `prediction_error=${latestReport.performanceDelta.predictionError.toFixed(3)}`,
+          `last_outcome=${latestOutcome}`
+        ],
+        confidence: 0.65,
+        audience: 'team'
+      })
+    }
+
+    return hints
+  }
+
+  private _adviceTypeLabel(adviceType: string): string {
+    const labels: Record<string, string> = {
+      mental: '心态',
+      macro_strategy: '宏观策略',
+      rank_disparity: '段位差距',
+      lane_matchup: '对线匹配',
+      enemy_weakness: '对手弱点',
+      composition: '阵容',
+      laning_phase: '对线',
+      vision: '视野',
+      risk_warning: '风险预警',
+      team_synergy: '团队配合',
+      itemization_hint: '出装',
+      objective_timing: '目标时机',
+      playstyle_adaptation: '打法适应',
+      gold_efficiency: '经济效率',
+      true_damage_warning: '真伤预警',
+      win_condition: '胜利条件',
+      kda_trend: 'KDA趋势'
+    }
+    return labels[adviceType] || adviceType
+  }
+
   clear(): void {
     this._reports = []
     this._onReportListeners.clear()
