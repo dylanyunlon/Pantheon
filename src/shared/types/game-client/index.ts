@@ -29,7 +29,7 @@ interface SummonerSpellOne {
   rawDisplayName: string
 }
 
-interface Scores {
+export interface Scores {
   assists: number
   creepScore: number
   deaths: number

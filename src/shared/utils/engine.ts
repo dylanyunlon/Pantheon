@@ -7,6 +7,7 @@ import {
   calculateAkariScore
 } from './analysis'
 import { RankedStats } from '@shared/types/league-client/ranked'
+import type { PlayerList, GameStats } from '@shared/types/game-client'
 import type { ParsedRole } from './ranked'
 import {
   PantheonCacheLayers,
@@ -71,7 +72,7 @@ import {
   createLiveIngestor,
   MetaIngestor,
   createMetaIngestor
-} from '../../ontology/ingestion'
+} from '@shared/ontology/ingestion'
 import type {
   LiveIngestorStats,
   LiveIngestorSession,
@@ -83,13 +84,13 @@ import type {
   MetaIngestorStats as MetaIngestorStatsType,
   ChampionMetaWithBalance,
   ChampionMetaListener
-} from '../../ontology/ingestion'
+} from '@shared/ontology/ingestion'
 import {
   ObjectStore,
   createObjectStore,
   ObjectSet,
   createObjectSet
-} from '../../ontology/store'
+} from '@shared/ontology/store'
 import type {
   ObjectStoreStats,
   OntologyObjectType,
@@ -101,20 +102,41 @@ import type {
   AggregationClause,
   AggregationResult,
   FetchPageResult
-} from '../../ontology/store'
+} from '@shared/ontology/store'
 import {
   PipelineRegistry,
   createPipelineRegistry,
   createTransformPipeline,
   createOntologyWriter
-} from '../../ontology/pipeline'
+} from '@shared/ontology/pipeline'
 import type {
   TransformPipeline,
   PipelineDescriptor,
   PipelineResult,
   StageMetrics,
   OntologyWriterStage
-} from '../../ontology/pipeline'
+} from '@shared/ontology/pipeline'
+import {
+  ObservableClient as OntologyObservableClient,
+  createObservableClient as createOntologyObservableClient,
+  SubscriptionGroup
+} from '@shared/ontology/observable'
+import type {
+  ObjectObserver,
+  QueryObserver,
+  LinkObserver,
+  AggregateObserver,
+  ObserveObjectOptions,
+  ObserveQueryOptions,
+  ObserveLinkOptions,
+  ObserveAggregateOptions,
+  ObjectSubscription,
+  QuerySubscription,
+  LinkSubscription,
+  AggregateSubscription,
+  SubscriptionDescriptor,
+  ObservableClientStats
+} from '@shared/ontology/observable'
 
 export const enum PantheonAdvicePriority {
   CRITICAL = 0,
@@ -177,6 +199,7 @@ export interface PipelineStageContext {
   enemyProfile: AggregatedTeamProfile | null
   currentGamePhase: GamePhase
   profile: ProfileSnapshot | null
+  histogram: HistogramResult
 }
 
 type PipelineStageHandler = (ctx: PipelineStageContext) => PipelineStageContext
@@ -263,6 +286,107 @@ function computeTeamScorePass(
     count++
   }
   return { total, count, perPlayer }
+}
+
+export interface ScoreBucket {
+  puuid: string
+  score: AkariScore
+  winRate: number
+  kdaAvg: number
+  gamesPlayed: number
+  tier: 'top' | 'high' | 'mid' | 'low' | 'bottom'
+}
+
+export interface HistogramResult {
+  allyBuckets: ScoreBucket[]
+  enemyBuckets: ScoreBucket[]
+  allyScoreTotal: number
+  allyScoreCount: number
+  enemyScoreTotal: number
+  enemyScoreCount: number
+  allyPerPlayer: Record<string, AkariScore>
+  enemyPerPlayer: Record<string, AkariScore>
+  allyAvg: number
+  enemyAvg: number
+  scoreDiff: number
+  tierDistribution: {
+    ally: Record<string, number>
+    enemy: Record<string, number>
+  }
+  latencyMs: number
+}
+
+function classifyScoreTier(scoreTotal: number): 'top' | 'high' | 'mid' | 'low' | 'bottom' {
+  if (scoreTotal >= 80) return 'top'
+  if (scoreTotal >= 60) return 'high'
+  if (scoreTotal >= 40) return 'mid'
+  if (scoreTotal >= 20) return 'low'
+  return 'bottom'
+}
+
+function computeHistogramPass(
+  allyPuuids: string[],
+  enemyPuuids: string[],
+  analyses: Record<string, MatchHistoryGamesAnalysisAll>
+): HistogramResult {
+  const start = Date.now()
+
+  const allyPass = computeTeamScorePass(allyPuuids, analyses)
+  const enemyPass = computeTeamScorePass(enemyPuuids, analyses)
+
+  const allyAvg = allyPass.count > 0 ? allyPass.total / allyPass.count : 0
+  const enemyAvg = enemyPass.count > 0 ? enemyPass.total / enemyPass.count : 0
+
+  const buildBuckets = (
+    puuids: string[],
+    perPlayer: Record<string, AkariScore>
+  ): ScoreBucket[] => {
+    const buckets: ScoreBucket[] = []
+    for (const puuid of puuids) {
+      const score = perPlayer[puuid]
+      if (!score) continue
+      const analysis = analyses[puuid]
+      buckets.push({
+        puuid,
+        score,
+        winRate: analysis?.summary.winRate ?? 0,
+        kdaAvg: analysis?.summary.averageKda ?? 0,
+        gamesPlayed: analysis?.summary.count ?? 0,
+        tier: classifyScoreTier(score.total)
+      })
+    }
+    return buckets
+  }
+
+  const allyBuckets = buildBuckets(allyPuuids, allyPass.perPlayer)
+  const enemyBuckets = buildBuckets(enemyPuuids, enemyPass.perPlayer)
+
+  const countTiers = (buckets: ScoreBucket[]): Record<string, number> => {
+    const dist: Record<string, number> = { top: 0, high: 0, mid: 0, low: 0, bottom: 0 }
+    for (const b of buckets) {
+      dist[b.tier]++
+    }
+    return dist
+  }
+
+  return {
+    allyBuckets,
+    enemyBuckets,
+    allyScoreTotal: allyPass.total,
+    allyScoreCount: allyPass.count,
+    enemyScoreTotal: enemyPass.total,
+    enemyScoreCount: enemyPass.count,
+    allyPerPlayer: allyPass.perPlayer,
+    enemyPerPlayer: enemyPass.perPlayer,
+    allyAvg,
+    enemyAvg,
+    scoreDiff: allyAvg - enemyAvg,
+    tierDistribution: {
+      ally: countTiers(allyBuckets),
+      enemy: countTiers(enemyBuckets)
+    },
+    latencyMs: Date.now() - start
+  }
 }
 
 function finalizeStage(
@@ -376,12 +500,10 @@ function stageTeamSynergy(ctx: PipelineStageContext): PipelineStageContext {
 function stageMacroStrategy(ctx: PipelineStageContext): PipelineStageContext {
   const advices: PantheonAdvice[] = []
 
-  const allyAvg = ctx.profile?.allyAvgScore ?? 0
-  const enemyAvg = ctx.profile?.enemyAvgScore ?? 0
-  const diff = ctx.profile?.scoreDiff ?? (allyAvg - enemyAvg)
-  const sampleCount = ctx.profile
-    ? Math.min(ctx.profile.allyScores.length, ctx.profile.enemyScores.length)
-    : 0
+  const allyAvg = ctx.histogram.allyAvg
+  const enemyAvg = ctx.histogram.enemyAvg
+  const diff = ctx.histogram.scoreDiff
+  const sampleCount = Math.min(ctx.histogram.allyScoreCount, ctx.histogram.enemyScoreCount)
   const baseConfidence = Math.min(sampleCount / 4, 1.0) * 0.7
 
   if (diff > 3) {
@@ -428,12 +550,39 @@ function stageMacroStrategy(ctx: PipelineStageContext): PipelineStageContext {
     })
   }
 
+  const allyTopCount = ctx.histogram.tierDistribution.ally['top'] + ctx.histogram.tierDistribution.ally['high']
+  const enemyTopCount = ctx.histogram.tierDistribution.enemy['top'] + ctx.histogram.tierDistribution.enemy['high']
+  if (allyTopCount >= 3 && enemyTopCount <= 1) {
+    advices.push({
+      type: PantheonAdviceType.MACRO_STRATEGY,
+      priority: PantheonAdvicePriority.MEDIUM,
+      title: '团队整体状态出色',
+      message: '我方多名玩家近期数据优秀，抓住状态优势窗口期主导比赛',
+      evidence: ['histogram_tier_advantage'],
+      confidence: baseConfidence * 1.1,
+      audience: 'team'
+    })
+  }
+
+  const allyBottomCount = ctx.histogram.tierDistribution.ally['low'] + ctx.histogram.tierDistribution.ally['bottom']
+  if (allyBottomCount >= 3 && sampleCount >= 4) {
+    advices.push({
+      type: PantheonAdviceType.RISK_WARNING,
+      priority: PantheonAdvicePriority.MEDIUM,
+      title: '团队整体状态不佳',
+      message: '我方多名玩家近期数据偏低，建议保守运营避免冒险，稳住心态等待对方失误',
+      evidence: ['histogram_tier_weakness'],
+      confidence: baseConfidence * 0.9,
+      audience: 'team'
+    })
+  }
+
   return finalizeStage(ctx, advices, {
     allyAvgScore: allyAvg,
     enemyAvgScore: enemyAvg,
     scoreDiff: diff,
-    allyPerPlayer: allyPass.perPlayer,
-    enemyPerPlayer: enemyPass.perPlayer,
+    allyPerPlayer: ctx.histogram.allyPerPlayer,
+    enemyPerPlayer: ctx.histogram.enemyPerPlayer,
     macroStrategyCompleted: true
   })
 }
@@ -1233,6 +1382,7 @@ export class PantheonEngine {
   private _ontologyStore: ObjectStore
   private _pipelineRegistry: PipelineRegistry
   private _ontologyWriter: OntologyWriterStage
+  private _ontologyObservable: OntologyObservableClient
 
   constructor(schedulerConfig?: Partial<SchedulerConfig>) {
     this._pipeline = new PantheonPipeline()
@@ -1279,6 +1429,7 @@ export class PantheonEngine {
     this._ontologyStore.startGc()
     this._pipelineRegistry = createPipelineRegistry()
     this._ontologyWriter = createOntologyWriter(this._ontologyStore)
+    this._ontologyObservable = createOntologyObservableClient(this._ontologyStore, 16)
   }
 
   get scheduler(): PantheonScheduler {
@@ -1656,6 +1807,55 @@ export class PantheonEngine {
     return this._ontologyWriter
   }
 
+  get ontologyObservable(): OntologyObservableClient {
+    return this._ontologyObservable
+  }
+
+  observeOntologyObject<T>(
+    objectType: OntologyObjectType,
+    primaryKey: string,
+    observer: ObjectObserver<T>,
+    includeOptimistic?: boolean
+  ): ObjectSubscription<T> {
+    return this._ontologyObservable.observeObject<T>(
+      { objectType, primaryKey, includeOptimistic },
+      observer
+    )
+  }
+
+  observeOntologyQuery<T>(
+    options: ObserveQueryOptions,
+    observer: QueryObserver<T>
+  ): QuerySubscription<T> {
+    return this._ontologyObservable.observeQuery<T>(options, observer)
+  }
+
+  observeOntologyLinks<T>(
+    options: ObserveLinkOptions,
+    observer: LinkObserver<T>
+  ): LinkSubscription<T> {
+    return this._ontologyObservable.observeLinks<T>(options, observer)
+  }
+
+  observeOntologyAggregate(
+    options: ObserveAggregateOptions,
+    observer: AggregateObserver
+  ): AggregateSubscription {
+    return this._ontologyObservable.observeAggregate(options, observer)
+  }
+
+  createSubscriptionGroup(id?: string): SubscriptionGroup {
+    return this._ontologyObservable.createGroup(id)
+  }
+
+  getObservableStats(): ObservableClientStats {
+    return this._ontologyObservable.getStats()
+  }
+
+  listOntologySubscriptions(): SubscriptionDescriptor[] {
+    return this._ontologyObservable.listSubscriptions()
+  }
+
   registerPipeline<I, O>(pipeline: TransformPipeline<I, O>): void {
     this._pipelineRegistry.register(pipeline)
   }
@@ -1746,6 +1946,13 @@ export class PantheonEngine {
     }
 
     const allyPuuids = profile.allyPuuids
+    const allAllyForHistogram = [params.selfPuuid, ...allyPuuids]
+    const histogram = computeHistogramPass(
+      allAllyForHistogram,
+      params.enemyMembers,
+      params.playerStats.players
+    )
+
     const ctx: PipelineStageContext = {
       stage: 'init',
       advices: [],
@@ -1764,7 +1971,8 @@ export class PantheonEngine {
       allyProfile: profile.allyProfile,
       enemyProfile: profile.enemyProfile,
       currentGamePhase: gamePhase,
-      profile
+      profile,
+      histogram
     }
 
     const result = this._pipeline.execute(ctx)
@@ -1917,6 +2125,7 @@ export class PantheonEngine {
     this._ontologyStore.clear()
     this._pipelineRegistry.clear()
     this._ontologyWriter.resetStats()
+    this._ontologyObservable.pauseAll()
   }
 
     dispose() {
@@ -1938,6 +2147,7 @@ export class PantheonEngine {
     }
     this._ontologyStore.dispose()
     this._pipelineRegistry.dispose()
+    this._ontologyObservable.dispose()
     this.clearCache()
   }
 
