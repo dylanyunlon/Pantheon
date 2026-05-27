@@ -82,6 +82,7 @@ import type {
   LiveEventListener,
   SnapshotListener,
   MetaIngestorStats as MetaIngestorStatsType,
+  MetaIngestorConfig,
   ChampionMetaWithBalance,
   ChampionMetaListener
 } from '@shared/ontology/ingestion'
@@ -1666,12 +1667,7 @@ export class PantheonEngine {
       fetchAramBalance?: () => Promise<unknown>
       fetchFandomBalance?: () => Promise<Record<string, unknown>>
     },
-    config?: Partial<{
-      cacheTtlMs: number
-      maxCacheSize: number
-      defaultRegion: string
-      defaultTier: string
-    }>
+    config?: Partial<MetaIngestorConfig>
   ): MetaIngestor {
     if (this._metaIngestor) {
       this._metaIngestor.dispose()
