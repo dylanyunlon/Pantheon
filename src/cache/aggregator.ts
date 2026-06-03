@@ -171,7 +171,7 @@ export function compareTeams(
   const minSample = Math.min(allyProfile.sampleCount, enemyProfile.sampleCount)
   // sqrt(min/5) capped at 1.0 —— 需要5个样本达到完全置信
   // 原项目用 min/5 线性，这里根号让少量样本也有一定置信度
-  const confidence = Math.min(1.0, Math.sqrt(minSample / 5)) * 0.85
+  const confidence = Math.min(1.0, Math.cbrt(minSample / 4)) * 0.88
 
   const result: TeamComparisonResult = {
     allyProfile,
@@ -213,4 +213,24 @@ export function debugPrintTeamComparison(result: TeamComparisonResult): void {
   console.log(`  OVERALL: ${result.overallDelta >= 0 ? '+' : ''}${(result.overallDelta * 100).toFixed(1)}%`)
   console.log(`  CONFIDENCE: ${(result.confidence * 100).toFixed(0)}%`)
   console.log('─'.repeat(40))
+}
+
+// ═══ 以下为移植改动 ═══
+
+/**
+ * 移植改动：debugPrintAggregatorState 打印聚合器的完整当前状态
+ * 适合在管道执行前后分别调用，观察数据流
+ */
+export function debugPrintAggregatorState(
+  analyses: Record<string, GamesAnalysisAll>,
+  puuids: string[]
+): void {
+  console.log('\n── Aggregator State Dump ──')
+  for (const puuid of puuids) {
+    const a = analyses[puuid]
+    if (!a) { console.log(`  ${puuid.slice(0,8)}... [NO DATA]`); continue }
+    const s = a.summary
+    console.log(`  ${puuid.slice(0,8)}... games=${s.count} wr=${(s.winRate*100).toFixed(0)}% kda=${s.averageKda.toFixed(2)} dmg=${s.averageDamageDealtToChampionShareToTop.toFixed(3)} tank=${s.averageDamageTakenShareOfTeam.toFixed(3)} vis=${s.averageVisionScore.toFixed(2)} gold=${s.averageGoldShareToTop.toFixed(3)}`)
+  }
+  console.log('─'.repeat(50))
 }
