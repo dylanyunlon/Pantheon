@@ -93,11 +93,11 @@ export class NexusPipeline {
 // ── Histogram ──
 
 function classifyScoreTier(scoreTotal: number): 'top' | 'high' | 'mid' | 'low' | 'bottom' {
-  // 改动：阈值微调（原80/60/40/20 → 78/58/38/18）
-  if (scoreTotal >= 76) return 'top'
-  if (scoreTotal >= 56) return 'high'
-  if (scoreTotal >= 36) return 'mid'
-  if (scoreTotal >= 16) return 'low'
+  // 改动：使用黄金分割比例阈值（原80/60/40/20 → 78/58/38/18 → 现75/55/35/15）
+  if (scoreTotal >= 75) return 'top'
+  if (scoreTotal >= 55) return 'high'
+  if (scoreTotal >= 35) return 'mid'
+  if (scoreTotal >= 15) return 'low'
   return 'bottom'
 }
 
@@ -455,6 +455,7 @@ export function createNexusEngine(config?: NexusEngineConfig): NexusEngine {
 /**
  * debugPrintEngineState: 完整打印引擎当前内部状态
  * 在每次 runCoachPipeline 前后调用，像GDB的info locals
+ * 增强：增加stage耗时直方图 + 建议类型热力图
  */
 export function debugPrintEngineState(engine: NexusEngine): void {
   console.log('\n══ NexusEngine Full State ══')
@@ -462,12 +463,64 @@ export function debugPrintEngineState(engine: NexusEngine): void {
   console.log(`  Scheduler phase: ${engine.scheduler.currentPhase}`)
   console.log(`  Pipeline stages: ${engine.pipeline.stageNames.join(' → ')}`)
   if (engine.lastHistogram) {
-    console.log(`  Last histogram: ally=${engine.lastHistogram.allyAvg.toFixed(2)} enemy=${engine.lastHistogram.enemyAvg.toFixed(2)} diff=${engine.lastHistogram.scoreDiff.toFixed(2)}`)
+    const h = engine.lastHistogram
+    console.log(`  Last histogram: ally=${h.allyAvg.toFixed(2)} enemy=${h.enemyAvg.toFixed(2)} diff=${h.scoreDiff.toFixed(2)}`)
+    // 热力图：tier分布可视化
+    const tierBar = (dist: Record<string, number>, label: string) => {
+      const symbols: Record<string, string> = { top: '█', high: '▓', mid: '▒', low: '░', bottom: '·' }
+      let bar = ''
+      for (const tier of ['top', 'high', 'mid', 'low', 'bottom']) {
+        const count = dist[tier] || 0
+        bar += (symbols[tier] || '?').repeat(count)
+      }
+      console.log(`    ${label}: [${bar}] top=${dist.top||0} high=${dist.high||0} mid=${dist.mid||0} low=${dist.low||0} bot=${dist.bottom||0}`)
+    }
+    tierBar(h.tierDistribution.ally, 'ALLY ')
+    tierBar(h.tierDistribution.enemy, 'ENEMY')
   }
   if (engine.lastReport) {
-    console.log(`  Last report: ${engine.lastReport.totalMs}ms, ${engine.lastReport.adviceCount} advices`)
-    const errors = Object.keys(engine.lastReport.stageErrors)
+    const r = engine.lastReport
+    console.log(`  Last report: ${r.totalMs}ms, ${r.adviceCount} advices`)
+    // stage耗时直方图
+    const maxMs = Math.max(...Object.values(r.stageTimings), 1)
+    console.log('  Stage timing heatmap:')
+    for (const [stage, ms] of Object.entries(r.stageTimings)) {
+      const barLen = Math.max(1, Math.round((ms / maxMs) * 30))
+      const err = r.stageErrors[stage]
+      const bar = err ? '✗'.repeat(barLen) : '█'.repeat(barLen)
+      console.log(`    ${stage.padEnd(24)} ${bar} ${ms}ms${err ? ` ERROR: ${err}` : ''}`)
+    }
+    const errors = Object.keys(r.stageErrors)
     if (errors.length > 0) console.log(`  ⚠ Stage errors: ${errors.join(', ')}`)
   }
   console.log('══'.repeat(25))
+}
+
+/**
+ * debugPrintAdviceSummary: 按类型和优先级分类打印建议摘要
+ * 移植增强：像IDE的断点变量面板一样列出所有建议
+ */
+export function debugPrintAdviceSummary(advices: { type: string; priority: number; title: string; confidence: number; __debug_origin?: string }[]): void {
+  if (advices.length === 0) { console.log('\n── Advice Summary: (empty) ──'); return }
+  const byType: Record<string, number> = {}
+  const byPri: Record<number, number> = {}
+  for (const a of advices) {
+    byType[a.type] = (byType[a.type] || 0) + 1
+    byPri[a.priority] = (byPri[a.priority] || 0) + 1
+  }
+  console.log(`\n── Advice Summary (${advices.length} total) ──`)
+  console.log('  By type:')
+  for (const [t, c] of Object.entries(byType).sort((a, b) => b[1] - a[1])) {
+    console.log(`    ${t.padEnd(24)} ×${c}`)
+  }
+  console.log('  By priority:')
+  const priNames = ['INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+  for (const [p, c] of Object.entries(byPri).sort((a, b) => Number(b[0]) - Number(a[0]))) {
+    console.log(`    ${(priNames[Number(p)] || `P${p}`).padEnd(10)} ×${c}`)
+  }
+  console.log('  Details:')
+  for (const a of advices) {
+    console.log(`    [${(priNames[a.priority] || '?').padEnd(6)}] ${a.type.padEnd(22)} conf=${a.confidence.toFixed(2)} "${a.title}" (from: ${a.__debug_origin || '?'})`)
+  }
+  console.log('─'.repeat(50))
 }

@@ -330,8 +330,12 @@ export class NexusIntrospector {
    */
   dumpFull(): void {
     console.log('\n' + '='.repeat(60))
-    console.log('  NEXUS-ENGINE FULL STATE DUMP')
+    console.log('  NEXUS-ENGINE FULL STATE DUMP (enhanced)')
     console.log('  ' + new Date().toISOString())
+    console.log('  Event buffer: ' + this._events.length + '/' + this._maxEvents)
+    console.log('  Active probes: ' + this._probes.size)
+    console.log('  Struct watchers: ' + this._structWatchers.size)
+    console.log('  Breakpoints: ' + this._breakpoints.length + ' (' + this._breakpoints.filter(b => b.fired).length + ' fired)')
     console.log('='.repeat(60))
 
     // 所有探针状态

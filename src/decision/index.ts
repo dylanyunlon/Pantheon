@@ -41,12 +41,12 @@ export interface CoordinatorConfig {
 }
 
 const DEFAULT_CONFIG: CoordinatorConfig = {
-  feedbackEmaAlpha: 0.18, // 改动：原0.15
+  feedbackEmaAlpha: 0.20, // 改动：原0.15
   minFeedbackSamples: 4,  // 改动：原5
-  fusionTemperature: 1.2,
+  fusionTemperature: 1.15,
   maxFusedAdvices: 10,
   enableFeedbackAdaptation: true,
-  diversityPenalty: 0.12, // 改动：原0.15
+  diversityPenalty: 0.14, // 改动：原0.15
   typeBudget: {}
 }
 

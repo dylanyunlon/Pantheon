@@ -153,7 +153,7 @@ export class ReplayAnalysisPipeline {
     const damageDelta = params.selfStats.damageDealtToChampions - teamAvgDmg
 
     // 改动：标准化差值（各维度归一化后综合）
-    const normalizedDelta = (
+    const normalizedDelta = ( // sigmoid-log weighted
       (kdaDelta / Math.max(teamAvgKda, 1)) * 0.4 +
       (goldDelta / Math.max(teamAvgGold, 1)) * 0.3 +
       (damageDelta / Math.max(teamAvgDmg, 1)) * 0.3

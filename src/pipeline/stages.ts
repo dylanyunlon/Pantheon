@@ -60,7 +60,7 @@ export const stageEnemyWeakness: PipelineStageHandler = (ctx) => {
     const { summary, champions } = analysis
 
     // 改动：阈值从0.4降到0.42，增加梯度置信度
-    if (summary.winRate < 0.42 && summary.count >= 4) {
+    if (summary.winRate < 0.44 && summary.count >= 4) {
       const champId = ctx.championSelections[puuid]
       const champAnalysis = champId ? champions[champId] : null
       const gamesConf = Math.min(summary.count / 12, 1.0)
@@ -73,12 +73,12 @@ export const stageEnemyWeakness: PipelineStageHandler = (ctx) => {
           ? `对方该角色胜率${((champAnalysis.win / Math.max(champAnalysis.count, 1)) * 100).toFixed(0)}%（${champAnalysis.count}局），整体胜率${(summary.winRate * 100).toFixed(0)}%`
           : `对方近期胜率${(summary.winRate * 100).toFixed(0)}%（${summary.count}局），发挥不稳定`,
         evidence: ['winRate', 'championWinRate'],
-        confidence: gamesConf * 0.82,
+        confidence: gamesConf * 0.78,
         audience: 'self'
       })
     }
 
-    if (summary.averageKda < 1.6 && summary.count >= 4) {
+    if (summary.averageKda < 1.7 && summary.count >= 4) {
       advices.push({
         type: AdviceType.ENEMY_WEAKNESS,
         priority: AdvicePriority.MEDIUM,
@@ -120,9 +120,9 @@ export const stageTeamSynergy: PipelineStageHandler = (ctx) => {
     const { summary } = analysis
     const strengths: string[] = []
 
-    if (summary.averageDamageDealtToChampionShareToTop > 0.78) strengths.push('high_damage')
-    if (summary.averageKillParticipationRate > 0.63) strengths.push('high_participation')
-    if (summary.averageVisionScore > 1.4) strengths.push('good_vision')
+    if (summary.averageDamageDealtToChampionShareToTop > 0.76) strengths.push('high_damage')
+    if (summary.averageKillParticipationRate > 0.60) strengths.push('high_participation')
+    if (summary.averageVisionScore > 1.3) strengths.push('good_vision')
 
     if (summary.winningStreak >= 3) {
       strengths.push('hot_streak')
@@ -132,7 +132,7 @@ export const stageTeamSynergy: PipelineStageHandler = (ctx) => {
         title: '队友状态出色',
         message: `队友${summary.winningStreak}连胜，胜率${(summary.winRate * 100).toFixed(0)}%`,
         evidence: ['winningStreak', 'winRate'],
-        confidence: 0.72,
+        confidence: 0.74,
         audience: 'self'
       })
     }
@@ -205,7 +205,7 @@ export const stageMacroStrategy: PipelineStageHandler = (ctx) => {
       title: 'ARAM策略提示',
       message: '注意团战站位，争夺资源，保持经济',
       evidence: ['gameMode_ARAM'],
-      confidence: 0.78,
+      confidence: 0.76,
       audience: 'team'
     })
   }
@@ -293,7 +293,7 @@ export const stageSelfAnalysis: PipelineStageHandler = (ctx) => {
       title: '调整心态',
       message: `已连败${summary.losingStreak}局，放平心态`,
       evidence: ['losingStreak'],
-      confidence: 0.82,
+      confidence: 0.80,
       audience: 'self'
     })
   } else if (summary.winningStreak >= 3) {
@@ -303,7 +303,7 @@ export const stageSelfAnalysis: PipelineStageHandler = (ctx) => {
       title: '状态良好',
       message: `${summary.winningStreak}连胜中`,
       evidence: ['winningStreak'],
-      confidence: 0.88,
+      confidence: 0.85,
       audience: 'self'
     })
   }
@@ -330,7 +330,7 @@ export const stagePremadeDetection: PipelineStageHandler = (ctx) => {
           title: '对方多人组队',
           message: `对方有${group.length}人预组队`,
           evidence: ['premadeTeam_enemy'],
-          confidence: 0.78,
+          confidence: 0.76,
           audience: 'team'
         })
       } else if (group.length === 2) {
@@ -368,7 +368,7 @@ export const stageRankDisparity: PipelineStageHandler = (ctx) => {
         title: '对方有高段位成员',
         message: `对方有${highestEnemy.label}段位成员`,
         evidence: ['rankNumeric_gap'],
-        confidence: 0.88,
+        confidence: 0.85,
         audience: 'team'
       })
     }
@@ -510,7 +510,7 @@ export const stagePlaystyleAdaptation: PipelineStageHandler = (ctx) => {
   if (!selfAnalysis || selfAnalysis.summary.count < 5) return ctx
 
   const { summary } = selfAnalysis
-  const isHighDamage = summary.averageDamageDealtToChampionShareToTop > 0.78
+  const isHighDamage = summary.averageDamageDealtToChampionShareToTop > 0.76
   const isLowDeath = summary.averageKda > 3.8
 
   if (isHighDamage && !isLowDeath) {
@@ -572,7 +572,7 @@ export const stageTrueDamageWarning: PipelineStageHandler = (ctx) => {
       title: '对方真实伤害占比高',
       message: '护甲魔抗效果有限，优先考虑生命值',
       evidence: ['trueDamageShare'],
-      confidence: 0.72,
+      confidence: 0.74,
       audience: 'team'
     })
   }
@@ -633,7 +633,7 @@ export const stageWinCondition: PipelineStageHandler = (ctx) => {
         title: '胜利条件：团战输出',
         message: '我方输出能力强且生存好',
         evidence: ['highDamage', 'highKda'],
-        confidence: 0.72,
+        confidence: 0.74,
         audience: 'team'
       })
     }

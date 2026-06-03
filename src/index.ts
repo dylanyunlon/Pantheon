@@ -1,13 +1,13 @@
 // @ts-nocheck
 /**
- * nexus-engine — 统一公共API
+ * nexus-engine — 统一公共API（移植增强版）
  *
- * 移植自 upstream/src/index.ts
  * 改动：
- *   1. 新增导出 NexusIntrospector, StructWatcher（upstream未实现）
+ *   1. 新增导出 NexusIntrospector, StructWatcher
  *   2. 新增导出所有 debugPrint* 函数
  *   3. 导出 NexusCache facade
- *   4. 重新组织导出顺序（按依赖层级从低到高）
+ *   4. 导出 calculateNexusScore 别名（兼容engine.ts内部引用）
+ *   5. 重新组织导出顺序（按依赖层级从低到高）
  */
 
 // ── Debug / Introspection（最底层）────────────────────────────────
@@ -29,6 +29,7 @@ export { AdvicePriority, AdviceType } from './types'
 export {
   computeKDAScore, computeConsistencyScore, computeStreakBonus,
   computeCSScore, computeCompositePlayerScore,
+  calculateNexusScore,
   debugPrintScoringBreakdown
 } from './core/scoring'
 
@@ -44,7 +45,7 @@ export { NexusScheduler, createNexusScheduler, mapQueryPhaseToGamePhase, debugPr
 
 // ── Pipeline ─────────────────────────────────────────────────────
 export { STAGE_REGISTRY, NEXUS_STAGES, debugPrintStageRegistry } from './pipeline/stages'
-export { NexusPipeline, NexusEngine, createNexusEngine, computeHistogramPass, debugPrintHistogram, debugPrintPipelineReport, debugPrintEngineState, rankToNumeric, rankToLabel } from './pipeline/engine'
+export { NexusPipeline, NexusEngine, createNexusEngine, computeHistogramPass, debugPrintHistogram, debugPrintPipelineReport, debugPrintEngineState, debugPrintAdviceSummary, rankToNumeric, rankToLabel } from './pipeline/engine'
 
 // ── Capture ──────────────────────────────────────────────────────
 export { ExperimentCapture, CaptureRingBuffer, RingBuffer, DistributedAccumulator, createExperimentCapture, debugPrintCaptureStats } from './capture'

@@ -7,7 +7,7 @@
  *   2. normalApproxPValue uses continuity correction (Yates) for small samples
  *   3. computeComparison now computes effect size (Cohen's h) alongside p-value
  *   4. New sequential testing support: optional early stopping via spending function
- *   5. Recommendation thresholds widened: winDelta 0.02→0.025, helpDelta 0.05→0.06
+ *   5. Recommendation thresholds widened: winDelta 0.02→0.028, helpDelta 0.05→0.065
  *   6. Multi-variant support: computeComparison works pairwise across all variants
  *
  * Debug instrumentation:

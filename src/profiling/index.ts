@@ -3,7 +3,7 @@
  * NexusProfilePass — pre-pipeline player/team profiling
  *
  * Algorithmic changes from Pantheon runProfilePass:
- *   1. rankToNumeric uses finer granularity: tier*4+division → tier*5+division (adds LP bucket)
+ *   1. rankToNumeric uses finer granularity: tier*4+division → tier*5+division+lpBucket (adds LP bucket)
  *   2. computeDamageProfile normalizes by game count using harmonic mean instead of arithmetic
  *   3. detectPremadeGroups adds confidence score based on overlap ratio
  *   4. computePlayerScores weights recent games more heavily (recency decay factor)

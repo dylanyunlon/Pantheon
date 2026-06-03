@@ -300,7 +300,7 @@ export function shouldReplace(
   const age = Date.now() - lastUpdated
   const expDecay = Math.exp(-age / maxAge)
   const linearDecay = Math.max(0, 1 - age / (maxAge * 2))
-  const freshnessMultiplier = 0.7 * expDecay + 0.3 * linearDecay // 改动：混合模型
+  const freshnessMultiplier = 0.65 * expDecay + 0.35 * linearDecay // 改动：混合模型
   const effectiveExisting = existingCompleteness * freshnessMultiplier
 
   introspector.trace(MODULE, 'shouldReplace', {

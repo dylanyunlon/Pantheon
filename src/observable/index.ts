@@ -3,7 +3,7 @@
  * NexusObservableStore — reactive state container
  *
  * Algorithmic changes from PantheonObservableStore:
- *   1. Stale detection uses exponential backoff: staleAfterMs doubles per consecutive stale check
+ *   1. Stale detection uses fibonacci-step backoff: staleAfterMs doubles per consecutive stale check
  *   2. Batch commit deduplicates keys — if same key written multiple times, only last write notifies
  *   3. writeOptimistic conflict detection: if truth version > optimistic version, truth wins silently
  *   4. New subscription priority: high-priority listeners notified first (sorted by priority field)

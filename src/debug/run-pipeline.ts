@@ -13,10 +13,12 @@
  * 移植改动:
  *   1. 模拟数据更真实（加入kdaCv、cherry等字段）
  *   2. 每个step之间打印分隔线和耗时
- *   3. 最后打印完整的introspector状态
+ *   3. 增加条件断点演示——当总分漂移超过阈值时自动dump
+ *   4. 增加StructWatcher演示——追踪self评分在不同模拟间的变化
+ *   5. 最后打印完整的introspector状态
  */
 
-import { NexusIntrospector } from './introspector'
+import { NexusIntrospector, StructWatcher } from './introspector'
 import { dumpAllState } from './dump-all'
 
 // ── 模拟数据生成器 ──
@@ -91,8 +93,26 @@ export function runMockPipeline(): void {
   const intro = NexusIntrospector.getInstance()
   const startAll = Date.now()
 
+  // 创建StructWatcher来追踪self评分（移植增强）
+  const selfScoreWatcher = new StructWatcher<{ mockScore: number; kda: number; wr: number }>('self_score_tracker')
+
+  // 注册条件断点（移植增强）：当模拟评分超过80分时自动触发
+  intro.addBreakpoint(
+    'high_score_breakpoint',
+    () => {
+      const snap = selfScoreWatcher.getLastSnapshot()
+      return snap !== null && typeof snap.mockScore === 'number' && snap.mockScore > 80
+    },
+    (i) => {
+      console.log('\n🔴 BREAKPOINT HIT: Self mock score exceeded 80!')
+      console.log('   Dumping introspector state at breakpoint...')
+      selfScoreWatcher.printDiffs(5)
+    },
+    false // 允许多次触发
+  )
+
   console.log('╔══════════════════════════════════════════════════════════════╗')
-  console.log('║       NEXUS-ENGINE — Mock Pipeline Run (移植增强版)          ║')
+  console.log('║       NEXUS-ENGINE — Mock Pipeline Run (移植增强版v2)        ║')
   console.log('║       ' + new Date().toISOString().padEnd(54) + '║')
   console.log('╠══════════════════════════════════════════════════════════════╣')
 
@@ -105,28 +125,39 @@ export function runMockPipeline(): void {
 
   const analyses: Record<string, any> = {}
   for (const puuid of allPuuids) {
-    // 给self一个"偏好"配置让debug更有趣
     const overrides = puuid === selfPuuid
       ? { winRate: 0.52, averageKda: 3.2, losingStreak: 0, winningStreak: 3 }
       : puuid.startsWith('ENMY-0001')
-        ? { winRate: 0.38, averageKda: 1.4, losingStreak: 4 }  // 一个弱的对手
+        ? { winRate: 0.38, averageKda: 1.4, losingStreak: 4 }
         : {}
     analyses[puuid] = mockAnalysis(puuid, overrides)
     const s = analyses[puuid].summary
     console.log(`  ${puuid.padEnd(18)} games=${String(s.count).padStart(2)} wr=${(s.winRate*100).toFixed(0).padStart(2)}% kda=${s.averageKda.toFixed(2).padStart(5)} cs/m=${s.averageCsPerMinute.toFixed(1)} cv=${s.kdaCv.toFixed(2)}`)
   }
 
-  // Step 2: 模拟评分
-  console.log('\n── Step 2: Scoring Pass ──────────────────────────────────────')
+  // Step 2: 模拟评分（使用sigmoid-log公式而非tanh）
+  console.log('\n── Step 2: Scoring Pass (sigmoid-log compression) ────────────')
   intro.checkpoint('mock-run', 'scoring_start', { playerCount: allPuuids.length })
 
   for (const puuid of allPuuids) {
     const a = analyses[puuid]
-    // 简单模拟评分（实际应调用computeCompositePlayerScore）
     const kda = a.summary.averageKda
     const wr = a.summary.winRate
-    const mockScore = Math.min(100, kda * 8 + wr * 40 + a.summary.averageCsPerMinute * 2)
-    console.log(`  ${puuid.padEnd(18)} score=${mockScore.toFixed(1).padStart(5)}  (kda×8=${(kda*8).toFixed(1)} + wr×40=${(wr*40).toFixed(1)} + cs×2=${(a.summary.averageCsPerMinute*2).toFixed(1)})`)
+    const cs = a.summary.averageCsPerMinute
+    const vis = a.summary.averageVisionScore
+    // 改动：使用sigmoid-log混合评分（移植改动）
+    const sigPart = 100 * (1 / (1 + Math.exp(-2.2 * (kda / 100 * 5 - 1))))
+    const logPart = 100 * (0.6 + 0.4 * Math.log1p(wr) / Math.log1p(1.6))
+    const mockScore = Math.min(100, sigPart * 0.4 + logPart * 0.3 + cs * 2 * 0.2 + vis * 10 * 0.1)
+    console.log(`  ${puuid.padEnd(18)} score=${mockScore.toFixed(1).padStart(5)}  (sig=${sigPart.toFixed(1)} log=${logPart.toFixed(1)} cs=${(cs*2).toFixed(1)} vis=${(vis*10).toFixed(1)})`)
+
+    // 追踪self的评分变化
+    if (puuid === selfPuuid) {
+      const diffs = selfScoreWatcher.snap({ mockScore: +mockScore.toFixed(1), kda: +kda.toFixed(2), wr: +wr.toFixed(3) })
+      if (diffs.length > 0) {
+        console.log(`  ↳ StructWatcher diffs: ${diffs.map(d => `${d.field}: ${d.from}→${d.to}`).join(', ')}`)
+      }
+    }
   }
 
   // Step 3: 模拟Pipeline stages
@@ -143,7 +174,6 @@ export function runMockPipeline(): void {
 
   for (const stage of stages) {
     const t0 = Date.now()
-    // 模拟stage工作
     const busyEnd = Date.now() + randInt(1, 4)
     while (Date.now() < busyEnd) { /* busy wait */ }
     const elapsed = Date.now() - t0
@@ -166,10 +196,10 @@ export function runMockPipeline(): void {
   // Step 4: 模拟建议输出
   console.log('\n── Step 4: Generated Advices ─────────────────────────────────')
   const mockAdvices = [
-    { type: 'enemy_weakness', title: '对手近期状态低迷', conf: 0.82, pri: 'HIGH' },
+    { type: 'enemy_weakness', title: '对手近期状态低迷', conf: 0.78, pri: 'HIGH' },
     { type: 'mental', title: '对手连败中', conf: 0.65, pri: 'LOW' },
-    { type: 'macro_strategy', title: '己方整体数据占优', conf: 0.72, pri: 'MEDIUM' },
-    { type: 'self_analysis', title: '拿手角色', conf: 0.88, pri: 'LOW' },
+    { type: 'macro_strategy', title: '己方整体数据占优', conf: 0.74, pri: 'MEDIUM' },
+    { type: 'self_analysis', title: '拿手角色', conf: 0.85, pri: 'LOW' },
     { type: 'lane_matchup', title: '对线对手角色熟练度高', conf: 0.76, pri: 'HIGH' },
   ]
 
@@ -185,7 +215,6 @@ export function runMockPipeline(): void {
     advices: totalAdvices
   })
 
-  // 打印checkpoints
   const checkpoints = intro.getCheckpoints()
   console.log(`  Total checkpoints: ${checkpoints.length}`)
   for (const cp of checkpoints.slice(-10)) {
@@ -193,7 +222,6 @@ export function runMockPipeline(): void {
     console.log(`  ${ts} ${cp.message}`)
   }
 
-  // 事件统计
   const allEvents = intro.getEvents({})
   const levelCounts: Record<string, number> = {}
   for (const e of allEvents) levelCounts[e.level] = (levelCounts[e.level] || 0) + 1
@@ -201,6 +229,14 @@ export function runMockPipeline(): void {
   for (const [level, count] of Object.entries(levelCounts)) {
     console.log(`    ${level}: ${count}`)
   }
+
+  // Step 6: StructWatcher演示
+  console.log('\n── Step 6: StructWatcher Replay ─────────────────────────────')
+  selfScoreWatcher.printDiffs(10)
+
+  // Step 7: 条件断点状态
+  console.log('\n── Step 7: Breakpoint Status ─────────────────────────────────')
+  intro.printReport()
 
   const totalTime = Date.now() - startAll
   console.log(`\n  Total wall time: ${totalTime}ms`)

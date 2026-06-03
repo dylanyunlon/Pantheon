@@ -161,17 +161,17 @@ export function compareTeams(
 
   // 加权总体差值
   const overallDelta =
-    dimensionDeltas.damage * 0.30 +
-    dimensionDeltas.kda * 0.25 +
-    dimensionDeltas.gold * 0.20 +
-    dimensionDeltas.tankiness * 0.15 +
+    dimensionDeltas.damage * 0.28 +
+    dimensionDeltas.kda * 0.27 +
+    dimensionDeltas.gold * 0.18 +
+    dimensionDeltas.tankiness * 0.17 +
     dimensionDeltas.vision * 0.10
 
   // 置信度（改动：使用根号衰减而非线性）
   const minSample = Math.min(allyProfile.sampleCount, enemyProfile.sampleCount)
   // sqrt(min/5) capped at 1.0 —— 需要5个样本达到完全置信
   // 原项目用 min/5 线性，这里根号让少量样本也有一定置信度
-  const confidence = Math.min(1.0, Math.cbrt(minSample / 4)) * 0.88
+  const confidence = Math.min(1.0, Math.cbrt(minSample / 3.5)) * 0.88
 
   const result: TeamComparisonResult = {
     allyProfile,

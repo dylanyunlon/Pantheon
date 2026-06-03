@@ -49,15 +49,15 @@ export interface SchedulerConfig {
 }
 
 const DEFAULT_CONFIG: SchedulerConfig = {
-  adviceTtlMs: 180_000,
-  decayHalfLifeMs: 60_000,
+  adviceTtlMs: 200_000,
+  decayHalfLifeMs: 55_000,
   maxQueueSize: 20,
   deduplicationWindowMs: 30_000,
   phaseTransitionCooldownMs: 5_000,
-  minRelevanceThreshold: 0.12,
+  minRelevanceThreshold: 0.10,
   maxRetries: 2,
-  batchCooldownMs: 3_000,
-  urgentPhaseBoost: 1.3,
+  batchCooldownMs: 2_500,
+  urgentPhaseBoost: 1.35,
   burstWindowMs: 2_000,
   burstThreshold: 6
 }
@@ -184,7 +184,7 @@ export class NexusScheduler {
       const phaseDecay = Math.exp(-phaseAge / this._config.decayHalfLifeMs)
 
       const relevanceScore = phaseRelevance * priorityFactor * advice.confidence *
-        (0.4 + 0.6 * phaseDecay) // 混合：50%固定 + 50%衰减
+        (0.45 + 0.55 * phaseDecay) // 混合：50%固定 + 50%衰减
 
       if (relevanceScore < effectiveThreshold) continue
 
