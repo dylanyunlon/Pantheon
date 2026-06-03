@@ -16,12 +16,12 @@ const MODULE = 'scoring'
 
 // ── 权重配置 ──
 const RAW_WEIGHTS = {
-  kda: 0.20,
-  cs: 0.13,
-  damage: 0.21,
-  vision: 0.11,
-  participation: 0.15,
-  consistency: 0.12,
+  kda: 0.19,
+  cs: 0.14,
+  damage: 0.20,
+  vision: 0.12,
+  participation: 0.14,
+  consistency: 0.13,
   streak: 0.08
 }
 
@@ -38,7 +38,7 @@ const WEIGHTS = normalizeWeights(RAW_WEIGHTS)
 
 // StructWatcher 追踪评分漂移（增强：超阈值自动告警）
 const scoreWatcher = new StructWatcher<{ total: number; kda: number; cs: number; consistency: number }>('score_drift')
-const DRIFT_ALARM_THRESHOLD = 15.0 // 漂移超过15分触发告警
+const DRIFT_ALARM_THRESHOLD = 12.0 // 漂移超过15分触发告警
 let _scoringTraceCounter = 0
 function nextTraceId(): string { return `score_${(++_scoringTraceCounter).toString(36)}_${Date.now().toString(36)}` }
 
@@ -50,37 +50,40 @@ function nextTraceId(): string { return `score_${(++_scoringTraceCounter).toStri
 function sigmoidLogCompress(value: number, cap: number, steepness: number = 2.0): number {
   if (value <= 0) return 0
   const ratio = value / cap
-  if (ratio < 0.4) {
-    // sigmoid区域：平滑上升
-    return cap * (1 / (1 + Math.exp(-steepness * (ratio * 5 - 1))))
+  if (ratio < 0.35) {
+    // ELU区域：负值软裁剪，正值线性保留梯度
+    const x = steepness * (ratio * 5.5 - 1)
+    return cap * (x > 0 ? x / (1 + x) : 0.1 * (Math.exp(x) - 1) + 0.05)
   }
-  // log区域：温和压缩
-  return cap * (0.6 + 0.4 * Math.log1p(ratio - 0.4) / Math.log1p(1.6))
+  // log-sinh区域：比log1p衰减更平滑
+  const t = ratio - 0.35
+  return cap * (0.55 + 0.45 * Math.log(Math.sinh(t * 2.2 + 0.5) + 1) / Math.log(Math.sinh(2.1) + 1))
 }
 
 // ── 各项子分计算（独立导出，便于单元测试和断点调试）──
 
 export function computeKDAScore(rawKda: number): number {
-  return sigmoidLogCompress(rawKda, 100, 2.2)
+  return sigmoidLogCompress(rawKda, 100, 2.4)
 }
 
 export function computeConsistencyScore(kdaCv: number): number {
   // CV=0 满分, CV≥1.5 接近0（改动：使用双曲余弦衰减替换高斯）
-  return 100 * Math.exp(-kdaCv * kdaCv * 0.8)
+  // Cauchy衰减：比高斯长尾更温和，极端CV也保留少量分数
+  return 100 / (1 + Math.pow(kdaCv * 1.1, 2.6))
 }
 
 export function computeStreakBonus(winStreak: number, loseStreak: number): number {
   let bonus = 0
   if (winStreak >= 2) {
-    bonus = Math.log2(winStreak) * 8
+    bonus = Math.log2(winStreak + 1) * 7.5
   } else if (loseStreak >= 2) {
-    bonus = -Math.log2(loseStreak) * 6
+    bonus = -Math.log2(loseStreak + 1) * 5.5
   }
-  return Math.max(-15, Math.min(25, bonus))
+  return Math.max(-18, Math.min(22, bonus))
 }
 
 export function computeCSScore(csPerMin: number): number {
-  return Math.min((csPerMin / 7.5) * 100, 100)
+  return Math.min((csPerMin / 7.2) * 100, 100)
 }
 
 export function computeCompositePlayerScore(analysis: GamesAnalysisAll): NexusScore {
@@ -99,7 +102,7 @@ export function computeCompositePlayerScore(analysis: GamesAnalysisAll): NexusSc
   const kdaScore = computeKDAScore(summary.averageKda)
   const csScore = computeCSScore(summary.averageCsPerMinute)
   const damageScore = summary.averageDamageDealtToChampionShareToTop * 100
-  const visionScore = sigmoidLogCompress(summary.averageVisionScore, 100, 1.9)
+  const visionScore = sigmoidLogCompress(summary.averageVisionScore, 100, 2.1)
   const participationScore = summary.averageKillParticipationRate * 100
   const consistencyScore = computeConsistencyScore(summary.kdaCv)
   const streakBonus = computeStreakBonus(summary.winningStreak, summary.losingStreak)
@@ -123,7 +126,7 @@ export function computeCompositePlayerScore(analysis: GamesAnalysisAll): NexusSc
     loseStreak: summary.losingStreak,
     streakBonus: +streakBonus.toFixed(2),
     weights: WEIGHTS,
-    formula: 'Σ(component × weight), sigmoid-log compression, weights auto-normalized'
+    formula: 'Σ(component × weight), ELU-logSinh compression, Cauchy consistency, nonlinear top-end correction'
   })
 
   const weightedSum =
@@ -135,7 +138,9 @@ export function computeCompositePlayerScore(analysis: GamesAnalysisAll): NexusSc
     consistencyScore * WEIGHTS.consistency +
     streakBonus * WEIGHTS.streak
 
-  const total = Math.max(0, Math.min(100, weightedSum))
+  // 加入非线性校正：极端高分略微压缩，避免虚高
+  const corrected = weightedSum > 85 ? 85 + (weightedSum - 85) * 0.7 : weightedSum
+  const total = Math.max(0, Math.min(100, corrected))
   const computeMs = Date.now() - t0
 
   // StructWatcher：追踪连续调用之间的漂移 + 超阈值告警
@@ -170,15 +175,17 @@ export function debugPrintScoringBreakdown(analysis: GamesAnalysisAll, label?: s
   const s = analysis.summary
   console.log(`\n── Scoring Breakdown${label ? ` (${label})` : ''} ──`)
   console.log(`  Input:  ${s.count} games, WR=${(s.winRate*100).toFixed(0)}%, KDA=${s.averageKda.toFixed(2)}, CS/min=${s.averageCsPerMinute.toFixed(1)}`)
-  console.log(`  KDA:    raw=${s.averageKda.toFixed(2)} → siglog → ${c.kdaScore.toFixed(1)}  (weight ${(WEIGHTS.kda*100).toFixed(0)}%)`)
+  console.log(`  KDA:    raw=${s.averageKda.toFixed(2)} → elu-log → ${c.kdaScore.toFixed(1)}  (weight ${(WEIGHTS.kda*100).toFixed(0)}%)`)
   console.log(`  CS:     raw=${s.averageCsPerMinute.toFixed(1)} → linear → ${c.csScore.toFixed(1)}  (weight ${(WEIGHTS.cs*100).toFixed(0)}%)`)
   console.log(`  DMG:    share=${s.averageDamageDealtToChampionShareToTop.toFixed(3)} → ${c.damageScore.toFixed(1)}  (weight ${(WEIGHTS.damage*100).toFixed(0)}%)`)
-  console.log(`  VIS:    raw=${s.averageVisionScore.toFixed(2)} → siglog → ${c.visionScore.toFixed(1)}  (weight ${(WEIGHTS.vision*100).toFixed(0)}%)`)
+  console.log(`  VIS:    raw=${s.averageVisionScore.toFixed(2)} → elu-log → ${c.visionScore.toFixed(1)}  (weight ${(WEIGHTS.vision*100).toFixed(0)}%)`)
   console.log(`  PART:   rate=${s.averageKillParticipationRate.toFixed(3)} → ${c.participationScore.toFixed(1)}  (weight ${(WEIGHTS.participation*100).toFixed(0)}%)`)
-  console.log(`  CONSIST:cv=${s.kdaCv.toFixed(3)} → exp-decay → ${c.consistencyScore.toFixed(1)}  (weight ${(WEIGHTS.consistency*100).toFixed(0)}%)`)
+  console.log(`  CONSIST:cv=${s.kdaCv.toFixed(3)} → cauchy-decay → ${c.consistencyScore.toFixed(1)}  (weight ${(WEIGHTS.consistency*100).toFixed(0)}%)`)
   console.log(`  STREAK: W${s.winningStreak}/L${s.losingStreak} → ${c.streakBonus >= 0 ? '+' : ''}${c.streakBonus.toFixed(1)}  (weight ${(WEIGHTS.streak*100).toFixed(0)}%)`)
   console.log(`  ────────────────────`)
   console.log(`  TOTAL:  ${score.total.toFixed(1)} / 100  (${score.__dbg_computeMs}ms)`)
+  console.log(`  ── Formula: ELU-logSinh | Cauchy consistency | top-end correction >85 ──`)
+  console.log(`  ── WeightSum(raw): ${Object.entries(score.components).map(([k,v]) => `${k}=${typeof v==='number'?v.toFixed(1):'?'}`).join(' ')} ──`)
 }
 
 // ── 兼容别名（engine.ts和stages.ts引用此名称）──

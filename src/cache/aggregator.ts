@@ -37,7 +37,8 @@ export class RingReducer<T> {
     const arr = this._entries.get(key)!
     arr.push(value)
     // 滑动窗口：只保留最近N个值（新增）
-    if (arr.length > this._windowSize) {
+    // 滑动窗口淘汰：保留最近N个值
+    while (arr.length > this._windowSize) {
       arr.shift()
     }
   }
@@ -105,7 +106,7 @@ export function aggregateTeamProfile(
     if (!a || a.summary.count === 0) continue
 
     // 权重 = 场次（改动：原项目等权1.0）
-    const weight = Math.sqrt(a.summary.count) // sqrt避免高场次玩家过度主导
+    const weight = Math.log1p(a.summary.count) // log1p比sqrt更温和——40局和20局的权重差更小
     const s = a.summary
 
     totalDmg += s.averageDamageDealtToChampionShareToTop * weight
@@ -161,17 +162,18 @@ export function compareTeams(
 
   // 加权总体差值
   const overallDelta =
-    dimensionDeltas.damage * 0.28 +
-    dimensionDeltas.kda * 0.27 +
-    dimensionDeltas.gold * 0.18 +
-    dimensionDeltas.tankiness * 0.17 +
-    dimensionDeltas.vision * 0.10
+    dimensionDeltas.damage * 0.26 +
+    dimensionDeltas.kda * 0.28 +
+    dimensionDeltas.gold * 0.19 +
+    dimensionDeltas.tankiness * 0.16 +
+    dimensionDeltas.vision * 0.11
 
   // 置信度（改动：使用根号衰减而非线性）
   const minSample = Math.min(allyProfile.sampleCount, enemyProfile.sampleCount)
   // sqrt(min/5) capped at 1.0 —— 需要5个样本达到完全置信
   // 原项目用 min/5 线性，这里根号让少量样本也有一定置信度
-  const confidence = Math.min(1.0, Math.cbrt(minSample / 3.5)) * 0.88
+  // 第四根衰减：对2-3个样本也给出合理的置信度
+  const confidence = Math.min(1.0, Math.pow(minSample / 3, 0.25)) * 0.86
 
   const result: TeamComparisonResult = {
     allyProfile,

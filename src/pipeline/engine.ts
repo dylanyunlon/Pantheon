@@ -94,10 +94,11 @@ export class NexusPipeline {
 
 function classifyScoreTier(scoreTotal: number): 'top' | 'high' | 'mid' | 'low' | 'bottom' {
   // 改动：使用黄金分割比例阈值（原80/60/40/20 → 78/58/38/18 → 现75/55/35/15）
-  if (scoreTotal >= 75) return 'top'
-  if (scoreTotal >= 55) return 'high'
-  if (scoreTotal >= 35) return 'mid'
-  if (scoreTotal >= 15) return 'low'
+  // 非均匀tier——上层区间更紧凑，区分度更高
+  if (scoreTotal >= 78) return 'top'
+  if (scoreTotal >= 58) return 'high'
+  if (scoreTotal >= 32) return 'mid'
+  if (scoreTotal >= 12) return 'low'
   return 'bottom'
 }
 
@@ -107,13 +108,25 @@ function computeTeamScorePass(
 ): { total: number; count: number; perPlayer: Record<string, NexusScore> } {
   let total = 0, count = 0
   const perPlayer: Record<string, NexusScore> = {}
+  const allScores: number[] = []
   for (const puuid of puuids) {
     const analysis = analyses[puuid]
     if (!analysis) continue
     const score = calculateNexusScore(analysis)
     perPlayer[puuid] = score
+    allScores.push(score.total)
     total += score.total
     count++
+  }
+  // 鲁棒均值：去掉最高最低后取平均（如果样本>=3）
+  let robustTotal = total
+  if (allScores.length >= 3) {
+    allScores.sort((a, b) => a - b)
+    robustTotal = allScores.slice(1, -1).reduce((s, v) => s + v, 0)
+    // 混合：70% 鲁棒均值 + 30% 原始均值
+    const robustAvg = robustTotal / (allScores.length - 2)
+    const rawAvg = total / count
+    total = (robustAvg * 0.7 + rawAvg * 0.3) * count
   }
   return { total, count, perPlayer }
 }
@@ -206,8 +219,11 @@ export class RingAggregator {
 
     const breakdown: Record<string, number> = {}
     let score = 0
-    for (const d of this._dims) {
-      const contrib = (d.value * d.weight) / totalWeight
+    for (let i = 0; i < this._dims.length; i++) {
+      const d = this._dims[i]
+      // 位置衰减：后添加的维度权重略大（recency bias 5%）
+      const positionBoost = 1 + (i / Math.max(this._dims.length - 1, 1)) * 0.05
+      const contrib = (d.value * d.weight * positionBoost) / totalWeight
       breakdown[d.name] = contrib
       score += contrib
     }
@@ -493,6 +509,11 @@ export function debugPrintEngineState(engine: NexusEngine): void {
     const errors = Object.keys(r.stageErrors)
     if (errors.length > 0) console.log(`  ⚠ Stage errors: ${errors.join(', ')}`)
   }
+  // 打印JSON序列化后的大致内存占用
+  try {
+    const stateJson = JSON.stringify(introspector.getAllProbeStates())
+    console.log(`  Memory estimate: ~${(stateJson.length * 2 / 1024).toFixed(1)}KB (probe state JSON × 2)`)
+  } catch { console.log('  Memory estimate: <serialization failed>') }
   console.log('══'.repeat(25))
 }
 
@@ -522,5 +543,11 @@ export function debugPrintAdviceSummary(advices: { type: string; priority: numbe
   for (const a of advices) {
     console.log(`    [${(priNames[a.priority] || '?').padEnd(6)}] ${a.type.padEnd(22)} conf=${a.confidence.toFixed(2)} "${a.title}" (from: ${a.__debug_origin || '?'})`)
   }
+  // 置信度分布统计
+  const confs = advices.map(a => a.confidence)
+  const avgConf = confs.reduce((s, c) => s + c, 0) / confs.length
+  const maxConf = Math.max(...confs)
+  const minConf = Math.min(...confs)
+  console.log(`  Confidence: avg=${avgConf.toFixed(3)} min=${minConf.toFixed(3)} max=${maxConf.toFixed(3)}`)
   console.log('─'.repeat(50))
 }

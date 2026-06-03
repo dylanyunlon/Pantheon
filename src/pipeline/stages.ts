@@ -35,6 +35,7 @@ function finalizeStage(
   }
 
   const stageTimings = { ...(ctx.__debug_stageTimings ?? {}) }
+  stageTimings[stageName] = Date.now() // 记录stage完成时刻——可与下一个stage的start做差
 
   introspector.checkpoint(MODULE, `stage_${stageName}_done`, {
     advicesGenerated: newAdvices.length,
@@ -60,7 +61,7 @@ export const stageEnemyWeakness: PipelineStageHandler = (ctx) => {
     const { summary, champions } = analysis
 
     // 改动：阈值从0.4降到0.42，增加梯度置信度
-    if (summary.winRate < 0.44 && summary.count >= 4) {
+    if (summary.winRate < 0.46 && summary.count >= 4) {
       const champId = ctx.championSelections[puuid]
       const champAnalysis = champId ? champions[champId] : null
       const gamesConf = Math.min(summary.count / 12, 1.0)
@@ -78,7 +79,7 @@ export const stageEnemyWeakness: PipelineStageHandler = (ctx) => {
       })
     }
 
-    if (summary.averageKda < 1.7 && summary.count >= 4) {
+    if (summary.averageKda < 1.8 && summary.count >= 4) {
       advices.push({
         type: AdviceType.ENEMY_WEAKNESS,
         priority: AdvicePriority.MEDIUM,
@@ -92,7 +93,8 @@ export const stageEnemyWeakness: PipelineStageHandler = (ctx) => {
 
     // 改动：连败检测降低到2场但置信度渐进
     if (summary.losingStreak >= 2) {
-      const streakConf = Math.min(0.3 + summary.losingStreak * 0.12, 0.8)
+      // 使用sigmoid饱和而非线性截断
+      const streakConf = 0.8 / (1 + Math.exp(-0.6 * (summary.losingStreak - 3)))
       advices.push({
         type: AdviceType.MENTAL,
         priority: summary.losingStreak >= 4 ? AdvicePriority.MEDIUM : AdvicePriority.LOW,
@@ -120,9 +122,9 @@ export const stageTeamSynergy: PipelineStageHandler = (ctx) => {
     const { summary } = analysis
     const strengths: string[] = []
 
-    if (summary.averageDamageDealtToChampionShareToTop > 0.76) strengths.push('high_damage')
-    if (summary.averageKillParticipationRate > 0.60) strengths.push('high_participation')
-    if (summary.averageVisionScore > 1.3) strengths.push('good_vision')
+    if (summary.averageDamageDealtToChampionShareToTop > 0.74) strengths.push('high_damage')
+    if (summary.averageKillParticipationRate > 0.58) strengths.push('high_participation')
+    if (summary.averageVisionScore > 1.2) strengths.push('good_vision')
 
     if (summary.winningStreak >= 3) {
       strengths.push('hot_streak')
@@ -164,9 +166,10 @@ export const stageMacroStrategy: PipelineStageHandler = (ctx) => {
   const diff = ctx.histogram.scoreDiff
   const sampleCount = Math.min(ctx.histogram.allyScoreCount, ctx.histogram.enemyScoreCount)
   // 改动：置信度计算用sqrt衰减
-  const baseConfidence = Math.min(Math.sqrt(sampleCount / 4), 1.0) * 0.72
+  // cbrt衰减：小样本也能给出中等置信度
+  const baseConfidence = Math.min(Math.cbrt(sampleCount / 3), 1.0) * 0.70
 
-  if (diff > 2.5) {
+  if (diff > 3.0) {
     advices.push({
       type: AdviceType.MACRO_STRATEGY,
       priority: AdvicePriority.MEDIUM,
@@ -176,7 +179,7 @@ export const stageMacroStrategy: PipelineStageHandler = (ctx) => {
       confidence: baseConfidence,
       audience: 'team'
     })
-  } else if (diff < -2.5) {
+  } else if (diff < -3.0) {
     advices.push({
       type: AdviceType.MACRO_STRATEGY,
       priority: AdvicePriority.HIGH,
@@ -250,7 +253,7 @@ export const stageSelfAnalysis: PipelineStageHandler = (ctx) => {
     const champData = champions[selfChampId]
     if (champData && champData.count >= 3) {
       const wr = champData.win / champData.count
-      if (wr > 0.60) {
+      if (wr > 0.58) {
         advices.push({
           type: AdviceType.MENTAL,
           priority: AdvicePriority.LOW,
@@ -537,7 +540,7 @@ export const stageGoldEfficiency: PipelineStageHandler = (ctx) => {
   if (!selfAnalysis) return ctx
 
   const goldEff = selfAnalysis.summary.averageDamageGoldEfficiency
-  if (goldEff < 0.62 && selfAnalysis.summary.count >= 5) {
+  if (goldEff < 0.60 && selfAnalysis.summary.count >= 5) {
     advices.push({
       type: AdviceType.GOLD_EFFICIENCY,
       priority: AdvicePriority.MEDIUM,
@@ -651,7 +654,7 @@ export const stageKdaTrend: PipelineStageHandler = (ctx) => {
 
   const { summary } = selfAnalysis
 
-  if (summary.kdaCv > 0.70 && summary.count >= 5) {
+  if (summary.kdaCv > 0.65 && summary.count >= 5) {
     advices.push({
       type: AdviceType.KDA_TREND,
       priority: AdvicePriority.MEDIUM,

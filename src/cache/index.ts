@@ -95,8 +95,10 @@ export class NexusCacheLayer<T> {
       if (this._clockIdx >= this._clockHand.length) this._clockIdx = 0
       const candidate = this._clockHand[this._clockIdx]
 
-      if (this._refBits.get(candidate)) {
-        // 给第二次机会
+      const entry = this._data.get(candidate)
+      const entryAge = entry ? Date.now() - entry.lastUpdated : Infinity
+      if (this._refBits.get(candidate) && entryAge < 60_000) {
+        // 给第二次机会（但超过60秒的老条目直接淘汰）
         this._refBits.set(candidate, false)
         this._clockIdx++
       } else {
@@ -233,6 +235,15 @@ export class NexusRefCounts<T> {
     if (collected > 0) {
       introspector.debug(MODULE, `GC collected ${collected} entries, remaining ${this._gcMap.size}`)
     }
+    // 调试：每10次GC打印一次完整状态
+    if (this._gcStats.gcRuns % 10 === 0 && this._gcStats.gcRuns > 0) {
+      introspector.checkpoint(MODULE, 'gc_periodic_report', {
+        runs: this._gcStats.gcRuns,
+        totalCollected: this._gcStats.collected,
+        trackedKeys: this._refCounts.size,
+        pendingGc: this._gcMap.size
+      })
+    }
   }
 
   startAutoGc(intervalMs: number = 5000): void {
@@ -268,11 +279,11 @@ export function canonicalizeCacheKey(params: CacheKeyParams): string {
     pos: [...params.positionAvailability].sort()
   }
   const str = JSON.stringify(sorted)
-  let hash = 0
+  // FNV-1a hash（比djb2碰撞率更低）
+  let hash = 0x811c9dc5
   for (let i = 0; i < str.length; i++) {
-    const ch = str.charCodeAt(i)
-    hash = ((hash << 5) - hash) + ch
-    hash |= 0
+    hash ^= str.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
   }
   return `nx_${Math.abs(hash).toString(36)}_${params.gamePhase}`
 }
@@ -300,7 +311,9 @@ export function shouldReplace(
   const age = Date.now() - lastUpdated
   const expDecay = Math.exp(-age / maxAge)
   const linearDecay = Math.max(0, 1 - age / (maxAge * 2))
-  const freshnessMultiplier = 0.65 * expDecay + 0.35 * linearDecay // 改动：混合模型
+  // 三段混合：指数+线性+余弦退火
+  const cosDecay = 0.5 * (1 + Math.cos(Math.PI * Math.min(age / (maxAge * 2), 1)))
+  const freshnessMultiplier = 0.55 * expDecay + 0.25 * linearDecay + 0.20 * cosDecay // 改动：混合模型
   const effectiveExisting = existingCompleteness * freshnessMultiplier
 
   introspector.trace(MODULE, 'shouldReplace', {

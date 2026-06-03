@@ -45,10 +45,10 @@ export interface InferenceConfig {
 const DEFAULT_CONFIG: InferenceConfig = {
   backend: 'rule-engine',
   modelPath: null,
-  minConfidenceThreshold: 0.22, // 改动：原0.3
+  minConfidenceThreshold: 0.20, // 改动：原0.3
   maxPredictions: 8,
   fallbackToRules: true,
-  ensembleWeight: 0.65,
+  ensembleWeight: 0.62,
   timeoutMs: 500
 }
 
@@ -254,7 +254,7 @@ export class NexusInferenceEngine {
 
     if (fv.selfWinRate < 0.42 && fv.selfLosingStreak >= 2) {
       predictions.push({
-        adviceType: 'mental', score: 0.76 + fv.selfLosingStreak * 0.03,
+        adviceType: 'mental', score: 0.74 + fv.selfLosingStreak * 0.035,
         priority: 1, confidence: Math.min(0.88, 0.58 + fv.dataCompletenessRatio * 0.3),
         reasoning: ['losing_streak', 'low_winrate']
       })
@@ -262,13 +262,13 @@ export class NexusInferenceEngine {
 
     if (fv.overallDelta > 0.04) {
       predictions.push({
-        adviceType: 'macro_strategy', score: 0.50 + fv.overallDelta * 2.0,
+        adviceType: 'macro_strategy', score: 0.52 + fv.overallDelta * 1.8,
         priority: 2, confidence: fv.comparisonConfidence * 0.78,
         reasoning: ['team_advantage', `delta=${fv.overallDelta.toFixed(3)}`]
       })
     } else if (fv.overallDelta < -0.04) {
       predictions.push({
-        adviceType: 'macro_strategy', score: 0.48 + Math.abs(fv.overallDelta) * 2.2,
+        adviceType: 'macro_strategy', score: 0.46 + Math.abs(fv.overallDelta) * 2.4,
         priority: 1, confidence: fv.comparisonConfidence * 0.78,
         reasoning: ['team_disadvantage', `delta=${fv.overallDelta.toFixed(3)}`]
       })
@@ -300,7 +300,7 @@ export class NexusInferenceEngine {
     return {
       predictions: predictions.slice(0, this._config.maxPredictions),
       latencyMs: 0,
-      modelId: 'rule-engine-v3', // 改动：版本号v2
+      modelId: 'rule-engine-v4', // 改动：版本号v2
       featureHash: fvHash
     }
   }

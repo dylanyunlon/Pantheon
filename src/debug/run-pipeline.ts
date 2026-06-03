@@ -101,10 +101,10 @@ export function runMockPipeline(): void {
     'high_score_breakpoint',
     () => {
       const snap = selfScoreWatcher.getLastSnapshot()
-      return snap !== null && typeof snap.mockScore === 'number' && snap.mockScore > 80
+      return snap !== null && typeof snap.mockScore === 'number' && snap.mockScore > 75
     },
     (i) => {
-      console.log('\n🔴 BREAKPOINT HIT: Self mock score exceeded 80!')
+      console.log('\n🔴 BREAKPOINT HIT: Self mock score exceeded 75!')
       console.log('   Dumping introspector state at breakpoint...')
       selfScoreWatcher.printDiffs(5)
     },
@@ -112,7 +112,7 @@ export function runMockPipeline(): void {
   )
 
   console.log('╔══════════════════════════════════════════════════════════════╗')
-  console.log('║       NEXUS-ENGINE — Mock Pipeline Run (移植增强版v2)        ║')
+  console.log('║       NEXUS-ENGINE — Mock Pipeline Run (nexus-engine v2.1)        ║')
   console.log('║       ' + new Date().toISOString().padEnd(54) + '║')
   console.log('╠══════════════════════════════════════════════════════════════╣')
 
@@ -136,7 +136,7 @@ export function runMockPipeline(): void {
   }
 
   // Step 2: 模拟评分（使用sigmoid-log公式而非tanh）
-  console.log('\n── Step 2: Scoring Pass (sigmoid-log compression) ────────────')
+  console.log('\n── Step 2: Scoring Pass (ELU-logSinh compression) ────────────')
   intro.checkpoint('mock-run', 'scoring_start', { playerCount: allPuuids.length })
 
   for (const puuid of allPuuids) {
@@ -146,8 +146,11 @@ export function runMockPipeline(): void {
     const cs = a.summary.averageCsPerMinute
     const vis = a.summary.averageVisionScore
     // 改动：使用sigmoid-log混合评分（移植改动）
-    const sigPart = 100 * (1 / (1 + Math.exp(-2.2 * (kda / 100 * 5 - 1))))
-    const logPart = 100 * (0.6 + 0.4 * Math.log1p(wr) / Math.log1p(1.6))
+    // ELU-logSinh 评分（与scoring.ts保持一致）
+    const x = 2.4 * (kda / 100 * 5.5 - 1)
+    const sigPart = 100 * (x > 0 ? x / (1 + x) : 0.1 * (Math.exp(x) - 1) + 0.05)
+    const t = Math.max(wr - 0.35, 0)
+    const logPart = 100 * (0.55 + 0.45 * Math.log(Math.sinh(t * 2.2 + 0.5) + 1) / Math.log(Math.sinh(2.1) + 1))
     const mockScore = Math.min(100, sigPart * 0.4 + logPart * 0.3 + cs * 2 * 0.2 + vis * 10 * 0.1)
     console.log(`  ${puuid.padEnd(18)} score=${mockScore.toFixed(1).padStart(5)}  (sig=${sigPart.toFixed(1)} log=${logPart.toFixed(1)} cs=${(cs*2).toFixed(1)} vis=${(vis*10).toFixed(1)})`)
 

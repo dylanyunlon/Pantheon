@@ -28,8 +28,8 @@ export interface StreamServerConfig {
 }
 
 const DEFAULT_CONFIG: StreamServerConfig = {
-  maxMessageHistory: 200,
-  heartbeatIntervalMs: 30_000,
+  maxMessageHistory: 250,
+  heartbeatIntervalMs: 25_000,
   enableMessageTrace: true
 }
 

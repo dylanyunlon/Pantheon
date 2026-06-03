@@ -41,12 +41,12 @@ export interface CoordinatorConfig {
 }
 
 const DEFAULT_CONFIG: CoordinatorConfig = {
-  feedbackEmaAlpha: 0.20, // 改动：原0.15
-  minFeedbackSamples: 4,  // 改动：原5
-  fusionTemperature: 1.15,
+  feedbackEmaAlpha: 0.22, // 改动：原0.15
+  minFeedbackSamples: 3,  // 改动：原5
+  fusionTemperature: 1.10,
   maxFusedAdvices: 10,
   enableFeedbackAdaptation: true,
-  diversityPenalty: 0.14, // 改动：原0.15
+  diversityPenalty: 0.16, // 改动：原0.15
   typeBudget: {}
 }
 
@@ -162,7 +162,7 @@ export class DecisionCoordinator {
     this._totalFusions++
 
     // 改动：融合温度自适应（建议越多温度越高，减少过度集中）
-    const adaptedTemp = this._config.fusionTemperature + Math.log2(Math.max(advices.length, 1)) * 0.1
+    const adaptedTemp = this._config.fusionTemperature + Math.log2(Math.max(advices.length, 1)) * 0.08
 
     const rawScores = advices.map(a => {
       const priorityFactor = 1 - (a.priority / 5)
