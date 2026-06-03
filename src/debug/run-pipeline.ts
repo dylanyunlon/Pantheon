@@ -1,138 +1,213 @@
 // @ts-nocheck
 /**
- * NexusRunPipeline — standalone script to run the full pipeline with mock data
+ * Mock Pipeline Runner — 用模拟数据跑完整pipeline并打印所有调试信息
  *
- * Usage: npx ts-node src/debug/run-pipeline.ts
+ * 这是最核心的"实验反馈"工具。运行它就像在真实环境里打断点:
+ *   1. 生成模拟的10人对局数据
+ *   2. 通过NexusEngine跑完整pipeline
+ *   3. 打印每个stage的耗时、建议生成结果、评分明细
+ *   4. 最后调用dumpAllState做全量状态快照
  *
- * Creates mock player/game data, runs the full NexusEngine pipeline,
- * and prints all intermediate results with debug probes.
+ * 用法: npx ts-node src/debug/run-pipeline.ts
+ *
+ * 移植改动:
+ *   1. 模拟数据更真实（加入kdaCv、cherry等字段）
+ *   2. 每个step之间打印分隔线和耗时
+ *   3. 最后打印完整的introspector状态
  */
 
 import { NexusIntrospector } from './introspector'
+import { dumpAllState } from './dump-all'
 
-// Mock data generators
-function mockPlayerAnalysis(puuid: string, overrides: Record<string, any> = {}): any {
+// ── 模拟数据生成器 ──
+
+function rand(min: number, max: number): number {
+  return min + Math.random() * (max - min)
+}
+
+function randInt(min: number, max: number): number {
+  return Math.floor(rand(min, max))
+}
+
+function mockSummary(overrides: Record<string, any> = {}): any {
+  const kills = rand(3, 12)
+  const deaths = rand(2, 8)
+  const assists = rand(4, 14)
+  const kda = (kills + assists) / Math.max(deaths, 1)
+  const games = randInt(8, 40)
+  const wins = Math.floor(games * rand(0.3, 0.7))
+
   return {
-    puuid,
-    summary: {
-      averageKDA: 2.5 + Math.random() * 3,
-      averageKills: 5 + Math.random() * 5,
-      averageDeaths: 4 + Math.random() * 3,
-      averageAssists: 7 + Math.random() * 5,
-      averageCreepScore: 150 + Math.random() * 80,
-      winRate: 0.45 + Math.random() * 0.15,
-      gamesPlayed: 20 + Math.floor(Math.random() * 80),
-      averagePhysicalDamageDealtToChampionShareOfTeam: 0.15 + Math.random() * 0.15,
-      averageMagicDamageDealtToChampionShareOfTeam: 0.1 + Math.random() * 0.15,
-      averageTrueDamageDealtToChampionShareOfTeam: 0.03 + Math.random() * 0.05,
-      ...overrides
+    count: games,
+    winRate: wins / games,
+    averageKda: kda,
+    averageKd: kills / Math.max(deaths, 1),
+    averageKills: kills,
+    averageDeaths: deaths,
+    averageAssists: assists,
+    averageCsPerMinute: rand(4.5, 9.0),
+    averageVisionScore: rand(0.8, 2.8),
+    averageKillParticipationRate: rand(0.4, 0.8),
+    averageDamageDealtToChampionShareToTop: rand(0.5, 1.0),
+    averageDamageTakenShareOfTeam: rand(0.1, 0.35),
+    averageGoldShareToTop: rand(0.6, 1.0),
+    averageDamageGoldEfficiency: rand(0.5, 1.2),
+    averageTrueDamageDealtToChampionShareOfTeam: rand(0.02, 0.12),
+    winningStreak: Math.random() > 0.6 ? randInt(0, 6) : 0,
+    losingStreak: Math.random() > 0.6 ? randInt(0, 5) : 0,
+    kdaCv: rand(0.2, 1.2),
+    cherry: {
+      count: randInt(0, 8),
+      top1Rate: rand(0.1, 0.4),
+      avgPlacement: rand(2, 6)
     },
-    recentMatches: Array.from({ length: 5 }, (_, i) => ({
-      matchId: `MOCK-${Date.now()}-${i}`,
-      win: Math.random() > 0.5,
-      kills: Math.floor(Math.random() * 10),
-      deaths: Math.floor(Math.random() * 8),
-      assists: Math.floor(Math.random() * 12),
-      creepScore: 100 + Math.floor(Math.random() * 150)
-    }))
+    ...overrides
   }
 }
 
-function mockRankedData(puuid: string, tier: string, division: string): any {
-  return {
-    data: {
-      queueMap: {
-        RANKED_SOLO_5x5: { tier, division, leaguePoints: Math.floor(Math.random() * 100) }
-      }
+function mockAnalysis(puuid: string, overrides: Record<string, any> = {}): any {
+  const champIds = [1, 22, 67, 157, 238, 412]
+  const champions: Record<number, any> = {}
+  for (const cid of champIds.slice(0, randInt(2, 5))) {
+    const count = randInt(3, 15)
+    champions[cid] = {
+      championId: cid,
+      count,
+      win: Math.floor(count * rand(0.3, 0.7)),
+      kda: rand(1.5, 5.0),
+      cs: rand(120, 250)
     }
   }
+  return {
+    puuid,
+    summary: mockSummary(overrides),
+    champions
+  }
 }
 
+// ── 主函数 ──
+
 export function runMockPipeline(): void {
-  const introspector = NexusIntrospector.getInstance()
+  const intro = NexusIntrospector.getInstance()
+  const startAll = Date.now()
 
-  console.log('╔══════════════════════════════════════════════════════╗')
-  console.log('║       NEXUS-ENGINE — Mock Pipeline Run              ║')
-  console.log('║       Started at: ' + new Date().toISOString().padEnd(34) + '║')
-  console.log('╠══════════════════════════════════════════════════════╣')
+  console.log('╔══════════════════════════════════════════════════════════════╗')
+  console.log('║       NEXUS-ENGINE — Mock Pipeline Run (移植增强版)          ║')
+  console.log('║       ' + new Date().toISOString().padEnd(54) + '║')
+  console.log('╠══════════════════════════════════════════════════════════════╣')
 
-  // Generate mock data
-  const selfPuuid = 'SELF-MOCK-001'
-  const allyPuuids = ['ALLY-MOCK-002', 'ALLY-MOCK-003', 'ALLY-MOCK-004', 'ALLY-MOCK-005']
-  const enemyPuuids = ['ENEMY-MOCK-001', 'ENEMY-MOCK-002', 'ENEMY-MOCK-003', 'ENEMY-MOCK-004', 'ENEMY-MOCK-005']
+  // Step 1: 生成模拟玩家
+  console.log('\n── Step 1: Generate Mock Players ─────────────────────────────')
+  const selfPuuid = 'SELF-0001-MOCK'
+  const allyPuuids = ['ALLY-0002-MOCK', 'ALLY-0003-MOCK', 'ALLY-0004-MOCK', 'ALLY-0005-MOCK']
+  const enemyPuuids = ['ENMY-0001-MOCK', 'ENMY-0002-MOCK', 'ENMY-0003-MOCK', 'ENMY-0004-MOCK', 'ENMY-0005-MOCK']
+  const allPuuids = [selfPuuid, ...allyPuuids, ...enemyPuuids]
 
-  console.log('\n── Step 1: Generate Mock Player Data ───────────────────')
-  const players: Record<string, any> = {}
-  for (const puuid of [selfPuuid, ...allyPuuids, ...enemyPuuids]) {
-    players[puuid] = mockPlayerAnalysis(puuid)
-    console.log(`  [${puuid.substring(0, 15)}] KDA=${players[puuid].summary.averageKDA.toFixed(2)} WR=${(players[puuid].summary.winRate * 100).toFixed(0)}%`)
+  const analyses: Record<string, any> = {}
+  for (const puuid of allPuuids) {
+    // 给self一个"偏好"配置让debug更有趣
+    const overrides = puuid === selfPuuid
+      ? { winRate: 0.52, averageKda: 3.2, losingStreak: 0, winningStreak: 3 }
+      : puuid.startsWith('ENMY-0001')
+        ? { winRate: 0.38, averageKda: 1.4, losingStreak: 4 }  // 一个弱的对手
+        : {}
+    analyses[puuid] = mockAnalysis(puuid, overrides)
+    const s = analyses[puuid].summary
+    console.log(`  ${puuid.padEnd(18)} games=${String(s.count).padStart(2)} wr=${(s.winRate*100).toFixed(0).padStart(2)}% kda=${s.averageKda.toFixed(2).padStart(5)} cs/m=${s.averageCsPerMinute.toFixed(1)} cv=${s.kdaCv.toFixed(2)}`)
   }
 
-  console.log('\n── Step 2: Generate Mock Ranked Data ───────────────────')
-  const tiers = ['GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'GOLD', 'PLATINUM', 'SILVER', 'GOLD', 'EMERALD', 'DIAMOND']
-  const divisions = ['IV', 'III', 'II', 'I']
-  const rankedStats: Record<string, any> = {}
-  for (let i = 0; i < [selfPuuid, ...allyPuuids, ...enemyPuuids].length; i++) {
-    const puuid = [selfPuuid, ...allyPuuids, ...enemyPuuids][i]
-    const tier = tiers[i % tiers.length]
-    const div = divisions[Math.floor(Math.random() * 4)]
-    rankedStats[puuid] = mockRankedData(puuid, tier, div)
-    console.log(`  [${puuid.substring(0, 15)}] ${tier} ${div}`)
+  // Step 2: 模拟评分
+  console.log('\n── Step 2: Scoring Pass ──────────────────────────────────────')
+  intro.checkpoint('mock-run', 'scoring_start', { playerCount: allPuuids.length })
+
+  for (const puuid of allPuuids) {
+    const a = analyses[puuid]
+    // 简单模拟评分（实际应调用computeCompositePlayerScore）
+    const kda = a.summary.averageKda
+    const wr = a.summary.winRate
+    const mockScore = Math.min(100, kda * 8 + wr * 40 + a.summary.averageCsPerMinute * 2)
+    console.log(`  ${puuid.padEnd(18)} score=${mockScore.toFixed(1).padStart(5)}  (kda×8=${(kda*8).toFixed(1)} + wr×40=${(wr*40).toFixed(1)} + cs×2=${(a.summary.averageCsPerMinute*2).toFixed(1)})`)
   }
 
-  console.log('\n── Step 3: Mock Scoring ────────────────────────────────')
-  for (const puuid of [selfPuuid, ...allyPuuids]) {
-    const analysis = players[puuid]
-    const kda = analysis.summary.averageKDA
-    const wr = analysis.summary.winRate
-    const score = kda * 10 + wr * 50
-    console.log(`  [${puuid.substring(0, 15)}] Score=${score.toFixed(1)} (kda=${(kda * 10).toFixed(1)} + wr=${(wr * 50).toFixed(1)})`)
-  }
-
-  console.log('\n── Step 4: Mock Pipeline Stages ────────────────────────')
+  // Step 3: 模拟Pipeline stages
+  console.log('\n── Step 3: Pipeline Stages ───────────────────────────────────')
   const stages = [
-    'data-fetch', 'normalize', 'score-compute', 'rank-analysis',
-    'lane-matchup', 'team-profile', 'damage-profile', 'premade-detect',
-    'threat-assess', 'objective-priority', 'item-suggest', 'rune-validate',
-    'advice-generate', 'advice-filter', 'advice-rank', 'advice-emit'
+    'enemy_weakness', 'team_synergy', 'macro_strategy', 'self_analysis',
+    'premade_detection', 'rank_disparity', 'lane_matchup', 'composition',
+    'itemization', 'objective_timing', 'playstyle_adaptation', 'gold_efficiency',
+    'true_damage_warning', 'cherry_strategy', 'win_condition', 'kda_trend'
   ]
 
   const stageTimings: Record<string, number> = {}
-  for (const stage of stages) {
-    const start = Date.now()
-    // Simulate stage work with random delay
-    const workMs = 1 + Math.floor(Math.random() * 5)
-    const end = Date.now() + workMs
-    while (Date.now() < end) { /* busy wait for simulation */ }
-    stageTimings[stage] = Date.now() - start
-    console.log(`  ✓ ${stage.padEnd(25)} ${stageTimings[stage]}ms`)
+  const stageAdviceCounts: Record<string, number> = {}
 
-    introspector.checkpoint('mock-pipeline', { stage, durationMs: stageTimings[stage] })
+  for (const stage of stages) {
+    const t0 = Date.now()
+    // 模拟stage工作
+    const busyEnd = Date.now() + randInt(1, 4)
+    while (Date.now() < busyEnd) { /* busy wait */ }
+    const elapsed = Date.now() - t0
+    stageTimings[stage] = elapsed
+
+    const adviceCount = randInt(0, 3)
+    stageAdviceCounts[stage] = adviceCount
+
+    const status = adviceCount > 0 ? `→ ${adviceCount} advice(s)` : '  (no advice)'
+    console.log(`  ✓ ${stage.padEnd(28)} ${String(elapsed).padStart(3)}ms  ${status}`)
+
+    intro.checkpoint('mock-run', `stage_${stage}`, { elapsed, adviceCount })
   }
 
-  const totalMs = Object.values(stageTimings).reduce((a, b) => a + b, 0)
-  console.log(`  ─────────────────────────────────────`)
-  console.log(`  Total pipeline duration: ${totalMs}ms`)
+  const totalPipeline = Object.values(stageTimings).reduce((a, b) => a + b, 0)
+  const totalAdvices = Object.values(stageAdviceCounts).reduce((a, b) => a + b, 0)
+  console.log(`  ${'─'.repeat(55)}`)
+  console.log(`  Total: ${totalPipeline}ms | ${totalAdvices} advices from ${stages.length} stages`)
 
-  console.log('\n── Step 5: Mock Advice Output ──────────────────────────')
-  const mockAdvice = [
-    { type: 'item-suggestion', text: 'Rush Plated Steelcaps vs AD-heavy comp', confidence: 0.82 },
-    { type: 'lane-warning', text: 'Enemy laner is 2 tiers higher — play safe', confidence: 0.91 },
-    { type: 'objective-timer', text: 'Dragon spawns in 45s — rotate bot', confidence: 0.76 },
-    { type: 'team-fight', text: 'Focus enemy ADC — lowest survivability', confidence: 0.68 }
+  // Step 4: 模拟建议输出
+  console.log('\n── Step 4: Generated Advices ─────────────────────────────────')
+  const mockAdvices = [
+    { type: 'enemy_weakness', title: '对手近期状态低迷', conf: 0.82, pri: 'HIGH' },
+    { type: 'mental', title: '对手连败中', conf: 0.65, pri: 'LOW' },
+    { type: 'macro_strategy', title: '己方整体数据占优', conf: 0.72, pri: 'MEDIUM' },
+    { type: 'self_analysis', title: '拿手角色', conf: 0.88, pri: 'LOW' },
+    { type: 'lane_matchup', title: '对线对手角色熟练度高', conf: 0.76, pri: 'HIGH' },
   ]
 
-  for (const advice of mockAdvice) {
-    console.log(`  [${advice.type.padEnd(20)}] conf=${advice.confidence.toFixed(2)} — "${advice.text}"`)
+  for (const a of mockAdvices) {
+    console.log(`  [${a.pri.padEnd(6)}] ${a.type.padEnd(22)} conf=${a.conf.toFixed(2)}  "${a.title}"`)
   }
 
-  console.log('\n── Step 6: Introspector State ──────────────────────────')
-  introspector.printReport()
+  // Step 5: Introspector状态快照
+  console.log('\n── Step 5: Introspector Snapshot ─────────────────────────────')
+  intro.checkpoint('mock-run', 'pipeline_complete', {
+    totalMs: Date.now() - startAll,
+    stages: stages.length,
+    advices: totalAdvices
+  })
 
-  console.log('\n╚══════════════════════════════════════════════════════╝')
+  // 打印checkpoints
+  const checkpoints = intro.getCheckpoints()
+  console.log(`  Total checkpoints: ${checkpoints.length}`)
+  for (const cp of checkpoints.slice(-10)) {
+    const ts = new Date(cp.timestamp).toISOString().slice(11, 23)
+    console.log(`  ${ts} ${cp.message}`)
+  }
+
+  // 事件统计
+  const allEvents = intro.getEvents({})
+  const levelCounts: Record<string, number> = {}
+  for (const e of allEvents) levelCounts[e.level] = (levelCounts[e.level] || 0) + 1
+  console.log(`\n  Event buffer: ${allEvents.length} events`)
+  for (const [level, count] of Object.entries(levelCounts)) {
+    console.log(`    ${level}: ${count}`)
+  }
+
+  const totalTime = Date.now() - startAll
+  console.log(`\n  Total wall time: ${totalTime}ms`)
+  console.log('\n╚══════════════════════════════════════════════════════════════╝')
 }
 
-// Run if executed directly
+// 直接运行
 if (typeof require !== 'undefined' && require.main === module) {
   runMockPipeline()
 }

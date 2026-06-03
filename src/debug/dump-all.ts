@@ -1,81 +1,73 @@
 // @ts-nocheck
 /**
- * NexusDumpAll — standalone script to dump all engine state
+ * 全量状态dump — 在任何时刻调用打印引擎所有内部状态
  *
- * Usage: npx ts-node src/debug/dump-all.ts
+ * 用法:
+ *   import { dumpAllState } from './debug/dump-all'
+ *   dumpAllState()   // 在你想要"断点"的地方调用
  *
- * Dumps introspector probe state, event ring buffer contents,
- * and struct watcher diffs for all registered components.
+ * 或命令行: npx ts-node src/debug/dump-all.ts
+ *
+ * 移植改动: 使用本地introspector实现而非upstream的stub
  */
 
 import { NexusIntrospector } from './introspector'
 
 export function dumpAllState(): void {
-  const introspector = NexusIntrospector.getInstance()
+  const intro = NexusIntrospector.getInstance()
 
   console.log('╔══════════════════════════════════════════════════════╗')
   console.log('║         NEXUS-ENGINE — FULL STATE DUMP              ║')
-  console.log('║         Generated at: ' + new Date().toISOString().padEnd(31) + '║')
+  console.log('║         ' + new Date().toISOString().padEnd(44) + '║')
   console.log('╠══════════════════════════════════════════════════════╣')
 
-  // 1. Print full introspector report
-  introspector.printReport()
+  // 1. 完整introspector报告
+  intro.printReport()
 
-  // 2. Dump all probes
+  // 2. 所有探针的详细状态
   console.log('\n── Registered Probe States ──────────────────────────────')
-  const probeNames = (introspector as any)._probes
-  if (probeNames && probeNames instanceof Map) {
-    for (const [name, fn] of probeNames) {
-      console.log(`\n  [${name}]`)
-      try {
-        const state = fn()
-        for (const [k, v] of Object.entries(state)) {
-          console.log(`    ${k}: ${JSON.stringify(v)}`)
-        }
-      } catch (e) {
-        console.log(`    <error reading probe: ${e}>`)
+  const states = intro.getAllProbeStates()
+  for (const [name, state] of Object.entries(states)) {
+    console.log(`\n  [${name}]`)
+    if (state) {
+      for (const [k, v] of Object.entries(state)) {
+        const repr = JSON.stringify(v)
+        console.log(`    ${k}: ${repr && repr.length > 100 ? repr.slice(0, 97) + '...' : repr}`)
       }
+    } else {
+      console.log('    <probe returned null>')
     }
-  } else {
-    console.log('  (no probes registered — introspector internal structure unknown)')
   }
 
-  // 3. Dump event buffer summary
-  console.log('\n── Event Buffer Summary ─────────────────────────────────')
-  const events = (introspector as any)._events
-  if (events && Array.isArray(events)) {
-    const typeCounts: Record<string, number> = {}
-    for (const evt of events) {
-      const key = `${evt.level || 'unknown'}:${evt.source || 'unknown'}`
-      typeCounts[key] = (typeCounts[key] || 0) + 1
+  // 3. 最近checkpoint事件——这是最重要的调试信息
+  console.log('\n── Recent Checkpoints (last 30) ─────────────────────────')
+  const checkpoints = intro.getCheckpoints().slice(-30)
+  for (const cp of checkpoints) {
+    const ts = new Date(cp.timestamp).toISOString().slice(11, 23)
+    console.log(`  ${ts} [${cp.source}] ${cp.message}`)
+    if (cp.data) {
+      const dataStr = JSON.stringify(cp.data)
+      console.log(`    ${dataStr.length > 120 ? dataStr.slice(0, 117) + '...' : dataStr}`)
     }
-    for (const [key, count] of Object.entries(typeCounts).sort((a, b) => b[1] - a[1])) {
-      console.log(`  ${key.padEnd(40)} ${count}`)
-    }
-    console.log(`  Total events in buffer: ${events.length}`)
   }
 
-  // 4. Dump struct watcher diffs
-  console.log('\n── Struct Watcher Diffs ─────────────────────────────────')
-  const watchers = (introspector as any)._structWatchers
-  if (watchers && watchers instanceof Map) {
-    for (const [name, watcher] of watchers) {
-      console.log(`\n  [${name}]`)
-      const diffs = watcher.getDiffs ? watcher.getDiffs() : []
-      if (diffs.length === 0) {
-        console.log('    (no diffs recorded)')
-      } else {
-        for (const d of diffs.slice(-5)) {
-          console.log(`    ${d.field}: ${JSON.stringify(d.from)} → ${JSON.stringify(d.to)} @${d.timestamp}`)
-        }
-      }
-    }
+  // 4. 事件分布统计
+  console.log('\n── Event Distribution ───────────────────────────────────')
+  const events = intro.getEvents({})
+  const typeCounts: Record<string, number> = {}
+  for (const evt of events) {
+    const key = `${evt.level}:${evt.source}`
+    typeCounts[key] = (typeCounts[key] || 0) + 1
   }
+  for (const [key, count] of Object.entries(typeCounts).sort((a, b) => b[1] - a[1]).slice(0, 20)) {
+    console.log(`  ${key.padEnd(40)} ${count}`)
+  }
+  console.log(`  Total events in buffer: ${events.length}`)
 
   console.log('\n╚══════════════════════════════════════════════════════╝')
 }
 
-// Run if executed directly
+// 直接运行
 if (typeof require !== 'undefined' && require.main === module) {
   dumpAllState()
 }
