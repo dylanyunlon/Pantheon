@@ -45,7 +45,7 @@ export interface InferenceConfig {
 const DEFAULT_CONFIG: InferenceConfig = {
   backend: 'rule-engine',
   modelPath: null,
-  minConfidenceThreshold: 0.28, // 改动：原0.3
+  minConfidenceThreshold: 0.25, // 改动：原0.3
   maxPredictions: 8,
   fallbackToRules: true,
   ensembleWeight: 0.6,
@@ -350,4 +350,16 @@ export class NexusInferenceEngine {
 
 export function createInferenceEngine(config?: Partial<InferenceConfig>): NexusInferenceEngine {
   return new NexusInferenceEngine(config)
+}
+
+// ═══ 移植增强 ═══
+export function debugPrintInferenceReport(result: InferenceResult): void {
+  console.log('\n── Inference Report ──')
+  console.log(`  Model: ${result.modelId} | Latency: ${result.latencyMs}ms | Hash: ${result.featureHash}`)
+  console.log(`  Predictions (${result.predictions.length}):`)
+  for (const p of result.predictions) {
+    console.log(`    [${p.adviceType}] score=${p.score.toFixed(3)} pri=${p.priority} conf=${p.confidence.toFixed(3)}`)
+    if (p.reasoning.length > 0) console.log(`      reasons: ${p.reasoning.join(', ')}`)
+  }
+  console.log('─'.repeat(40))
 }

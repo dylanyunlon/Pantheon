@@ -237,8 +237,8 @@ export class ExperimentCapture {
   private _flushCallback: ((events: CaptureEvent[]) => void) | null = null
 
   constructor(options?: { eventCapacity?: number; sampleCapacity?: number }) {
-    this._events = new RingBuffer<CaptureEvent>(options?.eventCapacity || 500)
-    this._samples = new RingBuffer<TrainingSample>(options?.sampleCapacity || 100)
+    this._events = new RingBuffer<CaptureEvent>(options?.eventCapacity || 800)
+    this._samples = new RingBuffer<TrainingSample>(options?.sampleCapacity || 150)
     this._sessionId = generateId('ses')
     this._accumulator = new DistributedAccumulator()
     this._sessionMeta = {
@@ -515,3 +515,37 @@ export class ExperimentCapture {
 export function createExperimentCapture(options?: { eventCapacity?: number; sampleCapacity?: number }): ExperimentCapture {
   return new ExperimentCapture(options)
 }
+
+// ═══ 移植增强 ═══
+
+export function debugPrintCaptureStats(capture: ExperimentCapture): void {
+  const meta = capture.sessionMeta
+  const events = capture.getEvents()
+  const samples = capture.getSamples()
+  console.log('\n── Capture Stats ──')
+  console.log(`  Session: ${meta.sessionId}`)
+  console.log(`  Active: ${capture.isActive}`)
+  console.log(`  Events: ${events.length} | Samples: ${samples.length}`)
+  console.log(`  Phases: ${meta.phases.join(' → ') || 'none'}`)
+  console.log(`  Duration: ${meta.endedAt ? ((meta.endedAt - meta.startedAt) / 1000).toFixed(1) + 's' : 'ongoing'}`)
+
+  // 事件类型分布
+  const kindCounts: Record<string, number> = {}
+  for (const e of events) kindCounts[e.kind] = (kindCounts[e.kind] || 0) + 1
+  console.log('  Event types:')
+  for (const [kind, count] of Object.entries(kindCounts).sort((a,b) => b[1]-a[1])) {
+    console.log(`    ${kind}: ${count}`)
+  }
+
+  // 累计器快照
+  const accDump = capture.accumulator.debugDump()
+  if (Object.keys(accDump).length > 0) {
+    console.log('  Accumulator:')
+    for (const [key, stats] of Object.entries(accDump)) {
+      if (stats) console.log(`    ${key}: avg=${stats.avg.toFixed(2)} min=${stats.min.toFixed(2)} max=${stats.max.toFixed(2)} n=${stats.count}`)
+    }
+  }
+  console.log('─'.repeat(40))
+}
+
+export { RingBuffer as CaptureRingBuffer }

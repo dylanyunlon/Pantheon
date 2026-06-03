@@ -513,3 +513,15 @@ export function debugPrintScrubReport(scrubber: NexusPrivacyScrubber): void {
   }
   console.log('╚═══════════════════════════════════════╝\n')
 }
+
+// ═══ 移植增强 ═══
+export function debugPrintScrubReport(scrubber: PrivacyScrubber): void {
+  const stats = scrubber.getStats()
+  console.log('\n── Privacy Scrubber Report ──')
+  console.log(`  Total scrubbed: ${stats.totalScrubbed}`)
+  console.log(`  By field:`)
+  for (const [field, count] of Object.entries(stats.byField || {}).sort((a: any,b: any) => b[1]-a[1])) {
+    console.log(`    ${field}: ${count}`)
+  }
+  console.log('─'.repeat(40))
+}
