@@ -312,6 +312,16 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
             this._log.info(`Experiment session started for phase: ${phase}`)
             this._engine.streaming.setSessionId(`${selfPuuid}:${gameInfo?.gameMode || ''}:${Date.now()}`)
             if (this._engine.streaming.isRunning) this._engine.streaming.broadcastPhaseTransition('unknown', mapQueryPhaseToGamePhase(phase))
+
+            // ═══ M79: Initialize LiveIngestor when entering in-game ═══
+            if (phase === 'in-game') {
+              this._initLiveIngestor()
+            }
+
+            // ═══ M80: Initialize MetaIngestor for champ-select draft analysis ═══
+            if (phase === 'champ-select') {
+              this._initMetaIngestor()
+            }
           }
         }
       }
@@ -325,10 +335,113 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
         if (phase === 'champ-select' && !this.settings.autoGenerateInChampSelect) return
         if (phase === 'in-game' && !this.settings.autoGenerateInGame) return
         if (phase === 'unavailable') return
+
+        // ═══ M77: Update debug state after generation ═══
         this._generateAdvices()
+        this._updateDebugState()
       },
       { delay: 500 }
     )
+  }
+
+  // ═══ M77: Debug state updater — pushes introspector data to MobX observable ═══
+  private _updateDebugState() {
+    try {
+      const { NexusIntrospector } = require('../../debug/introspector')
+      const intro = NexusIntrospector.getInstance()
+      const events = intro.getEvents({})
+      const checkpoints = intro.getCheckpoints()
+      const probeStates = intro.getAllProbeStates()
+      const levelDist: Record<string, number> = {}
+      for (const e of events) levelDist[e.level] = (levelDist[e.level] || 0) + 1
+
+      runInAction(() => {
+        this.state.debugIntrospector = {
+          eventCount: events.length,
+          checkpointCount: checkpoints.length,
+          probeCount: Object.keys(probeStates).length,
+          structWatcherCount: 0,
+          breakpointsFired: 0,
+          lastCheckpoint: checkpoints.length > 0 ? checkpoints[checkpoints.length - 1].message : null,
+          recentErrors: events.filter((e: any) => e.level === 'error').slice(-5).map((e: any) => `[${e.source}] ${e.message}`),
+          levelDistribution: levelDist
+        }
+      })
+    } catch { /* introspector not available, skip */ }
+  }
+
+  // ═══ M79: LiveIngestor initialization — bridges game-client LiveClientData ═══
+  private _initLiveIngestor() {
+    try {
+      const gameClientHttp = (this._lc as any).http
+      if (!gameClientHttp) {
+        this._log.warn('LiveIngestor: game client HTTP not available')
+        return
+      }
+
+      const ingestor = this._engine.initLiveIngestor({
+        fetchPlayerList: async () => {
+          try {
+            const res = await gameClientHttp.get('https://127.0.0.1:2999/liveclientdata/playerlist')
+            return res.data || []
+          } catch { return [] }
+        },
+        fetchGameStats: async () => {
+          try {
+            const res = await gameClientHttp.get('https://127.0.0.1:2999/liveclientdata/gamestats')
+            return res.data || {}
+          } catch { return {} }
+        },
+        fetchEventData: async () => {
+          try {
+            const res = await gameClientHttp.get('https://127.0.0.1:2999/liveclientdata/eventdata')
+            return res.data || { Events: [] }
+          } catch { return { Events: [] } }
+        }
+      }, {
+        pollIntervalMs: 3000,
+        snapshotBufferCapacity: 120,
+        eventBufferCapacity: 500,
+        enableDerivedTimeSeries: true,
+        enableRawDump: false
+      })
+
+      ingestor.onEvent((event: any) => {
+        this._log.info(`LiveIngestor event: ${event.type} at ${event.gameTime?.toFixed(0)}s`)
+      })
+
+      this._log.info('LiveIngestor initialized — polling game-client data')
+    } catch (e) {
+      this._log.warn('LiveIngestor init failed', e)
+    }
+  }
+
+  // ═══ M80: MetaIngestor initialization — bridges OPGG/SGP champion data ═══
+  private _initMetaIngestor() {
+    try {
+      const ingestor = this._engine.initMetaIngestor({
+        fetchChampion: async (options: { id: number; region: string; mode: string; tier: string; position?: string }) => {
+          try {
+            const sgpData = this._og.state.playerStats
+            if (!sgpData) return null
+            return { championId: options.id, region: options.region, mode: options.mode }
+          } catch { return null }
+        },
+        fetchAramBalance: async () => {
+          try { return {} } catch { return {} }
+        }
+      }, {
+        defaultRegion: 'kr',
+        defaultTier: 'platinum_plus',
+        cacheTtlMs: 4_320_000,
+        maxCacheSize: 300,
+        fetchTimeoutMs: 10_000
+      })
+
+      this._log.info('MetaIngestor initialized — caching champion meta data')
+    } catch (e) {
+      this._log.warn('MetaIngestor init failed', e)
+    }
   }
 
   private _handleDataTracking() {
