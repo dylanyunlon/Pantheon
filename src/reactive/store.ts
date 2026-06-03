@@ -13,6 +13,11 @@
  */
 
 import { introspector, StructWatcher } from '../debug/introspector'
+import {
+  TrieCanonicalizer, WhereCanonicalizer, WhereClause,
+  InvalidationGraph, CacheKeyRegistry,
+  objectMatchesWhere
+} from './canonicalize'
 const MODULE = 'reactive-store'
 
 // ── Types ──
@@ -175,8 +180,18 @@ export class ReactiveStore {
   private _stageMap = new Map<string, Set<string>>()
   private _stats = { writes: 0, reads: 0, batches: 0, optimisticOps: 0, invalidations: 0 }
 
+  // OSDK-pattern algorithm subsystems
+  readonly canonicalizer = new TrieCanonicalizer()
+  readonly whereCanonicalizer = new WhereCanonicalizer()
+  readonly invalidation = new InvalidationGraph()
+  readonly keyRegistry: CacheKeyRegistry
+
   constructor(cfg?: ReactiveStoreConfig) {
     this._refs = new NexusRefCounts(cfg?.refCountKeepAlive ?? 30_000, (k) => this._layers.deleteSubject(k))
+    this.keyRegistry = new CacheKeyRegistry({
+      keepAlive: cfg?.refCountKeepAlive ?? 60_000,
+      onDestroy: (key) => introspector.trace(MODULE, `CacheKey destroyed: ${key.type}`)
+    })
     if (cfg?.gcIntervalMs !== 0) this._refs.startAutoGc(cfg?.gcIntervalMs ?? 5000)
     this._layers.setInvalidateCallback((keys) => {
       this._stats.invalidations++
@@ -184,7 +199,14 @@ export class ReactiveStore {
       for (const k of keys) { const s = this._stageMap.get(k); if (s) for (const st of s) stages.add(st) }
       if (stages.size > 0) introspector.info(MODULE, `Invalidation → ${[...stages].join(',')}`, { keys: keys.length })
     })
-    introspector.registerProbe(MODULE, 'store', () => ({ ...this._stats, refs: this._refs.debugStats(), layers: this._layers.debugSnapshot() }))
+    introspector.registerProbe(MODULE, 'store', () => ({
+      ...this._stats,
+      refs: this._refs.debugStats(),
+      layers: this._layers.debugSnapshot(),
+      canonStats: this.canonicalizer.debugStats(),
+      invalidationStats: this.invalidation.getStats(),
+      registrySize: this.keyRegistry.size
+    }))
   }
 
   get layers() { return this._layers }
@@ -206,12 +228,24 @@ export class ReactiveStore {
   registerStageInterest(stage: string, keys: string[]) {
     for (const k of keys) { if (!this._stageMap.has(k)) this._stageMap.set(k, new Set()); this._stageMap.get(k)!.add(stage) }
   }
-  dispose() { this._refs.stopAutoGc(); this._stageMap.clear() }
+  dispose() { this._refs.stopAutoGc(); this._stageMap.clear(); this.keyRegistry.dispose() }
   getStats() { return { ...this._stats } }
+
+  /** Filter objects using the real OSDK evaluateFilter + objectMatchesWhere algorithm */
+  queryMatches(obj: Record<string, unknown>, where: WhereClause, strict?: boolean): boolean {
+    const canonical = this.whereCanonicalizer.canonicalize(where)
+    return objectMatchesWhere(obj, canonical ?? {}, strict ?? true)
+  }
 }
 
 export function createReactiveStore(cfg?: ReactiveStoreConfig) { return new ReactiveStore(cfg) }
 export function debugPrintStoreSnapshot(s: ReactiveStore) {
   const st = s.getStats(), l = s.layers.debugSnapshot()
-  console.log(`\n── ReactiveStore ──\n  W:${st.writes} R:${st.reads} B:${st.batches} Opt:${st.optimisticOps} Inv:${st.invalidations}\n  Layers: ${(l.layerStack as string[]).join('→')} | Subjects:${l.subjects}\n${'─'.repeat(40)}`)
+  console.log(`\n── ReactiveStore ──`)
+  console.log(`  W:${st.writes} R:${st.reads} B:${st.batches} Opt:${st.optimisticOps} Inv:${st.invalidations}`)
+  console.log(`  Layers: ${(l.layerStack as string[]).join('→')} | Subjects:${l.subjects}`)
+  console.log(`  Canon: ${JSON.stringify(s.canonicalizer.debugStats())}`)
+  console.log(`  Invalidation: ${JSON.stringify(s.invalidation.getStats())}`)
+  console.log(`  KeyRegistry: ${s.keyRegistry.size} keys`)
+  console.log('─'.repeat(40))
 }

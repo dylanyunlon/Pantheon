@@ -2,6 +2,8 @@
 /**
  * reactive/index.ts — barrel export for OSDK-pattern reactive layer
  */
+export { Trie, TrieCanonicalizer, WhereCanonicalizer, InvalidationGraph, CacheKeyRegistry, evaluateFilter, objectMatchesWhere } from './canonicalize'
+export type { Canonical, WhereClause, InvalidationTarget, TypedCacheKey } from './canonicalize'
 export { ReactiveStore, createReactiveStore, debugPrintStoreSnapshot, NexusLayers, NexusLayer, NexusSubject, NexusRefCounts, createOptimisticId } from './store'
 export type { NexusBatchContext, SubjectObserver, CacheEntry, CacheStatus, OptimisticId, ReactiveStoreConfig } from './store'
 export { IncrementalPipeline, createIncrementalPipeline, debugPrintIncrementalReport } from './incremental-pipeline'
