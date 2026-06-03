@@ -563,3 +563,20 @@ export function debugPrintExperimentReport(manager: NexusExperimentManager): voi
   }
   console.log('╚════════════════════════════════════════════╝\n')
 }
+
+// ═══ 移植增强 ═══
+export function debugPrintNexusExperimentManagerReport(instance: any): void {
+  console.log('\n── NexusExperimentManager State Dump ──')
+  if (instance && typeof instance.getStats === 'function') {
+    const stats = instance.getStats()
+    for (const [k, v] of Object.entries(stats)) {
+      console.log(`  ${k}: ${JSON.stringify(v)}`)
+    }
+  } else {
+    console.log('  (instance has no getStats method, printing keys)')
+    for (const key of Object.keys(instance || {})) {
+      console.log(`  ${key}: ${typeof instance[key]}`)
+    }
+  }
+  console.log('─'.repeat(40))
+}

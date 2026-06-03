@@ -506,3 +506,20 @@ export function debugPrintProfileSnapshot(snap: ProfileSnapshot): void {
   console.log(`║ Latency: ${snap.profilingLatencyMs}ms`.padEnd(45) + '║')
   console.log('╚════════════════════════════════════════════╝\n')
 }
+
+// ═══ 移植增强 ═══
+export function debugPrintReport(instance: any): void {
+  console.log('\n──  State Dump ──')
+  if (instance && typeof instance.getStats === 'function') {
+    const stats = instance.getStats()
+    for (const [k, v] of Object.entries(stats)) {
+      console.log(`  ${k}: ${JSON.stringify(v)}`)
+    }
+  } else {
+    console.log('  (instance has no getStats method, printing keys)')
+    for (const key of Object.keys(instance || {})) {
+      console.log(`  ${key}: ${typeof instance[key]}`)
+    }
+  }
+  console.log('─'.repeat(40))
+}

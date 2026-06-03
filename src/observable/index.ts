@@ -479,3 +479,20 @@ export function debugPrintStoreSnapshot(store: NexusObservableStore): void {
   console.log(`║ Write rate/s:   ${s.writeRatePerSec.toFixed(2).padEnd(22)}║`)
   console.log('╚════════════════════════════════════════╝\n')
 }
+
+// ═══ 移植增强 ═══
+export function debugPrintNexusObservableStoreReport(instance: any): void {
+  console.log('\n── NexusObservableStore State Dump ──')
+  if (instance && typeof instance.getStats === 'function') {
+    const stats = instance.getStats()
+    for (const [k, v] of Object.entries(stats)) {
+      console.log(`  ${k}: ${JSON.stringify(v)}`)
+    }
+  } else {
+    console.log('  (instance has no getStats method, printing keys)')
+    for (const key of Object.keys(instance || {})) {
+      console.log(`  ${key}: ${typeof instance[key]}`)
+    }
+  }
+  console.log('─'.repeat(40))
+}
