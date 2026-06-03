@@ -52,6 +52,7 @@
           :players="players"
         />
         <AdvisorPanel />
+        <IntrospectorPanel />
       </div>
     </NScrollbar>
     <div v-else class="no-ongoing-game">
@@ -98,6 +99,7 @@ import {
 } from './ongoing-game-utils'
 import TeamTagsArea from './widgets/TeamTagsArea.vue'
 import AdvisorPanel from './widgets/AdvisorPanel.vue'
+import IntrospectorPanel from './widgets/IntrospectorPanel.vue'
 
 const { showEasyToLaunch = true } = defineProps<{
   showEasyToLaunch?: boolean
