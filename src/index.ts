@@ -90,3 +90,20 @@ export type { ChampionMeta, ChampionMetaWithBalance, CounterMatchup, RunePageMet
 // ── Ontology: Observable Client ──────────────────────────────────
 export { ObservableClient, BatchNotifier, SubscriptionGroup, createObservableClient, debugPrintObservableReport } from './ontology/observable/observable-client'
 export type { ObjectObserverPayload, QueryObserverPayload, LinkObserverPayload, AggregateObserverPayload, SubscriptionDescriptor, ObservableClientStats } from './ontology/observable/observable-client'
+
+// ── Reactive Instant-Decision Layer (OSDK-pattern) ────────────
+export {
+  ReactiveStore, createReactiveStore, debugPrintStoreSnapshot,
+  NexusLayers, NexusLayer, NexusSubject, NexusRefCounts, createOptimisticId,
+  IncrementalPipeline, createIncrementalPipeline, debugPrintIncrementalReport,
+  OptimisticAdvisor, createOptimisticAdvisor,
+  GameBridge, createGameBridge, debugPrintBridgeState, mapGameflowPhase,
+  runReactiveDemo
+} from './reactive'
+export type {
+  NexusBatchContext, SubjectObserver, CacheEntry as ReactiveCacheEntry,
+  CacheStatus, OptimisticId, ReactiveStoreConfig,
+  IncrementalStage, StageDependency, IncrementalRunReport,
+  ChampionHoverEvent, ChampionLockEvent, OptimisticAdviceResult, AdvisorConfig,
+  GameBridgeConfig
+} from './reactive'
