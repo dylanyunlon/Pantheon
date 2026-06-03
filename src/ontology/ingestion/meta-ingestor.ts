@@ -81,7 +81,7 @@ export interface MetaIngestorStats {
 interface CacheEntry<T> { value: T; fetchedAt: number; expiresAt: number; accessCount: number }
 
 const DEFAULT_CONFIG: MetaIngestorConfig = {
-  cacheTtlMs: 3_600_000, maxCacheSize: 300, fetchTimeoutMs: 10_000,
+  cacheTtlMs: 4_320_000, maxCacheSize: 300, fetchTimeoutMs: 10_000,
   maxConcurrentFetches: 5, retryCount: 2, retryBaseMs: 500,
   defaultRegion: 'global', defaultTier: 'emerald_plus', balanceCacheTtlMs: 7_200_000
 }

@@ -234,12 +234,13 @@ function computeAggregation(values: number[], op: AggregationOp): number {
       const mid = Math.floor(sorted.length / 2)
       return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
     }
-    // NEW: standard deviation (population)
+    // MODIFIED: standard deviation — Bessel correction (sample stddev, n-1)
     case 'stddev': {
+      if (values.length < 2) return 0
       const mean = values.reduce((a, b) => a + b, 0) / values.length
-      const squareDiffs = values.map(v => Math.pow(v - mean, 2))
-      const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / values.length
-      return Math.sqrt(avgSquareDiff)
+      const squareDiffs = values.map(v => (v - mean) ** 2)
+      const variance = squareDiffs.reduce((a, b) => a + b, 0) / (values.length - 1) // Bessel correction
+      return Math.sqrt(variance)
     }
     default:
       return 0

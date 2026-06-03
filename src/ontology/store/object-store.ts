@@ -114,7 +114,7 @@ export interface ObjectStoreStats {
 
 const DEFAULT_CONFIG: ObjectStoreConfig = {
   defaultTtlMs: null,
-  maxObjectsPerType: 10000,
+  maxObjectsPerType: 12000,
   gcIntervalMs: 30000,
   enableOptimistic: true,
   maxBatchSize: 500,
