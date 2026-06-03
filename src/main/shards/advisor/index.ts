@@ -87,6 +87,27 @@ export class CoachAdvisorState {
     confidence: number
   } | null = null
 
+  // ═══ M77: debug state fields ═══
+  debugIntrospector: {
+    eventCount: number; checkpointCount: number; probeCount: number
+    structWatcherCount: number; breakpointsFired: number
+    lastCheckpoint: string | null; recentErrors: string[]
+    levelDistribution: Record<string, number>
+  } | null = null
+
+  debugPipelineTimings: {
+    stageTimings: Record<string, number>; totalMs: number
+    stagesRun: number; stageErrors: Record<string, string>; peakMemoryKB: number | null
+  } | null = null
+
+  debugCacheStats: {
+    hits: number; misses: number; writes: number; hitRate: string; truthSize: number
+  } | null = null
+
+  debugScoringDrift: {
+    recentDiffs: Array<{ field: string; from: unknown; to: unknown; timestamp: number }>
+  } | null = null
+
   setAdvices(advices: PantheonAdvice[]) {
     this.advices = advices
   }
@@ -108,6 +129,11 @@ export class CoachAdvisorState {
     this.currentGamePhase = 'unknown'
     this.schedulerStats = null
     this.teamComparisonSummary = null
+    // M77: clear debug state
+    this.debugIntrospector = null
+    this.debugPipelineTimings = null
+    this.debugCacheStats = null
+    this.debugScoringDrift = null
   }
 
   constructor() {
@@ -243,7 +269,12 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
       'pipelineInfo',
       'currentGamePhase',
       'schedulerStats',
-      'teamComparisonSummary'
+      'teamComparisonSummary',
+      // M77: debug state fields
+      'debugIntrospector',
+      'debugPipelineTimings',
+      'debugCacheStats',
+      'debugScoringDrift'
     ])
   }
 
@@ -780,6 +811,96 @@ export class CoachAdvisorMain implements IAkariShardInitDispose {
 
     this._ipc.onCall(CoachAdvisorMain.id, 'getCoordinatorSourceStats', () => {
       return this._engine.coordinator.fusionLayer.getSourceStats()
+    })
+
+    // ═══ M77-M78: Introspector IPC bridge handlers ═══
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getIntrospectorSnapshot', () => {
+      try {
+        const { NexusIntrospector } = require('../../debug/introspector')
+        const intro = NexusIntrospector.getInstance()
+        const events = intro.getEvents({})
+        const checkpoints = intro.getCheckpoints()
+        const probeStates = intro.getAllProbeStates()
+        const levelDist: Record<string, number> = {}
+        for (const e of events) levelDist[e.level] = (levelDist[e.level] || 0) + 1
+        const errors = events.filter((e: any) => e.level === 'error').slice(-5).map((e: any) => `[${e.source}] ${e.message}`)
+        return {
+          eventCount: events.length,
+          checkpointCount: checkpoints.length,
+          probeCount: Object.keys(probeStates).length,
+          structWatcherCount: 0,
+          breakpointsFired: 0,
+          lastCheckpoint: checkpoints.length > 0 ? checkpoints[checkpoints.length - 1].message : null,
+          recentErrors: errors,
+          levelDistribution: levelDist
+        }
+      } catch (e) {
+        this._log.warn('Introspector snapshot failed', e)
+        return null
+      }
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getIntrospectorEvents', (_, filter?: { level?: string; source?: string; limit?: number }) => {
+      try {
+        const { NexusIntrospector } = require('../../debug/introspector')
+        const intro = NexusIntrospector.getInstance()
+        return intro.getEvents(filter || {})
+      } catch { return [] }
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getIntrospectorProbeStates', () => {
+      try {
+        const { NexusIntrospector } = require('../../debug/introspector')
+        return NexusIntrospector.getInstance().getAllProbeStates()
+      } catch { return {} }
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getStructWatcherDiffs', (_, watcherName: string, count?: number) => {
+      try {
+        const { NexusIntrospector } = require('../../debug/introspector')
+        const watcher = NexusIntrospector.getInstance().getStructWatcher(watcherName)
+        if (!watcher) return []
+        return watcher.getDiffs().slice(-(count || 20))
+      } catch { return [] }
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getPipelineTimings', () => {
+      try {
+        const report = this._engine.getLastPipelineReport?.()
+        if (!report) return null
+        return {
+          stageTimings: report.stageTimings || {},
+          totalMs: report.totalMs || 0,
+          stagesRun: report.stagesRun || 0,
+          stageErrors: report.stageErrors || {}
+        }
+      } catch { return null }
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'getCacheHitRate', () => {
+      try {
+        const stats = this._engine.getCacheStats?.()
+        if (!stats) return null
+        const total = (stats.hits || 0) + (stats.misses || 0)
+        return {
+          hits: stats.hits || 0,
+          misses: stats.misses || 0,
+          writes: stats.writes || 0,
+          hitRate: total > 0 ? ((stats.hits / total) * 100).toFixed(1) + '%' : 'N/A',
+          truthSize: stats.truthSize || 0
+        }
+      } catch { return null }
+    })
+
+    this._ipc.onCall(CoachAdvisorMain.id, 'triggerFullDump', () => {
+      try {
+        const { dumpAllState } = require('../../debug/dump-all')
+        dumpAllState()
+        return 'Full state dump printed to main process stdout'
+      } catch (e) {
+        return `Dump failed: ${e}`
+      }
     })
   }
 

@@ -62,6 +62,34 @@ export const useCoachAdvisorStore = defineStore('coach-advisor', () => {
       allyProfile?: Record<string, number>
       enemyProfile?: Record<string, number>
       confidence: number
+    } | null,
+    // ═══ M77: introspector debug bridge fields ═══
+    debugIntrospector: null as {
+      eventCount: number
+      checkpointCount: number
+      probeCount: number
+      structWatcherCount: number
+      breakpointsFired: number
+      lastCheckpoint: string | null
+      recentErrors: string[]
+      levelDistribution: Record<string, number>
+    } | null,
+    debugPipelineTimings: null as {
+      stageTimings: Record<string, number>
+      totalMs: number
+      stagesRun: number
+      stageErrors: Record<string, string>
+      peakMemoryKB: number | null
+    } | null,
+    debugCacheStats: null as {
+      hits: number
+      misses: number
+      writes: number
+      hitRate: string
+      truthSize: number
+    } | null,
+    debugScoringDrift: null as {
+      recentDiffs: Array<{ field: string; from: unknown; to: unknown; timestamp: number }>
     } | null
   })
 
@@ -436,7 +464,64 @@ export class CoachAdvisorRenderer implements IAkariShardInitDispose {
       'pipelineInfo',
       'currentGamePhase',
       'schedulerStats',
-      'teamComparisonSummary'
+      'teamComparisonSummary',
+      // M77: debug state fields synced from main
+      'debugIntrospector',
+      'debugPipelineTimings',
+      'debugCacheStats',
+      'debugScoringDrift'
     ])
+  }
+
+  // ═══ M77-M78: Introspector IPC bridge ═══
+
+  getIntrospectorSnapshot() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getIntrospectorSnapshot') as Promise<{
+      eventCount: number
+      checkpointCount: number
+      probeCount: number
+      structWatcherCount: number
+      breakpointsFired: number
+      lastCheckpoint: string | null
+      recentErrors: string[]
+      levelDistribution: Record<string, number>
+    }>
+  }
+
+  getIntrospectorEvents(filter?: { level?: string; source?: string; limit?: number }) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getIntrospectorEvents', filter) as Promise<
+      Array<{ level: string; source: string; message: string; timestamp: number; data?: unknown }>
+    >
+  }
+
+  getIntrospectorProbeStates() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getIntrospectorProbeStates') as Promise<
+      Record<string, Record<string, unknown> | null>
+    >
+  }
+
+  getStructWatcherDiffs(watcherName: string, count?: number) {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getStructWatcherDiffs', watcherName, count) as Promise<
+      Array<{ field: string; from: unknown; to: unknown; timestamp: number }>
+    >
+  }
+
+  getPipelineTimings() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getPipelineTimings') as Promise<{
+      stageTimings: Record<string, number>
+      totalMs: number
+      stagesRun: number
+      stageErrors: Record<string, string>
+    }>
+  }
+
+  getCacheHitRate() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'getCacheHitRate') as Promise<{
+      hits: number; misses: number; writes: number; hitRate: string; truthSize: number
+    }>
+  }
+
+  triggerFullDump() {
+    return this._ipc.call(COACH_SHARD_NAMESPACE, 'triggerFullDump') as Promise<string>
   }
 }
