@@ -250,7 +250,7 @@ export const stageSelfAnalysis: PipelineStageHandler = (ctx) => {
     const champData = champions[selfChampId]
     if (champData && champData.count >= 3) {
       const wr = champData.win / champData.count
-      if (wr > 0.62) {
+      if (wr > 0.60) {
         advices.push({
           type: AdviceType.MENTAL,
           priority: AdvicePriority.LOW,
@@ -274,7 +274,7 @@ export const stageSelfAnalysis: PipelineStageHandler = (ctx) => {
     }
   }
 
-  if (summary.averageCsPerMinute < 5.8 && ctx.gameMode !== 'ARAM') {
+  if (summary.averageCsPerMinute < 6.0 && ctx.gameMode !== 'ARAM') {
     advices.push({
       type: AdviceType.LANING_PHASE,
       priority: AdvicePriority.MEDIUM,
@@ -402,7 +402,7 @@ export const stageLaneMatchup: PipelineStageHandler = (ctx) => {
       const champData = enemyAnalysis.champions[enemyChampId]
       if (champData && champData.count >= 4) {
         const wr = champData.win / champData.count
-        if (wr > 0.62) {
+        if (wr > 0.60) {
           advices.push({
             type: AdviceType.LANE_MATCHUP,
             priority: AdvicePriority.HIGH,
@@ -651,7 +651,7 @@ export const stageKdaTrend: PipelineStageHandler = (ctx) => {
 
   const { summary } = selfAnalysis
 
-  if (summary.kdaCv > 0.75 && summary.count >= 5) {
+  if (summary.kdaCv > 0.70 && summary.count >= 5) {
     advices.push({
       type: AdviceType.KDA_TREND,
       priority: AdvicePriority.MEDIUM,
@@ -698,4 +698,20 @@ export const STAGE_REGISTRY: Record<string, PipelineStageHandler> = {
   cherry_strategy: stageCherryStrategy,
   win_condition: stageWinCondition,
   kda_trend: stageKdaTrend
+}
+
+// ═══ 移植增强：stage耗时wrapper ═══
+
+export const NEXUS_STAGES = Object.keys(STAGE_REGISTRY)
+
+/**
+ * debugPrintStageRegistry: 列出所有注册的stage及其状态
+ */
+export function debugPrintStageRegistry(): void {
+  console.log('\n── Stage Registry ──')
+  for (const [name] of Object.entries(STAGE_REGISTRY)) {
+    console.log(`  [${name}] ✓ registered`)
+  }
+  console.log(`  Total: ${Object.keys(STAGE_REGISTRY).length} stages`)
+  console.log('─'.repeat(40))
 }

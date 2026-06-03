@@ -94,10 +94,10 @@ export class NexusPipeline {
 
 function classifyScoreTier(scoreTotal: number): 'top' | 'high' | 'mid' | 'low' | 'bottom' {
   // 改动：阈值微调（原80/60/40/20 → 78/58/38/18）
-  if (scoreTotal >= 78) return 'top'
-  if (scoreTotal >= 58) return 'high'
-  if (scoreTotal >= 38) return 'mid'
-  if (scoreTotal >= 18) return 'low'
+  if (scoreTotal >= 76) return 'top'
+  if (scoreTotal >= 56) return 'high'
+  if (scoreTotal >= 36) return 'mid'
+  if (scoreTotal >= 16) return 'low'
   return 'bottom'
 }
 
@@ -448,4 +448,26 @@ export function debugPrintPipelineReport(report: PipelineRunReport): void {
 
 export function createNexusEngine(config?: NexusEngineConfig): NexusEngine {
   return new NexusEngine(config)
+}
+
+// ═══ 移植增强 ═══
+
+/**
+ * debugPrintEngineState: 完整打印引擎当前内部状态
+ * 在每次 runCoachPipeline 前后调用，像GDB的info locals
+ */
+export function debugPrintEngineState(engine: NexusEngine): void {
+  console.log('\n══ NexusEngine Full State ══')
+  console.log(`  Runs: ${engine.runCount}`)
+  console.log(`  Scheduler phase: ${engine.scheduler.currentPhase}`)
+  console.log(`  Pipeline stages: ${engine.pipeline.stageNames.join(' → ')}`)
+  if (engine.lastHistogram) {
+    console.log(`  Last histogram: ally=${engine.lastHistogram.allyAvg.toFixed(2)} enemy=${engine.lastHistogram.enemyAvg.toFixed(2)} diff=${engine.lastHistogram.scoreDiff.toFixed(2)}`)
+  }
+  if (engine.lastReport) {
+    console.log(`  Last report: ${engine.lastReport.totalMs}ms, ${engine.lastReport.adviceCount} advices`)
+    const errors = Object.keys(engine.lastReport.stageErrors)
+    if (errors.length > 0) console.log(`  ⚠ Stage errors: ${errors.join(', ')}`)
+  }
+  console.log('══'.repeat(25))
 }

@@ -59,7 +59,7 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   batchCooldownMs: 3_000,
   urgentPhaseBoost: 1.3,
   burstWindowMs: 2_000,
-  burstThreshold: 8
+  burstThreshold: 6
 }
 
 // 阶段相关性矩阵（与原项目相同）
@@ -184,7 +184,7 @@ export class NexusScheduler {
       const phaseDecay = Math.exp(-phaseAge / this._config.decayHalfLifeMs)
 
       const relevanceScore = phaseRelevance * priorityFactor * advice.confidence *
-        (0.5 + 0.5 * phaseDecay) // 混合：50%固定 + 50%衰减
+        (0.4 + 0.6 * phaseDecay) // 混合：50%固定 + 50%衰减
 
       if (relevanceScore < effectiveThreshold) continue
 
@@ -353,4 +353,15 @@ export function mapQueryPhaseToGamePhase(queryPhase: string, gameTimeSeconds?: n
 
 export function createNexusScheduler(config?: Partial<SchedulerConfig>): NexusScheduler {
   return new NexusScheduler(config)
+}
+
+// ═══ 移植增强 ═══
+
+export function debugPrintSchedulerState(scheduler: NexusScheduler): void {
+  const stats = scheduler.getStats()
+  console.log('\n── Scheduler State ──')
+  console.log(`  Phase: ${scheduler.currentPhase}`)
+  console.log(`  Queue: delivered=${stats.delivered} expired=${stats.expired} suppressed=${stats.suppressed} total=${stats.totalQueued}`)
+  console.log(`  Avg relevance: ${stats.avgRelevance.toFixed(3)}`)
+  scheduler.debugPrintQueue()
 }
